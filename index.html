@@ -314,6 +314,168 @@ const records =
 JSON.parse(localStorage.getItem("rastro_records"))
 || [];
 
+const history =
+document.getElementById("history");
+
+if(records.length===0){
+history.innerHTML =
+"<p>Nenhum registro.</p>";
+return;
+}
+
+const grouped = {};
+
+records.forEach(record=>{
+
+let date;
+
+if(record.date){
+date = record.date;
+}else{
+date =
+new Date(record.created)
+.toISOString()
+.split("T")[0];
+}
+
+if(!grouped[date]){
+grouped[date]=[];
+}
+
+grouped[date].push(record);
+
+});
+
+const dates =
+Object.keys(grouped)
+.sort()
+.reverse();
+
+let html = "";
+
+dates.forEach(date=>{
+
+const dayRecords =
+grouped[date];
+
+html += `
+<div class="history-item">
+
+<h2 style="margin-bottom:15px">
+${date}
+</h2>
+`;
+
+const ratings =
+dayRecords.filter(r=>
+r.type==="rating"
+);
+
+if(ratings.length){
+
+html += `
+<div style="
+margin-bottom:20px;
+padding:12px;
+background:#1a2333;
+border-radius:12px;
+">
+`;
+
+ratings.forEach(r=>{
+
+html += `
+<div>
+<strong>${r.activity}</strong>:
+${r.value}
+</div>
+`;
+
+});
+
+html += `
+</div>
+`;
+
+}
+
+for(let hour=0;hour<24;hour++){
+
+for(let minute=0;minute<60;minute+=30){
+
+const slot =
+String(hour).padStart(2,"0")
++
+":"
++
+String(minute).padStart(2,"0");
+
+const slotActivities =
+dayRecords.filter(r=>{
+
+if(r.type!=="activity"){
+return false;
+}
+
+return r.time===slot;
+
+});
+
+html += `
+<div style="
+display:flex;
+padding:6px 0;
+border-bottom:1px solid #1f2a3b;
+">
+
+<div style="
+width:60px;
+color:#8ea2bf;
+">
+${slot}
+</div>
+
+<div>
+`;
+
+if(slotActivities.length){
+
+slotActivities.forEach(a=>{
+
+html += `
+<div>
+<strong>${a.activity}</strong>
+(${a.duration} min)
+</div>
+`;
+
+});
+
+}
+
+html += `
+</div>
+</div>
+`;
+
+}
+
+}
+
+html += `
+</div>
+`;
+
+});
+
+history.innerHTML = html;
+
+}
+
+const records =
+JSON.parse(localStorage.getItem("rastro_records"))
+|| [];
+
 const historyDiv =
 document.getElementById("history");
 
