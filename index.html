@@ -677,27 +677,21 @@ function renderDay(date){
 
         <h2>${date}</h2>
 
-        <div class="section-label">Estado</div>
-
-       ${states.length
+        ${states.length
     ? states.map(r=>`
         <div class="record">
-
             <strong>${r.activity}</strong>: ${r.value}
 
             ${r.notes ? `
-                <div style="
-                    margin-top:8px;
-                    color:#c9d2dc;
-                ">
+                <div style="margin-top:8px;color:#c9d2dc;">
                     ${r.notes}
                 </div>
             ` : ''}
 
         </div>
     `).join('')
-    : '<div class="small">Sem registros</div>'}).join('')
-            : '<div class="small">Sem registros</div>'}
+    : '<div class="small">Sem registros</div>'
+}
 
         <div class="section-label">Atividades</div>
 
