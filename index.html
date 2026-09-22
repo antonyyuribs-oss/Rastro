@@ -223,6 +223,20 @@ textarea{
 .section-label{margin:20px 0 10px;color:var(--muted);text-transform:uppercase;font-size:12px;letter-spacing:.1em}
 .activity-card{display:flex;justify-content:space-between;align-items:center;gap:20px}
 .activity-meta{color:var(--muted);font-size:12px;margin-top:4px}
+    .activity-title-btn{
+    background:none;
+    border:none;
+    padding:0;
+    color:var(--text);
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.activity-title-btn:hover{
+    color:var(--accent);
+    transform:none;
+}
 .archived-wrap{margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
 .restore-btn{border-color:var(--accent)}
 .day-title{display:flex;justify-content:space-between}
@@ -367,14 +381,15 @@ card.className="card activity-card";
 
 card.innerHTML=`
 <div>
-<div class="activity-name">${activity.name}</div>
-<div class="activity-meta">${total} registro(s)</div>
-</div>
+    <button
+        class="activity-title-btn"
+        onclick="openRegister('${activity.name}')">
+        ${activity.name}
+    </button>
 
-<div class="actions">
-<button onclick="openRegister('${activity.name}')">Registrar</button>
-<button onclick="archiveActivity(${idx})">Arquivar</button>
-<button onclick="deleteActivity(${idx})">Excluir</button>
+    <div class="activity-meta">
+        ${total} registro(s)
+    </div>
 </div>
 `;
 
