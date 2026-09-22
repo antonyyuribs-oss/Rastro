@@ -218,17 +218,17 @@ textarea{
     }
 }
 
-.summary-card{background:linear-gradient(180deg,#14181d,#101419);border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:24px}
-.summary-grid{display:flex;gap:24px;flex-wrap:wrap;margin-top:12px}
-.metric{min-width:120px}
-.metric-value{font-size:28px;font-weight:700}
-.metric-label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
-.section-title{color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:20px 0 12px}
-.archived-box{margin-top:24px;padding-top:12px;border-top:1px solid var(--border)}
-.archived-item{padding:10px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;color:var(--muted)}
-.activity-main{display:flex;flex-direction:column;gap:4px}
-.activity-sub{font-size:12px;color:var(--muted)}
-
+.hero{background:linear-gradient(180deg,#171c23,#11161b);padding:24px;border:1px solid var(--border);border-radius:24px;margin-bottom:24px}
+.metrics{display:flex;gap:24px;flex-wrap:wrap;margin-top:16px}
+.metric b{font-size:28px;display:block}
+.section-label{margin:20px 0 10px;color:var(--muted);text-transform:uppercase;font-size:12px;letter-spacing:.1em}
+.activity-card{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.activity-meta{color:var(--muted);font-size:12px;margin-top:4px}
+.archived-wrap{margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.restore-btn{border-color:var(--accent)}
+.day-title{display:flex;justify-content:space-between}
+.record{padding:8px 10px;background:#171c23;border-radius:10px;margin:4px 0}
+.slot:has(.record){background:rgba(45,108,223,.05)}
 </style>
 
 </head>
@@ -236,7 +236,7 @@ textarea{
 
 <header>
     <h1>Rastro</h1>
-
+    <div class="small">Arquivo pessoal da vida</div>
     <div class="nav">
         <button onclick="showHome()">Registro</button>
         <button onclick="showHistory()">Histórico</button>
@@ -326,69 +326,63 @@ document.getElementById("historyScreen").classList.remove("hidden");
 renderHistory();
 }
 
+
 function renderActivities(){
 
 const home=document.getElementById("homeScreen");
 
-const activeActivities=activities.filter(a=>!a.archived);
-const archivedActivities=activities.filter(a=>a.archived);
+const active=activities.filter(a=>!a.archived);
+const archived=activities.filter(a=>a.archived);
 
 home.innerHTML=`
-<div class="summary-card">
+<div class="hero">
 <h2>Arquivo da Vida</h2>
-<div class="small">Registro histórico pessoal</div>
-<div class="summary-grid">
-<div class="metric">
-<div class="metric-value">${records.length}</div>
-<div class="metric-label">Registros</div>
-</div>
-<div class="metric">
-<div class="metric-value">${activeActivities.length}</div>
-<div class="metric-label">Ativas</div>
-</div>
-<div class="metric">
-<div class="metric-value">${archivedActivities.length}</div>
-<div class="metric-label">Arquivadas</div>
+<div class="small">Registro histórico contínuo</div>
+<div class="metrics">
+<div class="metric"><b>${records.length}</b>Registros</div>
+<div class="metric"><b>${active.length}</b>Ativas</div>
+<div class="metric"><b>${archived.length}</b>Arquivadas</div>
 </div>
 </div>
-</div>
-
-<div class="section-title">Atividades Ativas</div>
+<div class="section-label">Atividades Ativas</div>
 `;
 
-activeActivities.forEach((activity,index)=>{
+active.forEach(activity=>{
 
-const count=records.filter(r=>r.activity===activity.name).length;
+const total=records.filter(r=>r.activity===activity.name).length;
+const idx=activities.indexOf(activity);
 
 const card=document.createElement("div");
-card.className="card activity";
-card.draggable=true;
+card.className="card activity-card";
 
 card.innerHTML=`
-<div class="activity-main">
+<div>
 <div class="activity-name">${activity.name}</div>
-<div class="activity-sub">${count} registro(s)</div>
+<div class="activity-meta">${total} registro(s)</div>
 </div>
+
 <div class="actions">
 <button onclick="openRegister('${activity.name}')">Registrar</button>
-<button onclick="archiveActivity(${activities.indexOf(activity)})">Arquivar</button>
-<button onclick="deleteActivity(${activities.indexOf(activity)})">Excluir</button>
+<button onclick="archiveActivity(${idx})">Arquivar</button>
+<button onclick="deleteActivity(${idx})">Excluir</button>
 </div>
 `;
 
 home.appendChild(card);
 });
 
-if(archivedActivities.length){
-const box=document.createElement("div");
-box.className="archived-box";
-
-box.innerHTML=`
-<div class="section-title">Arquivadas</div>
-${archivedActivities.map(a=>`<div class="archived-item">${a.name}</div>`).join('')}
-`;
-
-home.appendChild(box);
+if(archived.length){
+const div=document.createElement('div');
+div.className='archived-wrap';
+div.innerHTML=`<div class="section-label">Arquivadas</div>` +
+archived.map(a=>{
+const idx=activities.indexOf(a);
+return `<div class="card activity-card">
+<div><div class="activity-name">${a.name}</div></div>
+<div class="actions"><button class="restore-btn" onclick="unarchiveActivity(${idx})">Restaurar</button></div>
+</div>`;
+}).join('');
+home.appendChild(div);
 }
 }
 
