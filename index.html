@@ -432,7 +432,29 @@ activities.splice(index,1);
 save();
 renderActivities();
 }
+function archiveByName(activityName){
 
+    const idx = activities.findIndex(
+        a => a.name === activityName
+    );
+
+    if(idx === -1) return;
+
+    archiveActivity(idx);
+    closeModal();
+}
+
+function deleteByName(activityName){
+
+    const idx = activities.findIndex(
+        a => a.name === activityName
+    );
+
+    if(idx === -1) return;
+
+    deleteActivity(idx);
+    closeModal();
+}
 function addActivity(){
 
 const name=prompt("Nome da atividade");
