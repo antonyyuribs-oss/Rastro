@@ -3,51 +3,382 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Rastro</title>
 
 <style>
-body{
-    background:#0b0f14;
-    color:white;
-    font-family:Arial, sans-serif;
+*{
     margin:0;
-    padding:40px;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#05070b;
+    color:white;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+.header{
+    position:sticky;
+    top:0;
+    background:#0b0f14;
+    border-bottom:1px solid #1c2430;
+    padding:18px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
 }
 
 .card{
-    background:#141a22;
-    border-radius:20px;
+    background:#111722;
+    border-radius:18px;
     padding:20px;
-    max-width:700px;
-    margin:auto;
+    margin-bottom:15px;
+    cursor:pointer;
+    transition:0.2s;
 }
 
-h1{
-    color:#2ea8ff;
+.card:hover{
+    transform:translateY(-2px);
 }
 
-button{
-    background:#2ea8ff;
-    color:white;
+.card h3{
+    margin-bottom:6px;
+}
+
+.card p{
+    color:#9ba8bd;
+}
+
+.primary-btn{
+    width:100%;
     border:none;
-    padding:12px 20px;
+    padding:18px;
+    border-radius:16px;
+    background:#2d6cff;
+    color:white;
+    font-size:18px;
+    margin-top:10px;
+    cursor:pointer;
+}
+
+.modal-bg{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.modal{
+    width:100%;
+    max-width:500px;
+    background:#111722;
+    border-radius:20px;
+    padding:24px;
+}
+
+.modal h2{
+    margin-bottom:20px;
+}
+
+.input{
+    width:100%;
+    background:#1b2433;
+    border:none;
+    color:white;
+    padding:14px;
+    border-radius:12px;
+    margin-top:8px;
+    margin-bottom:16px;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+}
+
+.actions button{
+    flex:1;
+    border:none;
+    padding:14px;
     border-radius:12px;
     cursor:pointer;
+}
+
+.cancel{
+    background:#2a3345;
+    color:white;
+}
+
+.save{
+    background:#2d6cff;
+    color:white;
+}
+
+.history{
+    margin-top:30px;
+}
+
+.history-item{
+    background:#111722;
+    padding:12px;
+    border-radius:12px;
+    margin-bottom:10px;
+}
+
+.small{
+    color:#9ba8bd;
+    font-size:13px;
+}
+
+.success{
+    color:#61ff98;
+    margin-top:12px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-    <h1>Rastro</h1>
-
-    <p>
-        Sistema de rastreamento pessoal.
-    </p>
-
-    <button>Registrar</button>
+<div class="header">
+Rastro
 </div>
+
+<div class="container">
+
+<div class="card" onclick="openRating('Mente ao Acordar')">
+<h3>Mente ao Acordar</h3>
+<p>Registrar valor de -10 a +10</p>
+</div>
+
+<div class="card" onclick="openRating('Corpo ao Acordar')">
+<h3>Corpo ao Acordar</h3>
+<p>Registrar valor de -10 a +10</p>
+</div>
+
+<div class="card" onclick="openRating('Disposição Mental')">
+<h3>Disposição Mental</h3>
+<p>Registrar valor de -10 a +10</p>
+</div>
+
+<div class="card" onclick="openRating('Disposição Física')">
+<h3>Disposição Física</h3>
+<p>Registrar valor de -10 a +10</p>
+</div>
+
+<div class="card" onclick="openDuration('Trabalho')">
+<h3>Trabalho</h3>
+<p>Registrar duração</p>
+</div>
+
+<div class="card" onclick="openDuration('Treino')">
+<h3>Treino</h3>
+<p>Registrar duração</p>
+</div>
+
+<div class="card" onclick="openDuration('Leitura')">
+<h3>Leitura</h3>
+<p>Registrar duração</p>
+</div>
+
+<button class="primary-btn">
+Novo Registro
+</button>
+
+<div class="history">
+<h2>Últimos registros</h2>
+
+<div id="history"></div>
+</div>
+
+</div>
+
+<div class="modal-bg" id="modalBg">
+
+<div class="modal">
+
+<h2 id="modalTitle"></h2>
+
+<div id="ratingArea">
+
+<label>Valor (-10 a +10)</label>
+<input
+type="number"
+min="-10"
+max="10"
+class="input"
+id="ratingInput">
+
+</div>
+
+<div id="durationArea">
+
+<label>Duração (minutos)</label>
+<input
+type="number"
+class="input"
+id="durationInput">
+
+</div>
+
+<label>Observação</label>
+<textarea
+id="noteInput"
+class="input"
+rows="4"></textarea>
+
+<div class="actions">
+<button
+class="cancel"
+onclick="closeModal()">
+Cancelar
+</button>
+
+<button
+class="save"
+onclick="saveRecord()">
+Salvar
+</button>
+</div>
+
+<div id="savedMessage" class="success"></div>
+
+</div>
+
+</div>
+
+<script>
+
+let currentType = "";
+let currentActivity = "";
+
+loadHistory();
+
+function openRating(activity){
+
+currentActivity = activity;
+currentType = "rating";
+
+document.getElementById("modalTitle").innerText = activity;
+
+document.getElementById("ratingArea").style.display = "block";
+document.getElementById("durationArea").style.display = "none";
+
+document.getElementById("modalBg").style.display = "flex";
+}
+
+function openDuration(activity){
+
+currentActivity = activity;
+currentType = "duration";
+
+document.getElementById("modalTitle").innerText = activity;
+
+document.getElementById("ratingArea").style.display = "none";
+document.getElementById("durationArea").style.display = "block";
+
+document.getElementById("modalBg").style.display = "flex";
+}
+
+function closeModal(){
+
+document.getElementById("modalBg").style.display = "none";
+
+document.getElementById("ratingInput").value = "";
+document.getElementById("durationInput").value = "";
+document.getElementById("noteInput").value = "";
+
+document.getElementById("savedMessage").innerText = "";
+}
+
+function saveRecord(){
+
+const note =
+document.getElementById("noteInput").value;
+
+let value;
+
+if(currentType === "rating"){
+value =
+document.getElementById("ratingInput").value;
+}else{
+value =
+document.getElementById("durationInput").value;
+}
+
+const item = {
+activity: currentActivity,
+type: currentType,
+value: value,
+note: note,
+date: new Date().toLocaleString("pt-BR")
+};
+
+let records =
+JSON.parse(
+localStorage.getItem("rastro_records")
+) || [];
+
+records.unshift(item);
+
+localStorage.setItem(
+"rastro_records",
+JSON.stringify(records)
+);
+
+document.getElementById(
+"savedMessage"
+).innerText = "Registro salvo";
+
+loadHistory();
+
+setTimeout(closeModal,700);
+}
+
+function loadHistory(){
+
+let records =
+JSON.parse(
+localStorage.getItem("rastro_records")
+) || [];
+
+let html = "";
+
+records.slice(0,20).forEach(r=>{
+
+html += `
+<div class="history-item">
+<strong>${r.activity}</strong><br>
+
+<span class="small">
+${r.date}
+</span>
+
+<br>
+
+Valor:
+${r.value}
+
+${r.note ? "<br>"+r.note : ""}
+</div>
+`;
+
+});
+
+document.getElementById("history").innerHTML = html;
+}
+
+</script>
 
 </body>
 </html>
