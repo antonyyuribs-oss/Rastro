@@ -505,6 +505,23 @@ onclick="setDuration(${v})">${formatDuration(v)}</button>`
 <button onclick="saveActivityRecord('${activity}')">
 Salvar
 </button>
+
+<div style="
+margin-top:20px;
+display:flex;
+justify-content:flex-end;
+gap:10px;
+">
+
+<button onclick="archiveByName('${activity}')">
+Arquivar
+</button>
+
+<button onclick="deleteByName('${activity}')">
+Excluir
+</button>
+
+</div>
 `;
 }
 
