@@ -308,7 +308,135 @@ let selectedActivity = "";
 let selectedDuration = null;
 
 renderActivities();
-renderHistory();
+function renderHistory(){
+
+const records =
+JSON.parse(localStorage.getItem("rastro_records"))
+|| [];
+
+const historyDiv =
+document.getElementById("history");
+
+if(records.length===0){
+historyDiv.innerHTML="<p>Nenhum registro.</p>";
+return;
+}
+
+const grouped = {};
+
+records.forEach(r=>{
+
+let date;
+
+if(r.date){
+date = r.date;
+}else{
+date = new Date(r.created)
+.toISOString()
+.split("T")[0];
+}
+
+if(!grouped[date]){
+grouped[date]=[];
+}
+
+grouped[date].push(r);
+
+});
+
+const dates =
+Object.keys(grouped)
+.sort()
+.reverse();
+
+let html="";
+
+dates.forEach(date=>{
+
+html += `
+<div class="history-item">
+
+<h3>${date}</h3>
+`;
+
+const dayRecords = grouped[date];
+
+const states = dayRecords.filter(
+r=>r.type==="rating"
+);
+
+if(states.length){
+
+html += "<strong>Estados</strong><br>";
+
+states.forEach(s=>{
+
+html += `
+${s.activity}: ${s.value}<br>
+`;
+
+});
+
+html += "<br>";
+}
+
+html += "<strong>Linha do Tempo</strong><br><br>";
+
+for(let h=0; h<24; h++){
+
+for(let m=0; m<60; m+=30){
+
+const slot =
+String(h).padStart(2,"0")
++
+":"
++
+String(m).padStart(2,"0");
+
+const activities =
+dayRecords.filter(r=>{
+
+if(r.type!=="activity") return false;
+
+return r.time===slot;
+
+});
+
+html += `
+<div style="
+padding:6px;
+border-bottom:1px solid #1f2a3b;
+">
+
+<strong>${slot}</strong>
+`;
+
+activities.forEach(a=>{
+
+html += `
+<br>
+${a.activity}
+(${a.duration} min)
+`;
+
+});
+
+html += `
+</div>
+`;
+
+}
+
+}
+
+html += `
+</div>
+`;
+
+});
+
+historyDiv.innerHTML = html;
+};
 
 function renderActivities(){
 
