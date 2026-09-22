@@ -217,6 +217,18 @@ textarea{
         flex:1;
     }
 }
+
+.summary-card{background:linear-gradient(180deg,#14181d,#101419);border:1px solid var(--border);border-radius:24px;padding:24px;margin-bottom:24px}
+.summary-grid{display:flex;gap:24px;flex-wrap:wrap;margin-top:12px}
+.metric{min-width:120px}
+.metric-value{font-size:28px;font-weight:700}
+.metric-label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.section-title{color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin:20px 0 12px}
+.archived-box{margin-top:24px;padding-top:12px;border-top:1px solid var(--border)}
+.archived-item{padding:10px 14px;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;color:var(--muted)}
+.activity-main{display:flex;flex-direction:column;gap:4px}
+.activity-sub{font-size:12px;color:var(--muted)}
+
 </style>
 
 </head>
@@ -318,50 +330,66 @@ function renderActivities(){
 
 const home=document.getElementById("homeScreen");
 
-home.innerHTML="";
+const activeActivities=activities.filter(a=>!a.archived);
+const archivedActivities=activities.filter(a=>a.archived);
 
-activities
-.filter(a=>!a.archived)
-.forEach((activity,index)=>{
+home.innerHTML=`
+<div class="summary-card">
+<h2>Arquivo da Vida</h2>
+<div class="small">Registro histórico pessoal</div>
+<div class="summary-grid">
+<div class="metric">
+<div class="metric-value">${records.length}</div>
+<div class="metric-label">Registros</div>
+</div>
+<div class="metric">
+<div class="metric-value">${activeActivities.length}</div>
+<div class="metric-label">Ativas</div>
+</div>
+<div class="metric">
+<div class="metric-value">${archivedActivities.length}</div>
+<div class="metric-label">Arquivadas</div>
+</div>
+</div>
+</div>
+
+<div class="section-title">Atividades Ativas</div>
+`;
+
+activeActivities.forEach((activity,index)=>{
+
+const count=records.filter(r=>r.activity===activity.name).length;
 
 const card=document.createElement("div");
 card.className="card activity";
 card.draggable=true;
 
-card.ondragstart=e=>{
-e.dataTransfer.setData("index",index);
-};
-
-card.ondragover=e=>e.preventDefault();
-
-card.ondrop=e=>{
-e.preventDefault();
-
-const from=parseInt(
-e.dataTransfer.getData("index")
-);
-
-const item=activities.splice(from,1)[0];
-activities.splice(index,0,item);
-
-save();
-renderActivities();
-};
-
 card.innerHTML=`
+<div class="activity-main">
 <div class="activity-name">${activity.name}</div>
-
+<div class="activity-sub">${count} registro(s)</div>
+</div>
 <div class="actions">
 <button onclick="openRegister('${activity.name}')">Registrar</button>
-<button onclick="archiveActivity(${index})">Arquivar</button>
-<button onclick="deleteActivity(${index})">Excluir</button>
+<button onclick="archiveActivity(${activities.indexOf(activity)})">Arquivar</button>
+<button onclick="deleteActivity(${activities.indexOf(activity)})">Excluir</button>
 </div>
 `;
 
 home.appendChild(card);
-
 });
 
+if(archivedActivities.length){
+const box=document.createElement("div");
+box.className="archived-box";
+
+box.innerHTML=`
+<div class="section-title">Arquivadas</div>
+${archivedActivities.map(a=>`<div class="archived-item">${a.name}</div>`).join('')}
+`;
+
+home.appendChild(box);
+}
 }
 
 function archiveActivity(index){
