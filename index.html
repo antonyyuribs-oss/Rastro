@@ -688,12 +688,35 @@ function renderDay(date){
         ${activities.length
             ? activities.sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""))
                 .map(r=>`
-                <div class="record">
-                    <strong>${r.startTime||'--:--'}</strong> • ${r.activity} (${formatDuration(r.duration)})
-                    <br><br>
-                    <button onclick="editRecord(${r.id})">Editar</button>
-                    <button onclick="deleteRecord(${r.id})">Excluir</button>
-                </div>`).join('')
+<div class="record">
+
+    <strong>${r.startTime||'--:--'}</strong>
+    • ${r.activity}
+    (${formatDuration(r.duration)})
+
+    ${r.notes ? `
+        <div style="
+            margin-top:10px;
+            padding:10px;
+            background:#101419;
+            border-radius:10px;
+            color:#c9d2dc;
+        ">
+            ${r.notes}
+        </div>
+    ` : ''}
+
+    <br><br>
+
+    <button onclick="editRecord(${r.id})">
+        Editar
+    </button>
+
+    <button onclick="deleteRecord(${r.id})">
+        Excluir
+    </button>
+
+</div>`).join('')
             : '<div class="small">Sem atividades</div>'}
 
     </div>`;
@@ -701,10 +724,10 @@ function renderDay(date){
 
 function deleteRecord(id){
 
+if(!confirm("Excluir este registro?")) return;
 
-records=
-records.filter(
-r=>r.id!==id
+records = records.filter(
+r => r.id !== id
 );
 
 save();
