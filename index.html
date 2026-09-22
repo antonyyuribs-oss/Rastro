@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -229,6 +228,15 @@ textarea{
 .day-title{display:flex;justify-content:space-between}
 .record{padding:8px 10px;background:#171c23;border-radius:10px;margin:4px 0}
 .slot:has(.record){background:rgba(45,108,223,.05)}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.calendar-header{text-align:center;color:var(--muted);padding:8px;font-size:12px}
+.calendar-day{min-height:70px;border:1px solid var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#101419;transition:.2s}
+.calendar-day:hover{border-color:var(--accent)}
+.calendar-day.has-record{background:rgba(45,108,223,.15);border-color:var(--accent);font-weight:bold}
+.calendar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.back-btn{margin-bottom:16px}
+
 </style>
 
 </head>
@@ -301,9 +309,11 @@ let records =
 JSON.parse(localStorage.getItem("rastro_records"))
 ||
 [];
+
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let selectedDate = null;
+
 function save(){
 localStorage.setItem(
 "rastro_activities",
@@ -557,6 +567,7 @@ document.getElementById(
 ).innerHTML="";
 }
 
+
 function renderHistory(){
 
     if(selectedDate){
@@ -567,188 +578,27 @@ function renderHistory(){
 
 }
 
-const history=
-document.getElementById(
-"historyScreen"
-);
-
-history.innerHTML="";
-
-const grouped={};
-
-records.forEach(r=>{
-if(!grouped[r.date])
-grouped[r.date]=[];
-
-grouped[r.date].push(r);
-});
-
-Object.keys(grouped)
-.sort()
-.reverse()
-.forEach(date=>{
-
-const day=document.createElement("div");
-day.className="day";
-
-const dayRecords=
-grouped[date];
-
-const stateRecords=
-dayRecords.filter(r=>
-STATE_ACTIVITIES.includes(
-r.activity.toLowerCase()
-));
-
-const normalRecords=
-dayRecords.filter(r=>
-!STATE_ACTIVITIES.includes(
-r.activity.toLowerCase()
-));
-
-let stateHTML="";
-
-stateRecords.forEach(r=>{
-stateHTML+=`
-<div>
-<strong>${r.activity}</strong>:
-${r.value}
-</div>
-`;
-});
-
-let timelineHTML='';
-
-for(let h=0;h<24;h++){
-
-for(let m=0;m<60;m+=30){
-
-const time=
-String(h).padStart(2,'0')
-+
-':'
-+
-String(m).padStart(2,'0');
-
-const slotRecords=
-normalRecords
-.filter(r=>r.startTime===time)
-.sort((a,b)=>
-a.startTime.localeCompare(
-b.startTime
-)
-);
-
-timelineHTML+=`
-<div class="slot">
-
-<div class="time">
-${time}
-</div>
-
-<div>
-${slotRecords.map(r=>`
-<div class="record">
-${r.activity}
-(${formatDuration(r.duration)})
-<br>
-<span class="small">
-<button onclick="editRecord(${r.id})">
-Editar
-</button>
-
-<button onclick="deleteRecord(${r.id})">
-Excluir
-</button>
-</span>
-</div>
-`).join("")}
-</div>
-
-</div>
-`;
-}
-}
-
-day.innerHTML=
-`
-<div class="day-title">${date}</div>
-
-<div class="state-box">
-${stateHTML || 'Sem registros de estado'}
-</div>
-
-<div class="timeline">
-${timelineHTML}
-</div>
-`;
-
-history.appendChild(day);
-
-});
-
-}
-
-function deleteRecord(id){
-
-records=
-records.filter(
-r=>r.id!==id
-);
-
-save();
-renderHistory();
-}
-
 function renderCalendar(){
 
-    const history =
-    document.getElementById("historyScreen");
+    const history=document.getElementById("historyScreen");
 
-    const monthNames = [
-        "Janeiro","Fevereiro","Março","Abril",
-        "Maio","Junho","Julho","Agosto",
-        "Setembro","Outubro","Novembro","Dezembro"
-    ];
+    const months=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
-    const firstDay =
-    new Date(currentYear,currentMonth,1);
+    const firstDay=new Date(currentYear,currentMonth,1);
+    const totalDays=new Date(currentYear,currentMonth+1,0).getDate();
+    const startWeekDay=firstDay.getDay();
 
-    const lastDay =
-    new Date(currentYear,currentMonth+1,0);
+    const datesWithRecords=[...new Set(records.map(r=>r.date))];
 
-    const startWeekDay =
-    firstDay.getDay();
-
-    const totalDays =
-    lastDay.getDate();
-
-    const daysWithRecords =
-    [...new Set(records.map(r=>r.date))];
-
-    let html = `
+    let html=`
     <div class="card">
-
-        <div style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:20px;
-        ">
-
+        <div class="calendar-top">
             <button onclick="prevMonth()">◀</button>
-
-            <h2>
-            ${monthNames[currentMonth]}
-            ${currentYear}
-            </h2>
-
+            <h2>${months[currentMonth]} ${currentYear}</h2>
             <button onclick="nextMonth()">▶</button>
-
         </div>
 
         <div class="calendar-grid">
-
             <div class="calendar-header">D</div>
             <div class="calendar-header">S</div>
             <div class="calendar-header">T</div>
@@ -758,141 +608,107 @@ function renderCalendar(){
             <div class="calendar-header">S</div>
     `;
 
-    for(let i=0;i<startWeekDay;i++){
-        html += `<div></div>`;
-    }
+    for(let i=0;i<startWeekDay;i++) html+=`<div></div>`;
 
     for(let day=1;day<=totalDays;day++){
 
-        const date =
-        `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const date=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
 
-        const hasRecord =
-        daysWithRecords.includes(date);
-
-        html += `
-        <div
-            class="calendar-day ${hasRecord ? 'has-record' : ''}"
-            onclick="openDay('${date}')"
-        >
-            ${day}
-        </div>
-        `;
+        html+=`
+        <div class="calendar-day ${datesWithRecords.includes(date)?'has-record':''}"
+             onclick="openDay('${date}')">
+             ${day}
+        </div>`;
     }
 
-    html += `
-        </div>
-    </div>
-    `;
+    html+=`</div></div>`;
 
-    history.innerHTML = html;
-} 
+    history.innerHTML=html;
+}
+
+function openDay(date){
+    selectedDate=date;
+    renderHistory();
+}
+
+function backToCalendar(){
+    selectedDate=null;
+    renderHistory();
+}
+
+function prevMonth(){
+    currentMonth--;
+    if(currentMonth<0){
+        currentMonth=11;
+        currentYear--;
+    }
+    renderCalendar();
+}
+
+function nextMonth(){
+    currentMonth++;
+    if(currentMonth>11){
+        currentMonth=0;
+        currentYear++;
+    }
+    renderCalendar();
+}
 
 function renderDay(date){
 
-    const history =
-    document.getElementById("historyScreen");
+    const history=document.getElementById("historyScreen");
 
-    const dayRecords =
-    records.filter(r=>r.date===date);
+    const dayRecords=records.filter(r=>r.date===date);
 
-    const states =
-    dayRecords.filter(r=>
-    STATE_ACTIVITIES.includes(
-    r.activity.toLowerCase()
-    ));
+    const states=dayRecords.filter(r=>
+        STATE_ACTIVITIES.includes(r.activity.toLowerCase())
+    );
 
-    const activities =
-    dayRecords.filter(r=>
-    !STATE_ACTIVITIES.includes(
-    r.activity.toLowerCase()
-    ));
+    const activities=dayRecords.filter(r=>
+        !STATE_ACTIVITIES.includes(r.activity.toLowerCase())
+    );
 
-    history.innerHTML = `
+    history.innerHTML=`
     <div class="card">
 
-        <button onclick="backToCalendar()">
-        ← Calendário
+        <button class="back-btn" onclick="backToCalendar()">
+            ← Calendário
         </button>
 
-        <h2 style="margin-top:15px">
-        ${date}
-        </h2>
+        <h2>${date}</h2>
 
-        <div class="section-label">
-        ESTADOS
-        </div>
+        <div class="section-label">Estado</div>
 
-        ${
-            states.length
-            ?
-            states.map(r=>`
+        ${states.length
+            ? states.map(r=>`<div class="record"><strong>${r.activity}</strong>: ${r.value}</div>`).join('')
+            : '<div class="small">Sem registros</div>'}
+
+        <div class="section-label">Atividades</div>
+
+        ${activities.length
+            ? activities.sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""))
+                .map(r=>`
                 <div class="record">
-                <strong>${r.activity}</strong>: ${r.value}
-                </div>
-            `).join('')
-            :
-            '<div class="small">Sem registros</div>'
-        }
+                    <strong>${r.startTime||'--:--'}</strong> • ${r.activity} (${formatDuration(r.duration)})
+                    <br><br>
+                    <button onclick="editRecord(${r.id})">Editar</button>
+                    <button onclick="deleteRecord(${r.id})">Excluir</button>
+                </div>`).join('')
+            : '<div class="small">Sem atividades</div>'}
 
-        <div class="section-label">
-        ATIVIDADES
-        </div>
-
-        ${
-            activities.length
-            ?
-            activities
-            .sort((a,b)=>
-            (a.startTime||"")
-            .localeCompare(b.startTime||""))
-            .map(r=>`
-                <div class="record">
-                    <strong>${r.startTime || '--:--'}</strong>
-                    • ${r.activity}
-                    (${formatDuration(r.duration)})
-                </div>
-            `).join('')
-            :
-            '<div class="small">Sem atividades</div>'
-        }
-
-    </div>
-    `;
+    </div>`;
 }
 
-.calendar-grid{
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-    gap:8px;
-}
+function deleteRecord(id){
 
-.calendar-header{
-    text-align:center;
-    color:var(--muted);
-    padding:8px;
-}
 
-.calendar-day{
-    height:60px;
-    border:1px solid var(--border);
-    border-radius:14px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    background:#101419;
-    transition:.2s;
-}
+records=
+records.filter(
+r=>r.id!==id
+);
 
-.calendar-day:hover{
-    border-color:var(--accent);
-}
-
-.has-record{
-    background:rgba(45,108,223,.15);
-    border-color:var(--accent);
-    font-weight:bold;
+save();
+renderHistory();
 }
 
 function editRecord(id){
@@ -924,4 +740,3 @@ renderActivities();
 
 </body>
 </html>
-```
