@@ -387,9 +387,15 @@ home.appendChild(div);
 }
 
 function archiveActivity(index){
-activities[index].archived=true;
-save();
-renderActivities();
+    activities[index].archived = true;
+    save();
+    renderActivities();
+}
+
+function unarchiveActivity(index){
+    activities[index].archived = false;
+    save();
+    renderActivities();
 }
 
 function deleteActivity(index){
