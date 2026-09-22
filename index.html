@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rastro</title>
 
+
 <style>
 :root{
     --bg:#0b0d10;
@@ -23,135 +24,147 @@
 }
 
 body{
-    font-family:system-ui,sans-serif;
+    font-family:Inter,system-ui,sans-serif;
     background:var(--bg);
     color:var(--text);
+    line-height:1.5;
 }
 
 header{
     position:sticky;
     top:0;
-    background:#0f1318;
+    background:rgba(11,13,16,.88);
+    backdrop-filter:blur(18px);
     border-bottom:1px solid var(--border);
-    padding:14px;
+    padding:18px 22px;
     z-index:10;
 }
 
 h1{
-    font-size:22px;
+    font-size:26px;
+    font-weight:700;
+    letter-spacing:.5px;
 }
 
 .nav{
-    margin-top:10px;
+    margin-top:14px;
     display:flex;
-    gap:8px;
+    gap:10px;
+    flex-wrap:wrap;
 }
 
 button{
     background:var(--card);
     color:var(--text);
     border:1px solid var(--border);
-    padding:10px 12px;
-    border-radius:10px;
+    padding:10px 14px;
+    border-radius:12px;
     cursor:pointer;
+    transition:.18s ease;
 }
 
 button:hover{
     border-color:var(--accent);
+    transform:translateY(-1px);
 }
 
 .container{
-    max-width:900px;
+    max-width:980px;
     margin:auto;
-    padding:16px;
+    padding:28px 20px;
 }
 
 .card{
     background:var(--card);
     border:1px solid var(--border);
-    border-radius:12px;
-    padding:12px;
-    margin-bottom:10px;
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 4px 18px rgba(0,0,0,.18);
 }
 
 .activity{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    gap:8px;
+    gap:16px;
     cursor:grab;
 }
 
 .activity-name{
     font-weight:600;
+    font-size:15px;
 }
 
 .actions{
     display:flex;
-    gap:6px;
+    gap:8px;
     flex-wrap:wrap;
 }
 
-input,
-select,
-textarea{
+input,select,textarea{
     width:100%;
-    margin-top:6px;
-    margin-bottom:10px;
-    background:#0f1318;
-    color:white;
-    border:1px solid var(--border);
-    border-radius:8px;
-    padding:10px;
+    margin-top:8px;
+    margin-bottom:14px;
+    background:#101419;
+    color:var(--text);
+    border:1px solid #2b3440;
+    border-radius:12px;
+    padding:12px;
 }
 
 textarea{
     resize:vertical;
-    min-height:80px;
+    min-height:100px;
 }
 
-.hidden{
-    display:none;
-}
+.hidden{display:none;}
 
 .day{
-    margin-bottom:24px;
+    margin-bottom:34px;
+    padding:20px;
+    background:rgba(20,24,29,.55);
+    border:1px solid var(--border);
+    border-radius:20px;
 }
 
 .day-title{
-    font-size:20px;
-    margin-bottom:12px;
+    font-size:22px;
+    margin-bottom:16px;
+    font-weight:700;
 }
 
 .state-box{
-    background:var(--card);
+    background:#101419;
     border:1px solid var(--border);
-    padding:10px;
-    border-radius:12px;
-    margin-bottom:10px;
+    padding:16px;
+    border-radius:16px;
+    margin-bottom:16px;
 }
 
 .timeline{
     border:1px solid var(--border);
-    border-radius:12px;
+    border-radius:16px;
     overflow:hidden;
+    background:#11161b;
 }
 
 .slot{
-    min-height:36px;
-    border-bottom:1px solid #1c2229;
-    padding:6px 10px;
+    min-height:42px;
+    border-bottom:1px solid rgba(255,255,255,.04);
+    padding:8px 12px;
     display:flex;
-    gap:10px;
+    gap:14px;
 }
 
 .time{
-    width:60px;
+    width:64px;
     color:var(--muted);
+    font-size:13px;
 }
 
 .record{
-    color:white;
+    color:var(--text);
 }
 
 .small{
@@ -162,7 +175,7 @@ textarea{
 .modal{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,.7);
+    background:rgba(0,0,0,.78);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -171,24 +184,41 @@ textarea{
 
 .modal-content{
     width:100%;
-    max-width:500px;
+    max-width:560px;
     background:#11161b;
     border:1px solid var(--border);
-    border-radius:16px;
-    padding:16px;
+    border-radius:22px;
+    padding:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.45);
 }
 
 .quick-buttons{
     display:grid;
     grid-template-columns:repeat(3,1fr);
-    gap:6px;
-    margin-bottom:10px;
+    gap:8px;
+    margin-bottom:12px;
 }
 
 .quick-buttons button{
-    padding:8px;
+    padding:10px;
+}
+
+@media(max-width:720px){
+    .activity{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .actions{
+        width:100%;
+    }
+
+    .actions button{
+        flex:1;
+    }
 }
 </style>
+
 </head>
 <body>
 
