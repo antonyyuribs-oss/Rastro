@@ -6,839 +6,186 @@
 <title>Rastro</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+    --bg:#080b10;
+    --card:#121925;
+    --card-hover:#182132;
+    --blue:#2b6fff;
+    --text:#ffffff;
+    --muted:#8ea2bf;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
 body{
-background:#080b10;
-color:#fff;
-font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 
 header{
-padding:20px;
-font-size:28px;
-font-weight:700;
-text-align:center;
-border-bottom:1px solid #1a2230;
-position:sticky;
-top:0;
-background:#080b10;
+    padding:20px;
+    text-align:center;
+    font-size:32px;
+    font-weight:700;
+    border-bottom:1px solid #1a2230;
 }
 
 .container{
-max-width:700px;
-margin:auto;
-padding:20px;
+    max-width:900px;
+    margin:auto;
+    padding:20px;
 }
 
-.card{
-background:#121925;
-padding:18px;
-border-radius:16px;
-margin-bottom:12px;
-cursor:pointer;
+.section-title{
+    font-size:20px;
+    margin-bottom:12px;
 }
 
-.card:hover{
-background:#182132;
+.states{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:24px;
 }
 
-.card-title{
-font-size:18px;
-font-weight:600;
+.state-card{
+    background:var(--card);
+    border-radius:18px;
+    padding:18px;
 }
 
-.toolbar{
-display:flex;
-gap:10px;
-margin-bottom:20px;
+.state-value{
+    font-size:42px;
+    font-weight:700;
+    color:var(--blue);
 }
 
-.toolbar button{
-flex:1;
-padding:14px;
-border:none;
-border-radius:12px;
-background:#2b6fff;
-color:white;
-cursor:pointer;
+.fronts{
+    display:grid;
+    gap:12px;
+    margin-bottom:30px;
 }
 
-.history-item{
-background:#121925;
-padding:14px;
-border-radius:14px;
-margin-bottom:10px;
+.front-card{
+    background:var(--card);
+    border-radius:16px;
+    padding:18px;
+    cursor:pointer;
 }
 
-.small{
-font-size:12px;
-color:#9eb0ca;
+.front-card:hover{
+    background:var(--card-hover);
 }
 
-.delete-btn{
-margin-top:8px;
-background:#7d1d1d;
-color:white;
-border:none;
-padding:8px 12px;
-border-radius:8px;
-cursor:pointer;
+.timeline{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
 }
 
-.modal-bg{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.8);
-justify-content:center;
-align-items:center;
-padding:20px;
+.timeline-item{
+    background:var(--card);
+    border-radius:14px;
+    padding:14px;
 }
 
-.modal{
-background:#121925;
-width:100%;
-max-width:500px;
-border-radius:20px;
-padding:24px;
+.time{
+    color:var(--blue);
+    font-weight:700;
 }
 
-.modal h2{
-margin-bottom:20px;
+.capture-btn{
+    position:fixed;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    width:74px;
+    height:74px;
+    border:none;
+    border-radius:50%;
+    background:var(--blue);
+    color:white;
+    font-size:34px;
+    cursor:pointer;
+    box-shadow:0 0 30px rgba(43,111,255,.4);
 }
 
-.input{
-width:100%;
-padding:14px;
-margin-top:6px;
-margin-bottom:16px;
-background:#1a2333;
-border:none;
-border-radius:12px;
-color:white;
-}
-
-.duration-grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:8px;
-margin-bottom:16px;
-}
-
-.duration-btn{
-padding:12px;
-background:#1a2333;
-border:none;
-color:white;
-border-radius:10px;
-cursor:pointer;
-}
-
-.duration-btn.selected{
-background:#2b6fff;
-}
-
-.actions{
-display:flex;
-gap:10px;
-}
-
-.actions button{
-flex:1;
-padding:14px;
-border:none;
-border-radius:12px;
-cursor:pointer;
-}
-
-.cancel{
-background:#2a3445;
-color:white;
-}
-
-.save{
-background:#2b6fff;
-color:white;
-}
 </style>
 </head>
-
 <body>
 
 <header>Rastro</header>
 
 <div class="container">
 
-<div class="toolbar">
-<button onclick="showHistory()">Histórico</button>
-<button onclick="exportCSV()">CSV</button>
-</div>
+    <h2 class="section-title">Estados</h2>
 
-<div id="activities"></div>
+    <div class="states">
 
-<div id="historySection" style="display:none;">
-<h2 style="margin-bottom:15px">Histórico</h2>
-<div id="history"></div>
-</div>
+        <div class="state-card">
+            <div>Mental</div>
+            <div class="state-value">7</div>
+        </div>
 
-</div>
+        <div class="state-card">
+            <div>Físico</div>
+            <div class="state-value">6</div>
+        </div>
 
-<div class="modal-bg" id="modalBg">
-<div class="modal">
+    </div>
 
-<h2 id="activityTitle"></h2>
+    <h2 class="section-title">Frentes Ativas</h2>
 
-<div id="ratingSection">
+    <div class="fronts">
 
-<label>Valor (-10 a +10)</label>
-<input
-type="number"
-min="-10"
-max="10"
-class="input"
-id="ratingInput">
+        <div class="front-card">
+            Marcha 38
+        </div>
 
-</div>
+        <div class="front-card">
+            Contrabaixo
+        </div>
 
-<div id="durationSection">
+        <div class="front-card">
+            Estudo dos Evangelhos
+        </div>
 
-<label>Data</label>
-<input
-type="date"
-class="input"
-id="dateInput">
+        <div class="front-card">
+            Finanças
+        </div>
 
-<label>Hora Inicial</label>
-<input
-type="time"
-class="input"
-id="timeInput">
+    </div>
 
-<label>Duração</label>
+    <h2 class="section-title">Hoje</h2>
 
-<div class="duration-grid">
+    <div class="timeline">
 
-<button class="duration-btn" onclick="pickDuration(15)">15 min</button>
-<button class="duration-btn" onclick="pickDuration(30)">30 min</button>
-<button class="duration-btn" onclick="pickDuration(45)">45 min</button>
+        <div class="timeline-item">
+            <div class="time">08:00</div>
+            Caminhada 4 km
+        </div>
 
-<button class="duration-btn" onclick="pickDuration(60)">1h</button>
-<button class="duration-btn" onclick="pickDuration(90)">1h30</button>
-<button class="duration-btn" onclick="pickDuration(120)">2h</button>
+        <div class="timeline-item">
+            <div class="time">12:00</div>
+            Mandados urbanos
+        </div>
 
-<button class="duration-btn" onclick="pickDuration(180)">3h</button>
-<button class="duration-btn" onclick="pickDuration(240)">4h</button>
+        <div class="timeline-item">
+            <div class="time">20:00</div>
+            Estudo musical
+        </div>
 
-<button class="duration-btn" onclick="customDuration()">Outro</button>
+    </div>
 
 </div>
 
-<input
-type="number"
-id="customDurationInput"
-class="input"
-placeholder="Minutos"
-style="display:none">
-
-</div>
-
-<label>Observação</label>
-
-<textarea
-class="input"
-rows="4"
-id="notesInput"></textarea>
-
-<div class="actions">
-
-<button
-class="cancel"
-onclick="closeModal()">
-Cancelar
-</button>
-
-<button
-class="save"
-onclick="saveRecord()">
-Salvar
-</button>
-
-</div>
-
-</div>
-</div>
-
-<script>
-
-const activities = [
-"Mente ao Acordar",
-"Corpo ao Acordar",
-"Disposição Mental",
-"Disposição Física",
-"Trabalho",
-"Sono",
-"Descanso",
-"Treino",
-"Leitura",
-"Xadrez",
-"Bíblia",
-"Oração",
-"Culto",
-"Estudo Musical",
-"Ensaio",
-"Esposa",
-"Filhos",
-"Família",
-"Redes Sociais",
-"YouTube",
-"Netflix",
-"Casa",
-"Meditação"
-];
-
-const ratings = [
-"Mente ao Acordar",
-"Corpo ao Acordar",
-"Disposição Mental",
-"Disposição Física"
-];
-
-let selectedActivity = "";
-let selectedDuration = null;
-
-renderActivities();
-function renderHistory(){
-
-const records =
-JSON.parse(localStorage.getItem("rastro_records"))
-|| [];
-
-const history =
-document.getElementById("history");
-
-if(records.length===0){
-history.innerHTML =
-"<p>Nenhum registro.</p>";
-return;
-}
-
-const grouped = {};
-
-records.forEach(record=>{
-
-let date;
-
-if(record.date){
-date = record.date;
-}else{
-date =
-new Date(record.created)
-.toISOString()
-.split("T")[0];
-}
-
-if(!grouped[date]){
-grouped[date]=[];
-}
-
-grouped[date].push(record);
-
-});
-
-const dates =
-Object.keys(grouped)
-.sort()
-.reverse();
-
-let html = "";
-
-dates.forEach(date=>{
-
-const dayRecords =
-grouped[date];
-
-html += `
-<div class="history-item">
-
-<h2 style="margin-bottom:15px">
-${date}
-</h2>
-`;
-
-const ratings =
-dayRecords.filter(r=>
-r.type==="rating"
-);
-
-if(ratings.length){
-
-html += `
-<div style="
-margin-bottom:20px;
-padding:12px;
-background:#1a2333;
-border-radius:12px;
-">
-`;
-
-ratings.forEach(r=>{
-
-html += `
-<div>
-<strong>${r.activity}</strong>:
-${r.value}
-</div>
-`;
-
-});
-
-html += `
-</div>
-`;
-
-}
-
-for(let hour=0;hour<24;hour++){
-
-for(let minute=0;minute<60;minute+=30){
-
-const slot =
-String(hour).padStart(2,"0")
-+
-":"
-+
-String(minute).padStart(2,"0");
-
-const slotActivities =
-dayRecords.filter(r=>{
-
-if(r.type!=="activity"){
-return false;
-}
-
-return r.time===slot;
-
-});
-
-html += `
-<div style="
-display:flex;
-padding:6px 0;
-border-bottom:1px solid #1f2a3b;
-">
-
-<div style="
-width:60px;
-color:#8ea2bf;
-">
-${slot}
-</div>
-
-<div>
-`;
-
-if(slotActivities.length){
-
-slotActivities.forEach(a=>{
-
-html += `
-<div>
-<strong>${a.activity}</strong>
-(${a.duration} min)
-</div>
-`;
-
-});
-
-}
-
-html += `
-</div>
-</div>
-`;
-
-}
-
-}
-
-html += `
-</div>
-`;
-
-});
-
-history.innerHTML = html;
-
-}
-
-const records =
-JSON.parse(localStorage.getItem("rastro_records"))
-|| [];
-
-const historyDiv =
-document.getElementById("history");
-
-if(records.length===0){
-historyDiv.innerHTML="<p>Nenhum registro.</p>";
-return;
-}
-
-const grouped = {};
-
-records.forEach(r=>{
-
-let date;
-
-if(r.date){
-date = r.date;
-}else{
-date = new Date(r.created)
-.toISOString()
-.split("T")[0];
-}
-
-if(!grouped[date]){
-grouped[date]=[];
-}
-
-grouped[date].push(r);
-
-});
-
-const dates =
-Object.keys(grouped)
-.sort()
-.reverse();
-
-let html="";
-
-dates.forEach(date=>{
-
-html += `
-<div class="history-item">
-
-<h3>${date}</h3>
-`;
-
-const dayRecords = grouped[date];
-
-const states = dayRecords.filter(
-r=>r.type==="rating"
-);
-
-if(states.length){
-
-html += "<strong>Estados</strong><br>";
-
-states.forEach(s=>{
-
-html += `
-${s.activity}: ${s.value}<br>
-`;
-
-});
-
-html += "<br>";
-}
-
-html += "<strong>Linha do Tempo</strong><br><br>";
-
-for(let h=0; h<24; h++){
-
-for(let m=0; m<60; m+=30){
-
-const slot =
-String(h).padStart(2,"0")
-+
-":"
-+
-String(m).padStart(2,"0");
-
-const activities =
-dayRecords.filter(r=>{
-
-if(r.type!=="activity") return false;
-
-return r.time===slot;
-
-});
-
-html += `
-<div style="
-padding:6px;
-border-bottom:1px solid #1f2a3b;
-">
-
-<strong>${slot}</strong>
-`;
-
-activities.forEach(a=>{
-
-html += `
-<br>
-${a.activity}
-(${a.duration} min)
-`;
-
-});
-
-html += `
-</div>
-`;
-
-}
-
-}
-
-html += `
-</div>
-`;
-
-});
-
-historyDiv.innerHTML = html;
-};
-
-function renderActivities(){
-
-let html="";
-
-activities.forEach(a=>{
-
-html+=`
-<div class="card" onclick="openActivity('${a}')">
-<div class="card-title">${a}</div>
-</div>
-`;
-
-});
-
-document.getElementById("activities").innerHTML=html;
-}
-
-function openActivity(activity){
-
-selectedActivity=activity;
-
-document.getElementById("activityTitle").innerText=activity;
-
-document.getElementById("modalBg").style.display="flex";
-
-if(ratings.includes(activity)){
-
-document.getElementById("ratingSection").style.display="block";
-document.getElementById("durationSection").style.display="none";
-
-}else{
-
-document.getElementById("ratingSection").style.display="none";
-document.getElementById("durationSection").style.display="block";
-
-document.getElementById("dateInput").value=
-new Date().toISOString().split("T")[0];
-
-}
-
-}
-
-function closeModal(){
-
-document.getElementById("modalBg").style.display="none";
-
-document.getElementById("notesInput").value="";
-document.getElementById("ratingInput").value="";
-document.getElementById("timeInput").value="";
-document.getElementById("customDurationInput").value="";
-
-selectedDuration=null;
-}
-
-function pickDuration(min){
-
-selectedDuration=min;
-
-document.querySelectorAll(".duration-btn")
-.forEach(btn=>btn.classList.remove("selected"));
-
-event.target.classList.add("selected");
-}
-
-function customDuration(){
-
-document.getElementById(
-"customDurationInput"
-).style.display="block";
-}
-
-function saveRecord(){
-
-const records =
-JSON.parse(localStorage.getItem("rastro_records"))
-|| [];
-
-let record;
-
-if(ratings.includes(selectedActivity)){
-
-record={
-type:"rating",
-activity:selectedActivity,
-value:document.getElementById("ratingInput").value,
-notes:document.getElementById("notesInput").value,
-created:new Date().toISOString()
-};
-
-}else{
-
-const custom =
-document.getElementById("customDurationInput").value;
-
-record={
-type:"activity",
-activity:selectedActivity,
-date:document.getElementById("dateInput").value,
-time:document.getElementById("timeInput").value,
-duration:custom || selectedDuration,
-notes:document.getElementById("notesInput").value,
-created:new Date().toISOString()
-};
-
-}
-
-records.unshift(record);
-
-localStorage.setItem(
-"rastro_records",
-JSON.stringify(records)
-);
-
-renderHistory();
-closeModal();
-}
-
-function renderHistory(){
-
-const records=
-JSON.parse(localStorage.getItem("rastro_records"))
-|| [];
-
-let html="";
-
-records.forEach((r,index)=>{
-
-html+=`
-<div class="history-item">
-
-<strong>${r.activity}</strong><br>
-
-<span class="small">
-${r.created}
-</span><br>
-`;
-
-if(r.type==="rating"){
-html+=`Valor: ${r.value}<br>`;
-}else{
-html+=`
-Data: ${r.date}<br>
-Hora: ${r.time}<br>
-Duração: ${r.duration} min<br>
-`;
-}
-
-if(r.notes){
-html+=`Obs: ${r.notes}<br>`;
-}
-
-html+=`
-<button
-class="delete-btn"
-onclick="deleteRecord(${index})">
-Excluir
-</button>
-
-</div>
-`;
-
-});
-
-document.getElementById("history").innerHTML=html;
-}
-
-function deleteRecord(index){
-
-const records=
-JSON.parse(localStorage.getItem("rastro_records"))
-|| [];
-
-records.splice(index,1);
-
-localStorage.setItem(
-"rastro_records",
-JSON.stringify(records)
-);
-
-renderHistory();
-}
-
-function showHistory(){
-
-    renderHistory();
-
-    const section =
-    document.getElementById("historySection");
-
-    section.style.display =
-    section.style.display === "none"
-    ? "block"
-    : "none";
-
-}
-
-const section =
-document.getElementById("historySection");
-
-section.style.display =
-section.style.display==="none"
-? "block"
-: "none";
-}
-
-function exportCSV(){
-
-const records=
-JSON.parse(localStorage.getItem("rastro_records"))
-|| [];
-
-let csv=
-"Atividade,Data,Hora,Duracao,Valor,Observacao\n";
-
-records.forEach(r=>{
-
-csv+=`"${r.activity}",
-"${r.date||''}",
-"${r.time||''}",
-"${r.duration||''}",
-"${r.value||''}",
-"${r.notes||''}"\n`;
-
-});
-
-const blob =
-new Blob([csv],{type:"text/csv"});
-
-const url=
-URL.createObjectURL(blob);
-
-const a=
-document.createElement("a");
-
-a.href=url;
-a.download="rastro.csv";
-a.click();
-}
-</script>
+<button class="capture-btn">+</button>
 
 </body>
 </html>
