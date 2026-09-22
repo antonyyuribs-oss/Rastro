@@ -211,3 +211,454 @@ textarea{
 </div>
 
 <div id="modalContainer"></div>
+
+<script>
+
+const STATE_ACTIVITIES = [
+"mente ao acordar",
+"corpo ao acordar",
+"disposição mental",
+"disposição física"
+];
+
+const DEFAULT_ACTIVITIES = [
+"Mente ao Acordar",
+"Corpo ao Acordar",
+"Disposição Mental",
+"Disposição Física",
+"Trabalho",
+"Sono",
+"Descanso",
+"Treino",
+"Leitura",
+"Xadrez",
+"Bíblia",
+"Oração",
+"Culto",
+"Estudo Musical",
+"Ensaio",
+"Esposa",
+"Filhos",
+"Família",
+"Redes Sociais",
+"YouTube",
+"Netflix",
+"Casa",
+"Meditação"
+];
+
+let activities =
+JSON.parse(localStorage.getItem("rastro_activities"))
+||
+DEFAULT_ACTIVITIES.map(a=>({
+name:a,
+archived:false
+}));
+
+let records =
+JSON.parse(localStorage.getItem("rastro_records"))
+||
+[];
+
+function save(){
+localStorage.setItem(
+"rastro_activities",
+JSON.stringify(activities)
+);
+
+localStorage.setItem(
+"rastro_records",
+JSON.stringify(records)
+);
+}
+
+function showHome(){
+document.getElementById("homeScreen").classList.remove("hidden");
+document.getElementById("historyScreen").classList.add("hidden");
+renderActivities();
+}
+
+function showHistory(){
+document.getElementById("homeScreen").classList.add("hidden");
+document.getElementById("historyScreen").classList.remove("hidden");
+renderHistory();
+}
+
+function renderActivities(){
+
+const home=document.getElementById("homeScreen");
+
+home.innerHTML="";
+
+activities
+.filter(a=>!a.archived)
+.forEach((activity,index)=>{
+
+const card=document.createElement("div");
+card.className="card activity";
+card.draggable=true;
+
+card.ondragstart=e=>{
+e.dataTransfer.setData("index",index);
+};
+
+card.ondragover=e=>e.preventDefault();
+
+card.ondrop=e=>{
+e.preventDefault();
+
+const from=parseInt(
+e.dataTransfer.getData("index")
+);
+
+const item=activities.splice(from,1)[0];
+activities.splice(index,0,item);
+
+save();
+renderActivities();
+};
+
+card.innerHTML=`
+<div class="activity-name">${activity.name}</div>
+
+<div class="actions">
+<button onclick="openRegister('${activity.name}')">Registrar</button>
+<button onclick="archiveActivity(${index})">Arquivar</button>
+<button onclick="deleteActivity(${index})">Excluir</button>
+</div>
+`;
+
+home.appendChild(card);
+
+});
+
+}
+
+function archiveActivity(index){
+activities[index].archived=true;
+save();
+renderActivities();
+}
+
+function deleteActivity(index){
+
+if(!confirm("Excluir atividade?")) return;
+
+activities.splice(index,1);
+
+save();
+renderActivities();
+}
+
+function addActivity(){
+
+const name=prompt("Nome da atividade");
+
+if(!name) return;
+
+activities.push({
+name,
+archived:false
+});
+
+save();
+renderActivities();
+}
+
+function openRegister(activity){
+
+const isState =
+STATE_ACTIVITIES.includes(
+activity.toLowerCase()
+);
+
+const today=
+new Date().toISOString().split("T")[0];
+
+let content="";
+
+if(isState){
+
+content=`
+<label>Data</label>
+<input id="date" type="date" value="${today}">
+
+<label>Valor (-10 a +10)</label>
+<input id="value" type="number" min="-10" max="10" value="0">
+
+<label>Notas</label>
+<textarea id="notes"></textarea>
+
+<button onclick="saveStateRecord('${activity}')">
+Salvar
+</button>
+`;
+
+}else{
+
+content=`
+<label>Data</label>
+<input id="date" type="date" value="${today}">
+
+<label>Hora Inicial</label>
+<input id="startTime" type="time">
+
+<label>Duração</label>
+
+<div class="quick-buttons">
+${[
+15,30,45,60,90,120,180,240
+].map(v=>
+`<button type="button"
+onclick="setDuration(${v})">${formatDuration(v)}</button>`
+).join("")}
+</div>
+
+<input id="duration" type="number" value="30">
+
+<label>Notas</label>
+<textarea id="notes"></textarea>
+
+<button onclick="saveActivityRecord('${activity}')">
+Salvar
+</button>
+`;
+}
+
+showModal(activity,content);
+
+}
+
+function formatDuration(min){
+
+if(min===60) return "1h";
+if(min===90) return "1h30";
+if(min===120) return "2h";
+if(min===180) return "3h";
+if(min===240) return "4h";
+
+return min+" min";
+}
+
+function setDuration(v){
+document.getElementById("duration").value=v;
+}
+
+function saveStateRecord(activity){
+
+records.push({
+id:Date.now(),
+activity,
+date:date.value,
+value:Number(value.value),
+notes:notes.value
+});
+
+save();
+closeModal();
+}
+
+function saveActivityRecord(activity){
+
+records.push({
+id:Date.now(),
+activity,
+date:date.value,
+startTime:startTime.value,
+duration:Number(duration.value),
+notes:notes.value
+});
+
+save();
+closeModal();
+}
+
+function showModal(title,content){
+
+document.getElementById(
+"modalContainer"
+).innerHTML=
+`
+<div class="modal">
+<div class="modal-content">
+<h3>${title}</h3>
+<br>
+${content}
+<br>
+<button onclick="closeModal()">Fechar</button>
+</div>
+</div>
+`;
+}
+
+function closeModal(){
+document.getElementById(
+"modalContainer"
+).innerHTML="";
+}
+
+function renderHistory(){
+
+const history=
+document.getElementById(
+"historyScreen"
+);
+
+history.innerHTML="";
+
+const grouped={};
+
+records.forEach(r=>{
+if(!grouped[r.date])
+grouped[r.date]=[];
+
+grouped[r.date].push(r);
+});
+
+Object.keys(grouped)
+.sort()
+.reverse()
+.forEach(date=>{
+
+const day=document.createElement("div");
+day.className="day";
+
+const dayRecords=
+grouped[date];
+
+const stateRecords=
+dayRecords.filter(r=>
+STATE_ACTIVITIES.includes(
+r.activity.toLowerCase()
+));
+
+const normalRecords=
+dayRecords.filter(r=>
+!STATE_ACTIVITIES.includes(
+r.activity.toLowerCase()
+));
+
+let stateHTML="";
+
+stateRecords.forEach(r=>{
+stateHTML+=`
+<div>
+<strong>${r.activity}</strong>:
+${r.value}
+</div>
+`;
+});
+
+let timelineHTML='';
+
+for(let h=0;h<24;h++){
+
+for(let m=0;m<60;m+=30){
+
+const time=
+String(h).padStart(2,'0')
++
+':'
++
+String(m).padStart(2,'0');
+
+const slotRecords=
+normalRecords
+.filter(r=>r.startTime===time)
+.sort((a,b)=>
+a.startTime.localeCompare(
+b.startTime
+)
+);
+
+timelineHTML+=`
+<div class="slot">
+
+<div class="time">
+${time}
+</div>
+
+<div>
+${slotRecords.map(r=>`
+<div class="record">
+${r.activity}
+(${formatDuration(r.duration)})
+<br>
+<span class="small">
+<button onclick="editRecord(${r.id})">
+Editar
+</button>
+
+<button onclick="deleteRecord(${r.id})">
+Excluir
+</button>
+</span>
+</div>
+`).join("")}
+</div>
+
+</div>
+`;
+}
+}
+
+day.innerHTML=
+`
+<div class="day-title">${date}</div>
+
+<div class="state-box">
+${stateHTML || 'Sem registros de estado'}
+</div>
+
+<div class="timeline">
+${timelineHTML}
+</div>
+`;
+
+history.appendChild(day);
+
+});
+
+}
+
+function deleteRecord(id){
+
+records=
+records.filter(
+r=>r.id!==id
+);
+
+save();
+renderHistory();
+}
+
+function editRecord(id){
+
+const record=
+records.find(
+r=>r.id===id
+);
+
+if(!record) return;
+
+const notes=
+prompt(
+"Editar notas",
+record.notes || ""
+);
+
+if(notes===null) return;
+
+record.notes=notes;
+
+save();
+renderHistory();
+}
+
+renderActivities();
+
+</script>
+
+</body>
+</html>
+```
