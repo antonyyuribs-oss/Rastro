@@ -1070,6 +1070,53 @@ link.download="rastro.json";
 link.click();
 
 }
+
+/* ===========================
+   IMPORTAÇÃO JSON
+=========================== */
+
+function importJSON(){
+    document.getElementById("importFile").click();
+}
+
+function handleImport(event){
+
+    const file = event.target.files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        try{
+
+            const data = JSON.parse(e.target.result);
+
+            if(data.atividades){
+                activities = data.atividades;
+            }
+
+            if(data.registros){
+                records = data.registros;
+            }
+
+            save();
+
+            renderActivities();
+
+            alert("Importação concluída com sucesso.");
+
+        }catch(error){
+
+            alert("Arquivo JSON inválido.");
+
+            console.error(error);
+        }
+    };
+
+    reader.readAsText(file);
+}
 renderActivities();
 lucide.createIcons();
 </script>
