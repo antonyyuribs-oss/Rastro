@@ -306,6 +306,18 @@ textarea{
         <i data-lucide="sparkles"></i>
     </button>
 
+        <button onclick="importJSON()" title="Importar">
+    <i data-lucide="upload"></i>
+</button>
+
+<input
+    type="file"
+    id="importFile"
+    accept=".json"
+    style="display:none"
+    onchange="handleImport(event)"
+>
+
 </div>
 </header>
 
