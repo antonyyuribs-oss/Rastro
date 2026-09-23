@@ -326,7 +326,7 @@ textarea{resize:vertical;min-height:100px}
 .bottom-nav{
     position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:30;
     width:min(100%,var(--content));
-    display:grid;grid-template-columns:repeat(4,1fr);align-items:end;
+    display:grid;grid-template-columns:repeat(3,1fr);align-items:end;
     padding:8px 10px calc(8px + env(safe-area-inset-bottom));
     background:rgba(20,28,18,.95);border-top:1px solid var(--border-soft);
     backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
@@ -435,9 +435,6 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
     </button>
     <button class="nav-item" id="navHistory" onclick="showHistory()" aria-label="Histórico">
         <i data-lucide="calendar-days"></i><span>Histórico</span>
-    </button>
-    <button class="nav-item" onclick="openDataMenu()" aria-label="Dados">
-        <i data-lucide="chart-no-axes-column-increasing"></i><span>Dados</span>
     </button>
     <button class="nav-item" onclick="openMoreMenu()" aria-label="Mais opções">
         <i data-lucide="ellipsis"></i><span>Mais</span>
@@ -1500,6 +1497,7 @@ function openMoreMenu(){
         <div class="menu-stack">
             <button onclick="closeModal();addActivity()"><i data-lucide="plus"></i> Adicionar atividade</button>
             <button onclick="closeModal();openReorderActivities()"><i data-lucide="list-restart"></i> Organizar atividades</button>
+            <button onclick="closeModal();openDataMenu()"><i data-lucide="chart-no-axes-column-increasing"></i> Dados</button>
             <button onclick="importJSON();closeModal()"><i data-lucide="upload"></i> Importar backup (JSON)</button>
         </div>
     `,'Rastro');
