@@ -238,13 +238,71 @@ textarea{resize:vertical;min-height:100px}
 .timeline-edit-hint{margin-top:8px;color:var(--muted);font-size:9px}
 .small{font-size:12px;color:var(--muted)}
 
-/* modal atual — bottom sheet virá na etapa 5 */
-.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px}
-.modal-content{width:100%;max-width:560px;max-height:88vh;overflow:auto;background:#11161b;border:1px solid var(--border);border-radius:22px;padding:22px;box-shadow:var(--shadow)}
-.modal-content h3{font-size:20px;letter-spacing:-.015em}
+/* ETAPA 5 — bottom sheets e formulários móveis */
+.modal{
+    position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.68);
+    display:flex;align-items:flex-end;justify-content:center;padding:0;
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    animation:fadeIn .16s ease both
+}
+.modal-content{
+    width:min(100%,560px);max-height:min(92dvh,820px);overflow:auto;
+    background:linear-gradient(180deg,#151a21,#0f1318 34%);
+    border:1px solid var(--border);border-bottom:0;border-radius:26px 26px 0 0;
+    padding:9px 18px calc(20px + env(safe-area-inset-bottom));
+    box-shadow:0 -18px 60px rgba(0,0,0,.46);
+    animation:sheetUp .22s cubic-bezier(.2,.75,.25,1) both;
+    overscroll-behavior:contain
+}
+.sheet-handle{width:36px;height:4px;border-radius:999px;background:#3a424d;margin:2px auto 12px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+.sheet-title-wrap{min-width:0}
+.sheet-eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.modal-content h3{font-size:21px;line-height:1.15;letter-spacing:-.025em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet-close{width:36px;height:36px;flex:none;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--surface-2)}
+.sheet-close svg{width:17px;height:17px}
+.sheet-form{display:grid;gap:0}
+.form-label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;font-weight:650;color:var(--text-2);margin:0 0 6px}
+.form-label span{font-size:10px;font-weight:500;color:var(--muted)}
+.modal-content input:not([type="range"]),.modal-content select,.modal-content textarea{
+    margin:0 0 16px;background:#0b0f14;border-color:#29323d;border-radius:13px;padding:13px 14px
+}
+.modal-content input[type="date"],.modal-content input[type="time"]{min-height:47px}
+.modal-content textarea{min-height:94px;max-height:180px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick-buttons,.duration-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
+.duration-chip{
+    min-height:43px;padding:8px 6px;border-radius:12px;background:var(--surface-2);color:var(--text-2);
+    border-color:var(--border);font-size:12px;font-weight:650
+}
+.duration-chip.active{background:var(--accent-soft);border-color:rgba(59,130,246,.7);color:#b9d3ff;box-shadow:inset 0 0 0 1px rgba(59,130,246,.12)}
+.duration-custom{display:grid;grid-template-columns:1fr 86px auto;align-items:center;gap:8px;margin-bottom:16px;color:var(--muted);font-size:11px}
+.duration-custom input{margin:0!important;text-align:center;padding:10px!important;min-height:40px!important}
+.primary-action{
+    width:100%;min-height:50px;margin-top:2px;border-color:#397ad9;background:linear-gradient(180deg,#438bf4,#2f6fd0);
+    color:#fff;font-weight:730;box-shadow:0 8px 22px rgba(35,92,179,.22);display:flex;align-items:center;justify-content:center;gap:8px
+}
+.primary-action svg{width:18px;height:18px}
+.secondary-action{width:100%;min-height:46px}
+.danger-action{color:#ff9b9b;border-color:rgba(242,107,107,.3);background:rgba(242,107,107,.065)}
+.management-zone{margin-top:22px;padding-top:16px;border-top:1px solid var(--border-soft)}
+.management-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.management-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.management-actions button{min-height:42px;font-size:11px}
+.state-control{padding:4px 0 18px}
+.state-readout{font-size:48px;line-height:1;font-weight:780;letter-spacing:-.055em;text-align:center;color:var(--text);font-variant-numeric:tabular-nums;margin:2px 0 18px}
+.state-readout.positive{color:#7dd9ac}.state-readout.negative{color:#ff8585}.state-readout.neutral{color:var(--text-2)}
+.state-range{appearance:none;-webkit-appearance:none;width:100%;height:8px;border-radius:99px;outline:none;margin:0!important;background:linear-gradient(90deg,#df6868 0%,#69727d 50%,#58c895 100%)}
+.state-range::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#f5f7fa;border:5px solid var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.state-range::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:#f5f7fa;border:5px solid var(--accent);box-shadow:0 4px 14px rgba(0,0,0,.35)}
+.state-scale{display:flex;justify-content:space-between;margin-top:10px;color:var(--muted);font-size:10px}
+.state-scale span:nth-child(2){color:var(--text-2)}
 .menu-stack{display:grid;gap:9px}
 .menu-stack button{width:100%;text-align:left;padding:14px}
-.menu-note{font-size:12px;color:var(--muted);margin:0 0 12px}
+.menu-note{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.5}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes sheetUp{from{transform:translateY(22px);opacity:.4}to{transform:translateY(0);opacity:1}}
+@media(min-width:700px){.modal{padding:24px;align-items:flex-end}.modal-content{border-bottom:1px solid var(--border);border-radius:26px}}
 
 /* navegação inferior */
 .bottom-nav{
@@ -617,156 +675,193 @@ renderActivities();
 
 function openRegister(activity){
 
-const isState =
-STATE_ACTIVITIES.includes(
-activity.toLowerCase()
-);
+    const isState = STATE_ACTIVITIES.includes(activity.toLowerCase());
+    const today = new Date().toLocaleDateString('en-CA');
+    let content="";
 
-const today=
-new Date().toLocaleDateString('en-CA');
+    if(isState){
+        content=`
+        <div class="sheet-form">
+            <label class="form-label" for="date">Data</label>
+            <input id="date" type="date" value="${today}">
 
-let content="";
+            <label class="form-label" for="value">Como está agora? <span>-10 a +10</span></label>
+            <div class="state-control">
+                <div id="stateReadout" class="state-readout neutral">0</div>
+                <input id="value" class="state-range" type="range" min="-10" max="10" step="1" value="0"
+                       oninput="updateStateRange('value','stateReadout')">
+                <div class="state-scale"><span>-10</span><span>0</span><span>+10</span></div>
+            </div>
 
-if(isState){
+            <label class="form-label" for="notes">Notas <span>opcional</span></label>
+            <textarea id="notes" placeholder="Algum contexto que ajude a entender este registro?"></textarea>
 
-content=`
-<label>Data</label>
-<input id="date" type="date" value="${today}">
+            <button class="primary-action" onclick="saveStateRecord('${activity}')">
+                <i data-lucide="check"></i> Registrar
+            </button>
 
-<label>Valor (-10 a +10)</label>
-<input id="value" type="number" min="-10" max="10" value="0">
+            <div class="management-zone">
+                <div class="management-title">Gerenciar atividade</div>
+                <div class="management-actions">
+                    <button onclick="archiveByName('${activity}')"><i data-lucide="archive"></i> Arquivar</button>
+                    <button class="danger-action" onclick="deleteByName('${activity}')"><i data-lucide="trash-2"></i> Excluir</button>
+                </div>
+            </div>
+        </div>`;
+    }else{
+        content=`
+        <div class="sheet-form">
+            <div class="form-row">
+                <div>
+                    <label class="form-label" for="date">Data</label>
+                    <input id="date" type="date" value="${today}">
+                </div>
+                <div>
+                    <label class="form-label" for="startTime">Hora inicial</label>
+                    <input id="startTime" type="time">
+                </div>
+            </div>
 
-<label>Notas</label>
-<textarea id="notes"></textarea>
+            <label class="form-label">Duração <span>toque para selecionar</span></label>
+            <div class="duration-chips">
+                ${[30,60,90,120,180,240].map(v=>
+                    `<button type="button" class="duration-chip ${v===30?'active':''}" data-duration="${v}" onclick="setDuration(${v})">${formatDuration(v)}</button>`
+                ).join("")}
+            </div>
+            <div class="duration-custom">
+                <span>Outra duração</span>
+                <input id="duration" type="number" min="1" step="5" value="30" oninput="syncDurationChips()">
+                <span>min</span>
+            </div>
 
-<button onclick="saveStateRecord('${activity}')">
-Salvar
-</button>
+            <label class="form-label" for="notes">Notas <span>opcional</span></label>
+            <textarea id="notes" placeholder="O que vale a pena deixar registrado?"></textarea>
 
-<br><br>
+            <button class="primary-action" onclick="saveActivityRecord('${activity}')">
+                <i data-lucide="check"></i> Registrar
+            </button>
 
-<button onclick="deleteByName('${activity}')">
-Excluir
-</button>
+            <div class="management-zone">
+                <div class="management-title">Gerenciar atividade</div>
+                <div class="management-actions">
+                    <button onclick="archiveByName('${activity}')"><i data-lucide="archive"></i> Arquivar</button>
+                    <button class="danger-action" onclick="deleteByName('${activity}')"><i data-lucide="trash-2"></i> Excluir</button>
+                </div>
+            </div>
+        </div>`;
+    }
 
-<button onclick="archiveByName('${activity}')">
-Arquivar
-</button>
-`;
-
-}else{
-
-content=`
-<label>Data</label>
-<input id="date" type="date" value="${today}">
-
-<label>Hora Inicial</label>
-<input id="startTime" type="time">
-
-<label>Duração</label>
-
-<div class="quick-buttons">
-${[
-30,60,90,120,180,240
-].map(v=>
-`<button type="button"
-onclick="setDuration(${v})">${formatDuration(v)}</button>`
-).join("")}
-</div>
-
-<input id="duration" type="number" value="30">
-
-<label>Notas</label>
-<textarea id="notes"></textarea>
-
-<div class="modal-footer-actions">
-
-<button onclick="saveActivityRecord('${activity}')">
-Salvar
-</button>
-
-<button onclick="deleteByName('${activity}')">
-Excluir
-</button>
-
-<button onclick="archiveByName('${activity}')">
-Arquivar
-</button>
-
-</div>
-`;
-}
-
-showModal(activity,content);
-
+    showModal(activity,content,'Novo registro');
+    if(isState) updateStateRange('value','stateReadout');
 }
 
 function formatDuration(min){
-
-if(min===60) return "1h";
-if(min===90) return "1h30";
-if(min===120) return "2h";
-if(min===180) return "3h";
-if(min===240) return "4h";
-
-return min+" min";
+    if(min===60) return "1h";
+    if(min===90) return "1h30";
+    if(min===120) return "2h";
+    if(min===180) return "3h";
+    if(min===240) return "4h";
+    return min+" min";
 }
 
-function setDuration(v){
-document.getElementById("duration").value=v;
+function setDuration(v, inputId='duration'){
+    const input=document.getElementById(inputId);
+    if(input) input.value=v;
+    const scope=input?.closest('.sheet-form') || document;
+    scope.querySelectorAll('.duration-chip').forEach(btn=>{
+        btn.classList.toggle('active',Number(btn.dataset.duration)===Number(v));
+    });
+}
+
+function syncDurationChips(inputId='duration'){
+    const input=document.getElementById(inputId);
+    if(!input) return;
+    const scope=input.closest('.sheet-form') || document;
+    scope.querySelectorAll('.duration-chip').forEach(btn=>{
+        btn.classList.toggle('active',Number(btn.dataset.duration)===Number(input.value));
+    });
+}
+
+function updateStateRange(inputId='value',outputId='stateReadout'){
+    const input=document.getElementById(inputId);
+    const output=document.getElementById(outputId);
+    if(!input || !output) return;
+    const v=Number(input.value);
+    output.textContent=v>0?`+${v}`:String(v);
+    output.classList.toggle('positive',v>0);
+    output.classList.toggle('negative',v<0);
+    output.classList.toggle('neutral',v===0);
+}
+
+function refreshAfterRecordSave(){
+    const home=document.getElementById('homeScreen');
+    const history=document.getElementById('historyScreen');
+    if(home && !home.classList.contains('hidden')) renderActivities();
+    if(history && !history.classList.contains('hidden')) renderHistory();
 }
 
 function saveStateRecord(activity){
+    const dateEl=document.getElementById('date');
+    const valueEl=document.getElementById('value');
+    const notesEl=document.getElementById('notes');
+    if(!dateEl || !valueEl) return;
 
-records.push({
-id:Date.now(),
-activity,
-date:date.value,
-value:Number(value.value),
-notes:notes.value
-});
+    records.push({
+        id:Date.now(),
+        activity,
+        date:dateEl.value,
+        value:Number(valueEl.value),
+        notes:notesEl?.value || ''
+    });
 
-save();
-closeModal();
+    save();
+    closeModal();
+    refreshAfterRecordSave();
 }
 
 function saveActivityRecord(activity){
+    const dateEl=document.getElementById('date');
+    const startEl=document.getElementById('startTime');
+    const durationEl=document.getElementById('duration');
+    const notesEl=document.getElementById('notes');
+    if(!dateEl || !durationEl) return;
 
-records.push({
-id:Date.now(),
-activity,
-date:date.value,
-startTime:startTime.value,
-duration:Number(duration.value),
-notes:notes.value
-});
+    records.push({
+        id:Date.now(),
+        activity,
+        date:dateEl.value,
+        startTime:startEl?.value || '',
+        duration:Math.max(1,Number(durationEl.value)||30),
+        notes:notesEl?.value || ''
+    });
 
-save();
-closeModal();
+    save();
+    closeModal();
+    refreshAfterRecordSave();
 }
 
-function showModal(title,content){
-
-document.getElementById(
-"modalContainer"
-).innerHTML=
-`
-<div class="modal">
-<div class="modal-content">
-<h3>${title}</h3>
-<br>
-${content}
-<br>
-<button onclick="closeModal()">Fechar</button>
-</div>
-</div>
-`;
+function showModal(title,content,eyebrow='Rastro'){
+    document.body.style.overflow='hidden';
+    document.getElementById('modalContainer').innerHTML=`
+    <div class="modal" onclick="closeModal()">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-label="${title}" onclick="event.stopPropagation()">
+            <div class="sheet-handle" aria-hidden="true"></div>
+            <div class="sheet-head">
+                <div class="sheet-title-wrap">
+                    <div class="sheet-eyebrow">${eyebrow}</div>
+                    <h3>${title}</h3>
+                </div>
+                <button class="sheet-close" onclick="closeModal()" aria-label="Fechar"><i data-lucide="x"></i></button>
+            </div>
+            ${content}
+        </div>
+    </div>`;
+    lucide.createIcons();
 }
 
 function closeModal(){
-document.getElementById(
-"modalContainer"
-).innerHTML="";
+    document.body.style.overflow='';
+    document.getElementById('modalContainer').innerHTML="";
 }
 
 
@@ -936,12 +1031,12 @@ function openRecordMenu(id){
     const r=records.find(x=>x.id===id);
     if(!r) return;
     showModal(r.activity,`
-        <p class="menu-note">Escolha o que deseja fazer com este registro.</p>
+        <p class="menu-note">Escolha uma ação para este registro.</p>
         <div class="menu-stack">
-            <button onclick="closeModal();editRecord(${id})">Editar registro</button>
-            <button onclick="closeModal();deleteRecord(${id})">Excluir registro</button>
+            <button class="secondary-action" onclick="closeModal();editRecord(${id})"><i data-lucide="pencil"></i> Editar registro</button>
+            <button class="secondary-action danger-action" onclick="closeModal();deleteRecord(${id})"><i data-lucide="trash-2"></i> Excluir registro</button>
         </div>
-    `);
+    `,'Registro');
 }
 
 function renderDay(date){
@@ -1027,75 +1122,77 @@ r => r.id !== id
 );
 
 save();
+if(document.querySelector('.modal')) closeModal();
 renderHistory();
 }
 
 function editRecord(id){
-
     const record = records.find(r => r.id === id);
-
     if(!record) return;
 
-    const isState =
-    STATE_ACTIVITIES.includes(
-        record.activity.toLowerCase()
-    );
+    const isState = STATE_ACTIVITIES.includes(record.activity.toLowerCase());
 
     if(isState){
+        showModal(record.activity, `
+            <div class="sheet-form">
+                <label class="form-label" for="editDate">Data</label>
+                <input id="editDate" type="date" value="${record.date || ''}">
 
-        showModal("Editar Registro", `
+                <label class="form-label" for="editValue">Como estava? <span>-10 a +10</span></label>
+                <div class="state-control">
+                    <div id="editStateReadout" class="state-readout neutral">${Number(record.value)||0}</div>
+                    <input id="editValue" class="state-range" type="range" min="-10" max="10" step="1" value="${Number(record.value)||0}"
+                           oninput="updateStateRange('editValue','editStateReadout')">
+                    <div class="state-scale"><span>-10</span><span>0</span><span>+10</span></div>
+                </div>
 
-            <label>Data</label>
-            <input id="editDate"
-                   type="date"
-                   value="${record.date || ''}">
+                <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
+                <textarea id="editNotes">${record.notes || ''}</textarea>
 
-            <label>Valor (-10 a +10)</label>
-            <input id="editValue"
-                   type="number"
-                   min="-10"
-                   max="10"
-                   value="${record.value || 0}">
-
-            <label>Notas</label>
-            <textarea id="editNotes">${record.notes || ''}</textarea>
-
-            <button onclick="saveEditedRecord(${id})">
-                Salvar Alterações
-            </button>
-
-        `);
-
+                <button class="primary-action" onclick="saveEditedRecord(${id})"><i data-lucide="check"></i> Salvar alterações</button>
+                <div class="management-zone">
+                    <button class="secondary-action danger-action" onclick="deleteRecord(${id})"><i data-lucide="trash-2"></i> Excluir este registro</button>
+                </div>
+            </div>
+        `,'Editar registro');
+        updateStateRange('editValue','editStateReadout');
     }else{
+        const d=Number(record.duration)||30;
+        showModal(record.activity, `
+            <div class="sheet-form">
+                <div class="form-row">
+                    <div>
+                        <label class="form-label" for="editDate">Data</label>
+                        <input id="editDate" type="date" value="${record.date || ''}">
+                    </div>
+                    <div>
+                        <label class="form-label" for="editStartTime">Hora inicial</label>
+                        <input id="editStartTime" type="time" value="${record.startTime || ''}">
+                    </div>
+                </div>
 
-        showModal("Editar Registro", `
+                <label class="form-label">Duração</label>
+                <div class="duration-chips">
+                    ${[30,60,90,120,180,240].map(v=>
+                        `<button type="button" class="duration-chip ${v===d?'active':''}" data-duration="${v}" onclick="setDuration(${v},'editDuration')">${formatDuration(v)}</button>`
+                    ).join('')}
+                </div>
+                <div class="duration-custom">
+                    <span>Outra duração</span>
+                    <input id="editDuration" type="number" min="1" step="5" value="${d}" oninput="syncDurationChips('editDuration')">
+                    <span>min</span>
+                </div>
 
-            <label>Data</label>
-            <input id="editDate"
-                   type="date"
-                   value="${record.date || ''}">
+                <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
+                <textarea id="editNotes">${record.notes || ''}</textarea>
 
-            <label>Hora Inicial</label>
-            <input id="editStartTime"
-                   type="time"
-                   value="${record.startTime || ''}">
-
-            <label>Duração (min)</label>
-            <input id="editDuration"
-                   type="number"
-                   value="${record.duration || 30}">
-
-            <label>Notas</label>
-            <textarea id="editNotes">${record.notes || ''}</textarea>
-
-            <button onclick="saveEditedRecord(${id})">
-                Salvar Alterações
-            </button>
-
-        `);
-
+                <button class="primary-action" onclick="saveEditedRecord(${id})"><i data-lucide="check"></i> Salvar alterações</button>
+                <div class="management-zone">
+                    <button class="secondary-action danger-action" onclick="deleteRecord(${id})"><i data-lucide="trash-2"></i> Excluir este registro</button>
+                </div>
+            </div>
+        `,'Editar registro');
     }
-
 }
 
 function saveEditedRecord(id){
@@ -1143,7 +1240,7 @@ function openDataMenu(){
             <button onclick="exportCSV();closeModal()">Exportar planilha (CSV)</button>
             <button onclick="exportJSON();closeModal()">Exportar backup (JSON)</button>
         </div>
-    `);
+    `,'Exportação');
 }
 
 function openMoreMenu(){
@@ -1152,7 +1249,7 @@ function openMoreMenu(){
         <div class="menu-stack">
             <button onclick="importJSON();closeModal()">Importar backup (JSON)</button>
         </div>
-    `);
+    `,'Rastro');
 }
 
 function exportCSV(){
@@ -1285,6 +1382,10 @@ if(data.registros){
 
     reader.readAsText(file);
 }
+document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && document.querySelector('.modal')) closeModal();
+});
+
 showHome();
 </script>
 
