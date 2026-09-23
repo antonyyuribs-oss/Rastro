@@ -158,27 +158,85 @@ textarea{resize:vertical;min-height:100px}
 .modal-footer-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
 .modal-footer-actions button{width:100%}
 
-/* histórico — mantém a função existente com acabamento novo */
-.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
-.calendar-header{text-align:center;color:var(--muted);padding:5px 2px;font-size:11px}
+/* HISTÓRICO — calendário e Rastro do dia */
+.history-shell{display:grid;gap:18px}
+.calendar-card{padding:16px 14px 18px}
+.calendar-top{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:10px;margin-bottom:17px}
+.calendar-top h2{text-align:center;font-size:20px;line-height:1.2;letter-spacing:-.025em}
+.icon-button{width:42px;height:42px;padding:0;display:grid;place-items:center;background:var(--surface-3)}
+.icon-button svg{width:18px;height:18px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.calendar-header{text-align:center;color:var(--muted);padding:4px 0 7px;font-size:10px;font-weight:650;text-transform:uppercase}
 .calendar-day{
-    aspect-ratio:1/1;min-height:0;border:1px solid var(--border);border-radius:12px;
-    display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--surface-3);transition:.16s
+    position:relative;aspect-ratio:1/1;min-height:0;border:1px solid transparent;border-radius:12px;
+    display:grid;place-items:center;cursor:pointer;background:transparent;color:var(--text-2);
+    font-size:13px;transition:.16s ease
 }
-.calendar-day:hover{border-color:#3b4e68}
-.calendar-day.has-record{background:var(--accent-soft);border-color:rgba(59,130,246,.72);font-weight:700;color:#dbeafe}
-.calendar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
-.calendar-top h2{font-size:20px;letter-spacing:-.02em}
-.back-btn{margin-bottom:16px}
-.record{color:var(--text);padding:12px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;margin:8px 0}
+.calendar-day:hover{background:var(--surface-2)}
+.calendar-day.today{border-color:rgba(255,255,255,.17);font-weight:760;color:var(--text)}
+.calendar-day.has-record{background:var(--surface-2);color:var(--text);font-weight:650}
+.calendar-day.has-record::after{
+    content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;
+    border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(59,130,246,.12)
+}
+.calendar-day.many-records::after{width:16px;border-radius:99px}
+.calendar-legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:15px;color:var(--muted);font-size:10px}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.legend-today{width:12px;height:12px;border:1px solid rgba(255,255,255,.22);border-radius:4px}
+.history-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.history-stat{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:12px 10px}
+.history-stat b{display:block;font-size:18px;line-height:1.1;margin-bottom:5px;letter-spacing:-.02em}
+.history-stat span{display:block;color:var(--muted);font-size:10px;line-height:1.2}
+
+.day-view{display:grid;gap:18px}
+.day-toolbar{display:grid;grid-template-columns:42px 1fr 42px;gap:10px;align-items:center}
+.day-toolbar-main{display:flex;justify-content:center;align-items:center;gap:7px;min-width:0}
+.day-back{display:inline-flex;align-items:center;gap:7px;background:transparent;border-color:transparent;color:var(--text-2);padding:8px 4px}
+.day-back svg{width:17px;height:17px}
+.day-date{text-align:center}
+.day-date h2{font-size:20px;letter-spacing:-.025em}
+.day-date p{font-size:11px;color:var(--muted);margin-top:3px}
+.day-nav-button{width:42px;height:42px;padding:0;display:grid;place-items:center;background:var(--surface-3)}
+.day-nav-button svg{width:18px;height:18px}
+.day-state-section .section-heading{margin-bottom:10px}
+.day-state-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.day-state-card{
+    min-width:0;background:linear-gradient(180deg,var(--surface-2),var(--surface));border:1px solid var(--border-soft);
+    border-radius:14px;padding:10px 5px;text-align:center;cursor:pointer
+}
+.day-state-card .state-icon{margin-bottom:6px;width:27px;height:27px}
+.day-state-card .state-icon svg{width:15px;height:15px}
+.day-state-card .state-name{font-size:9px;min-height:20px}
+.day-state-card .state-value{font-size:19px;margin-top:4px}
+.day-state-card.mental .state-icon,.day-state-card.mental .state-value{color:var(--green)}
+.day-state-card.body .state-icon,.day-state-card.body .state-value{color:var(--blue)}
+.day-state-card.disp-mental .state-icon,.day-state-card.disp-mental .state-value{color:var(--amber)}
+.day-state-card.disp-body .state-icon,.day-state-card.disp-body .state-value{color:var(--red)}
+.day-state-card.empty-state{opacity:.72}
+
+.timeline-wrap{position:relative;display:grid;gap:0;margin-top:2px}
+.timeline-empty{padding:28px 14px;text-align:center;border:1px dashed var(--border);border-radius:16px;color:var(--muted);font-size:12px}
+.timeline-item{display:grid;grid-template-columns:54px 18px minmax(0,1fr);gap:8px;position:relative;min-height:96px}
+.timeline-time{padding-top:14px;color:var(--text-2);font-size:11px;text-align:right;font-variant-numeric:tabular-nums}
+.timeline-rail{position:relative;display:flex;justify-content:center}
+.timeline-rail::before{content:'';position:absolute;top:0;bottom:0;width:1px;background:linear-gradient(var(--accent),rgba(59,130,246,.15))}
+.timeline-item:first-child .timeline-rail::before{top:20px}
+.timeline-item:last-child .timeline-rail::before{bottom:calc(100% - 21px)}
+.timeline-dot{position:relative;z-index:1;width:10px;height:10px;margin-top:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+.timeline-card{
+    margin:5px 0 12px;background:var(--surface);border:1px solid var(--border-soft);border-radius:15px;
+    padding:12px 13px;cursor:pointer;transition:.16s ease
+}
+.timeline-card:active{transform:scale(.992);background:var(--surface-2)}
+.timeline-title-row{display:flex;align-items:center;gap:9px;min-width:0}
+.timeline-activity-icon{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;color:#7fb0ff;background:rgba(59,130,246,.08)}
+.timeline-activity-icon svg{width:16px;height:16px}
+.timeline-title{font-size:13px;font-weight:690;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.timeline-notes{margin-top:10px;padding-top:9px;border-top:1px solid var(--border-soft);color:var(--text-2);font-size:11px;line-height:1.45}
+.timeline-edit-hint{margin-top:8px;color:var(--muted);font-size:9px}
 .small{font-size:12px;color:var(--muted)}
-.day{margin-bottom:34px;padding:20px;background:rgba(20,24,29,.55);border:1px solid var(--border);border-radius:20px}
-.day-title{font-size:22px;margin-bottom:16px;font-weight:700;display:flex;justify-content:space-between}
-.state-box{background:var(--surface-3);border:1px solid var(--border);padding:16px;border-radius:16px;margin-bottom:16px}
-.timeline{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface)}
-.slot{min-height:42px;border-bottom:1px solid rgba(255,255,255,.04);padding:8px 12px;display:flex;gap:14px}
-.slot:has(.record){background:rgba(59,130,246,.05)}
-.time{width:64px;color:var(--muted);font-size:13px}
 
 /* modal atual — bottom sheet virá na etapa 5 */
 .modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:20px}
@@ -712,62 +770,108 @@ document.getElementById(
 }
 
 
-function renderHistory(){
+function formatDateBR(date){
+    const [y,m,d]=date.split('-').map(Number);
+    const dt=new Date(y,m-1,d);
+    const raw=new Intl.DateTimeFormat('pt-BR',{day:'numeric',month:'long',year:'numeric'}).format(dt);
+    return raw.charAt(0).toUpperCase()+raw.slice(1);
+}
 
+function formatWeekday(date){
+    const [y,m,d]=date.split('-').map(Number);
+    const dt=new Date(y,m-1,d);
+    const raw=new Intl.DateTimeFormat('pt-BR',{weekday:'long'}).format(dt);
+    return raw.charAt(0).toUpperCase()+raw.slice(1);
+}
+
+function monthKey(year,month){
+    return `${year}-${String(month+1).padStart(2,'0')}`;
+}
+
+function renderHistory(){
     if(selectedDate){
+        setScreenHeader('Rastro do dia',formatDateBR(selectedDate));
         renderDay(selectedDate);
     }else{
+        setScreenHeader('Histórico','Seu rastro ao longo do tempo');
         renderCalendar();
     }
-
+    lucide.createIcons();
 }
 
 function renderCalendar(){
-
     const history=document.getElementById("historyScreen");
-
     const months=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-
     const firstDay=new Date(currentYear,currentMonth,1);
     const totalDays=new Date(currentYear,currentMonth+1,0).getDate();
     const startWeekDay=firstDay.getDay();
-
-    const datesWithRecords=[...new Set(records.map(r=>r.date))];
+    const key=monthKey(currentYear,currentMonth);
+    const monthRecords=records.filter(r=>(r.date||'').startsWith(key));
+    const counts={};
+    monthRecords.forEach(r=>{counts[r.date]=(counts[r.date]||0)+1;});
+    const recordedDays=Object.keys(counts).length;
+    const durationMin=monthRecords
+        .filter(r=>!STATE_ACTIVITIES.includes((r.activity||'').toLowerCase()))
+        .reduce((sum,r)=>sum+(Number(r.duration)||0),0);
+    const durationHours=Math.round((durationMin/60)*10)/10;
+    const today=todayISO();
 
     let html=`
-    <div class="card">
-        <div class="calendar-top">
-            <button onclick="prevMonth()">◀</button>
-            <h2>${months[currentMonth]} ${currentYear}</h2>
-            <button onclick="nextMonth()">▶</button>
-        </div>
+    <div class="history-shell">
+        <div class="card calendar-card">
+            <div class="calendar-top">
+                <button class="icon-button" onclick="prevMonth()" aria-label="Mês anterior"><i data-lucide="chevron-left"></i></button>
+                <h2>${months[currentMonth]} ${currentYear}</h2>
+                <button class="icon-button" onclick="nextMonth()" aria-label="Próximo mês"><i data-lucide="chevron-right"></i></button>
+            </div>
 
-        <div class="calendar-grid">
-            <div class="calendar-header">D</div>
-            <div class="calendar-header">S</div>
-            <div class="calendar-header">T</div>
-            <div class="calendar-header">Q</div>
-            <div class="calendar-header">Q</div>
-            <div class="calendar-header">S</div>
-            <div class="calendar-header">S</div>
+            <div class="calendar-grid">
+                <div class="calendar-header">D</div>
+                <div class="calendar-header">S</div>
+                <div class="calendar-header">T</div>
+                <div class="calendar-header">Q</div>
+                <div class="calendar-header">Q</div>
+                <div class="calendar-header">S</div>
+                <div class="calendar-header">S</div>
     `;
 
     for(let i=0;i<startWeekDay;i++) html+=`<div></div>`;
 
     for(let day=1;day<=totalDays;day++){
-
         const date=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-
+        const count=counts[date]||0;
+        const classes=[
+            'calendar-day',
+            count ? 'has-record' : '',
+            count>=5 ? 'many-records' : '',
+            date===today ? 'today' : ''
+        ].filter(Boolean).join(' ');
         html+=`
-        <div class="calendar-day ${datesWithRecords.includes(date)?'has-record':''}"
-             onclick="openDay('${date}')">
-             ${day}
-        </div>`;
+        <button class="${classes}" onclick="openDay('${date}')" aria-label="${day} de ${months[currentMonth]}, ${count} registros">
+            ${day}
+        </button>`;
     }
 
-    html+=`</div></div>`;
+    html+=`
+            </div>
+            <div class="calendar-legend">
+                <span class="legend-item"><span class="legend-dot"></span>com registros</span>
+                <span class="legend-item"><span class="legend-today"></span>hoje</span>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-heading"><h2>Resumo do mês</h2><span class="eyebrow">visão rápida</span></div>
+            <div class="history-stats">
+                <div class="history-stat"><b>${recordedDays}</b><span>dias registrados</span></div>
+                <div class="history-stat"><b>${monthRecords.length}</b><span>registros totais</span></div>
+                <div class="history-stat"><b>${String(durationHours).replace('.',',')}h</b><span>atividades</span></div>
+            </div>
+        </div>
+    </div>`;
 
     history.innerHTML=html;
+    lucide.createIcons();
 }
 
 function openDay(date){
@@ -779,175 +883,139 @@ function backToCalendar(){
     selectedDate=null;
     renderHistory();
 }
+
 function previousDay(){
-
     const [year, month, day] = selectedDate.split('-').map(Number);
-
     const d = new Date(year, month - 1, day);
-
     d.setDate(d.getDate() - 1);
-
     selectedDate =
         d.getFullYear() + '-' +
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
         String(d.getDate()).padStart(2, '0');
-
     renderHistory();
 }
 
 function nextDay(){
-
     const [year, month, day] = selectedDate.split('-').map(Number);
-
     const d = new Date(year, month - 1, day);
-
     d.setDate(d.getDate() + 1);
-
     selectedDate =
         d.getFullYear() + '-' +
         String(d.getMonth() + 1).padStart(2, '0') + '-' +
         String(d.getDate()).padStart(2, '0');
-
     renderHistory();
 }
+
 function prevMonth(){
     currentMonth--;
-    if(currentMonth<0){
-        currentMonth=11;
-        currentYear--;
-    }
+    if(currentMonth<0){currentMonth=11;currentYear--;}
     renderCalendar();
 }
 
 function nextMonth(){
     currentMonth++;
-    if(currentMonth>11){
-        currentMonth=0;
-        currentYear++;
-    }
+    if(currentMonth>11){currentMonth=0;currentYear++;}
     renderCalendar();
 }
+
 function getEndTime(startTime, duration){
-
     if(!startTime) return '--:--';
-
     const [h,m] = startTime.split(':').map(Number);
-
-    const totalMinutes = h * 60 + m + duration;
-
+    const totalMinutes = h * 60 + m + (Number(duration)||0);
     const endH = Math.floor(totalMinutes / 60) % 24;
     const endM = totalMinutes % 60;
-
     return `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
 }
-function renderDay(date){
 
-    const history=document.getElementById("historyScreen");
-
-    const dayRecords=records.filter(r=>r.date===date);
-
-    const states=dayRecords.filter(r=>
-        STATE_ACTIVITIES.includes(r.activity.toLowerCase())
-    );
-
-    const activities=dayRecords.filter(r=>
-        !STATE_ACTIVITIES.includes(r.activity.toLowerCase())
-    );
-
-        history.innerHTML=`
-<div class="card">
-
-    <div style="
-        display:flex;
-        gap:10px;
-        align-items:center;
-        margin-bottom:16px;
-        flex-wrap:wrap;
-    ">
-
-        <button onclick="backToCalendar()">
-            ← Calendário
-        </button>
-
-        <button onclick="previousDay()">
-            ⬅️
-        </button>
-
-        <button onclick="nextDay()">
-            ➡️
-        </button>
-
-    </div>
-
-    <h2>${date}</h2>
-
-
-${states.length
-? states.map(r=>`
-    <div class="record">
-
-        <strong>${r.activity}</strong>: ${r.value}
-
-        ${r.notes ? `
-            <div style="margin-top:8px;color:#c9d2dc;">
-                ${r.notes}
-            </div>
-        ` : ''}
-
-        <br><br>
-
-        <button onclick="editRecord(${r.id})">
-            Editar
-        </button>
-
-        <button onclick="deleteRecord(${r.id})">
-            Excluir
-        </button>
-
-    </div>
-`).join('')
-    : '<div class="small">Sem registros</div>'
+function latestStateForDate(name,date){
+    const matches=records.filter(r=>r.activity===name && r.date===date);
+    return matches.length ? matches[matches.length-1] : null;
 }
 
-        <div class="section-label">Atividades</div>
-
-        ${activities.length
-            ? activities.sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""))
-                .map(r=>`
-<div class="record">
-
-    <strong>
-${r.startTime||'--:--'}–${getEndTime(r.startTime,r.duration)}
-</strong>
-    • ${r.activity}
-    (${formatDuration(r.duration)})
-
-    ${r.notes ? `
-        <div style="
-            margin-top:10px;
-            padding:10px;
-            background:#101419;
-            border-radius:10px;
-            color:#c9d2dc;
-        ">
-            ${r.notes}
+function openRecordMenu(id){
+    const r=records.find(x=>x.id===id);
+    if(!r) return;
+    showModal(r.activity,`
+        <p class="menu-note">Escolha o que deseja fazer com este registro.</p>
+        <div class="menu-stack">
+            <button onclick="closeModal();editRecord(${id})">Editar registro</button>
+            <button onclick="closeModal();deleteRecord(${id})">Excluir registro</button>
         </div>
-    ` : ''}
+    `);
+}
 
-    <br><br>
+function renderDay(date){
+    const history=document.getElementById("historyScreen");
+    const dayRecords=records.filter(r=>r.date===date);
+    const activitiesOfDay=dayRecords
+        .filter(r=>!STATE_ACTIVITIES.includes((r.activity||'').toLowerCase()))
+        .sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""));
 
-    <button onclick="editRecord(${r.id})">
-        Editar
-    </button>
+    const stateCards=STATE_UI.map(cfg=>{
+        const r=latestStateForDate(cfg.name,date);
+        const value=r ? formatStateValue(r.value) : '—';
+        return `
+            <div class="day-state-card ${cfg.cls} ${r?'':'empty-state'}" ${r?`onclick="openRecordMenu(${r.id})"`:''}>
+                <div class="state-icon"><i data-lucide="${cfg.icon}"></i></div>
+                <div class="state-name">${cfg.short}</div>
+                <div class="state-value ${r?'':'empty'}">${value}</div>
+            </div>`;
+    }).join('');
 
-    <button onclick="deleteRecord(${r.id})">
-        Excluir
-    </button>
+    const stateNotes=STATE_UI.map(cfg=>{
+        const r=latestStateForDate(cfg.name,date);
+        if(!r || !r.notes) return '';
+        return `<div class="timeline-card" onclick="openRecordMenu(${r.id})">
+            <div class="timeline-title">${cfg.name}</div>
+            <div class="timeline-notes">${r.notes}</div>
+        </div>`;
+    }).join('');
 
-</div>`).join('')
-            : '<div class="small">Sem atividades</div>'}
+    const timeline=activitiesOfDay.length
+        ? activitiesOfDay.map(r=>`
+            <div class="timeline-item">
+                <div class="timeline-time">${r.startTime||'--:--'}</div>
+                <div class="timeline-rail"><span class="timeline-dot"></span></div>
+                <div class="timeline-card" onclick="openRecordMenu(${r.id})">
+                    <div class="timeline-title-row">
+                        <div class="timeline-activity-icon"><i data-lucide="${activityIcon(r.activity)}"></i></div>
+                        <div style="min-width:0">
+                            <div class="timeline-title">${r.activity}</div>
+                            <div class="timeline-meta">${r.startTime||'--:--'}–${getEndTime(r.startTime,r.duration)} · ${formatDuration(Number(r.duration)||0)}</div>
+                        </div>
+                    </div>
+                    ${r.notes ? `<div class="timeline-notes">${r.notes}</div>` : ''}
+                    <div class="timeline-edit-hint">Toque para editar ou excluir</div>
+                </div>
+            </div>`).join('')
+        : `<div class="timeline-empty">Nenhuma atividade registrada neste dia.</div>`;
 
+    history.innerHTML=`
+    <div class="day-view">
+        <div class="day-toolbar">
+            <button class="day-nav-button" onclick="previousDay()" aria-label="Dia anterior"><i data-lucide="chevron-left"></i></button>
+            <button class="day-back" onclick="backToCalendar()"><i data-lucide="calendar-days"></i><span>Voltar ao calendário</span></button>
+            <button class="day-nav-button" onclick="nextDay()" aria-label="Próximo dia"><i data-lucide="chevron-right"></i></button>
+        </div>
+
+        <div class="day-date">
+            <h2>${formatDateBR(date)}</h2>
+            <p>${formatWeekday(date)} · ${dayRecords.length} ${dayRecords.length===1?'registro':'registros'}</p>
+        </div>
+
+        <section class="day-state-section">
+            <div class="section-heading"><h2>Estado do dia</h2><span class="eyebrow">-10 a +10</span></div>
+            <div class="day-state-grid">${stateCards}</div>
+            ${stateNotes ? `<div class="section-label">Observações do estado</div>${stateNotes}` : ''}
+        </section>
+
+        <section>
+            <div class="section-heading"><h2>Linha do tempo</h2><span class="eyebrow">${activitiesOfDay.length} ${activitiesOfDay.length===1?'atividade':'atividades'}</span></div>
+            <div class="timeline-wrap">${timeline}</div>
+        </section>
     </div>`;
+
+    lucide.createIcons();
 }
 
 function deleteRecord(id){
