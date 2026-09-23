@@ -239,6 +239,15 @@ textarea{
 }
     .modal-footer-actions{
     display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:20px;
+}
+
+.modal-footer-actions button{
+    width:100%;
+}
+    display:flex;
     justify-content:flex-end;
     gap:10px;
     margin-top:20px;
@@ -553,18 +562,18 @@ onclick="setDuration(${v})">${formatDuration(v)}</button>`
 <label>Notas</label>
 <textarea id="notes"></textarea>
 
+<div class="modal-footer-actions">
+
 <button onclick="saveActivityRecord('${activity}')">
 Salvar
 </button>
 
-<div class="modal-footer-actions">
+<button onclick="deleteByName('${activity}')">
+Excluir
+</button>
 
 <button onclick="archiveByName('${activity}')">
 Arquivar
-</button>
-
-<button onclick="deleteByName('${activity}')">
-Excluir
 </button>
 
 </div>
