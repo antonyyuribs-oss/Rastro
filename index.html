@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0a0c0f">
+<meta name="theme-color" content="#151c13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rastro">
@@ -12,17 +12,17 @@
 
 <style>
 :root{
-    --bg:#0a0c0f;
-    --surface:#11151a;
-    --surface-2:#161b22;
-    --surface-3:#0f1318;
-    --border:#252d37;
-    --border-soft:rgba(255,255,255,.07);
-    --text:#f2f5f8;
-    --text-2:#c4cbd4;
-    --muted:#7f8a98;
-    --accent:#6f7c4a;
-    --accent-soft:rgba(111,124,74,.18);
+    --bg:#151c13;
+    --surface:#1b2418;
+    --surface-2:#222d1e;
+    --surface-3:#121910;
+    --border:#33402d;
+    --border-soft:rgba(214,195,157,.075);
+    --text:#f1f0e9;
+    --text-2:#d1d2c5;
+    --muted:#979d8c;
+    --accent:#82905a;
+    --accent-soft:rgba(130,144,90,.19);
     --green:#48c78e;
     --blue:#d6c39d;
     --sand:#d6c39d;
@@ -42,8 +42,11 @@ body{
     min-height:100vh;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif;
     background:
-        radial-gradient(circle at 50% -12%,rgba(111,124,74,.10),transparent 27rem),
-        var(--bg);
+        radial-gradient(ellipse at 12% 8%,rgba(79,94,58,.28) 0 10%,transparent 31%),
+        radial-gradient(ellipse at 88% 18%,rgba(43,59,39,.32) 0 12%,transparent 34%),
+        radial-gradient(ellipse at 24% 62%,rgba(64,78,47,.22) 0 13%,transparent 35%),
+        radial-gradient(ellipse at 82% 78%,rgba(35,48,32,.30) 0 11%,transparent 33%),
+        linear-gradient(145deg,#182016 0%,#131a12 46%,#192217 100%);
     color:var(--text);
     line-height:1.45;
     padding-bottom:calc(88px + env(safe-area-inset-bottom));
@@ -57,7 +60,7 @@ button{-webkit-tap-highlight-color:transparent}
     position:sticky;
     top:0;
     z-index:20;
-    background:rgba(10,12,15,.82);
+    background:rgba(20,28,18,.86);
     backdrop-filter:blur(20px) saturate(140%);
     -webkit-backdrop-filter:blur(20px) saturate(140%);
     border-bottom:1px solid var(--border-soft);
@@ -130,13 +133,13 @@ button{-webkit-tap-highlight-color:transparent}
     user-select:none;
     transition:border-color .16s ease,background .16s ease,transform .16s ease;
 }
-.activity-card:active{transform:scale(.98);background:#192029}
+.activity-card:active{transform:scale(.98);background:#273321}
 .activity-card{-webkit-touch-callout:none}
 .activity-card.reorder-source{
     transform:scale(.95);
     border-color:var(--accent);
-    background:linear-gradient(180deg,rgba(111,124,74,.22),var(--surface));
-    box-shadow:0 12px 28px rgba(0,0,0,.34),0 0 0 2px rgba(111,124,74,.14);
+    background:linear-gradient(180deg,rgba(130,144,90,.24),var(--surface));
+    box-shadow:0 12px 28px rgba(0,0,0,.28),0 0 0 2px rgba(130,144,90,.15);
     position:relative;z-index:4
 }
 .activity-card.reorder-target{border-color:rgba(214,195,157,.52)}
@@ -144,7 +147,7 @@ body.reordering{user-select:none;-webkit-user-select:none}
 body.reordering .activity-card:not(.reorder-source){transition:transform .12s ease,border-color .12s ease}
 .activity-icon{
     width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
-    color:#a6b47a;background:rgba(111,124,74,.12)
+    color:#aebc7d;background:rgba(130,144,90,.14)
 }
 .activity-icon svg{width:18px;height:18px;stroke-width:1.9}
 .activity-title-btn{width:100%;font-size:11px;line-height:1.15;font-weight:590;color:var(--text-2);overflow-wrap:anywhere}
@@ -158,10 +161,10 @@ button{
     background:var(--surface-2);color:var(--text);border:1px solid var(--border);
     padding:10px 14px;border-radius:12px;cursor:pointer;transition:.16s ease;
 }
-button:hover{border-color:#56613c}
+button:hover{border-color:#69764a}
 button:active{transform:scale(.985)}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-.restore-btn{border-color:rgba(111,124,74,.55);color:#b7c28e}
+.restore-btn{border-color:rgba(130,144,90,.55);color:#c1c99e}
 input,select,textarea{
     width:100%;margin-top:8px;margin-bottom:14px;background:var(--surface-3);color:var(--text);
     border:1px solid var(--border);border-radius:12px;padding:12px;outline:none
@@ -192,7 +195,7 @@ textarea{resize:vertical;min-height:100px}
 .calendar-day.has-record{background:var(--surface-2);color:var(--text);font-weight:650}
 .calendar-day.has-record::after{
     content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;
-    border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(111,124,74,.16)
+    border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(130,144,90,.17)
 }
 .calendar-day.many-records::after{width:16px;border-radius:99px}
 .calendar-legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:15px;color:var(--muted);font-size:10px}
@@ -235,17 +238,17 @@ textarea{resize:vertical;min-height:100px}
 .timeline-item{display:grid;grid-template-columns:54px 18px minmax(0,1fr);gap:8px;position:relative;min-height:96px}
 .timeline-time{padding-top:14px;color:var(--text-2);font-size:11px;text-align:right;font-variant-numeric:tabular-nums}
 .timeline-rail{position:relative;display:flex;justify-content:center}
-.timeline-rail::before{content:'';position:absolute;top:0;bottom:0;width:1px;background:linear-gradient(var(--accent),rgba(111,124,74,.18))}
+.timeline-rail::before{content:'';position:absolute;top:0;bottom:0;width:1px;background:linear-gradient(var(--accent),rgba(130,144,90,.18))}
 .timeline-item:first-child .timeline-rail::before{top:20px}
 .timeline-item:last-child .timeline-rail::before{bottom:calc(100% - 21px)}
-.timeline-dot{position:relative;z-index:1;width:10px;height:10px;margin-top:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(111,124,74,.16)}
+.timeline-dot{position:relative;z-index:1;width:10px;height:10px;margin-top:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(130,144,90,.16)}
 .timeline-card{
     margin:5px 0 12px;background:var(--surface);border:1px solid var(--border-soft);border-radius:15px;
     padding:12px 13px;cursor:pointer;transition:.16s ease
 }
 .timeline-card:active{transform:scale(.992);background:var(--surface-2)}
 .timeline-title-row{display:flex;align-items:center;gap:9px;min-width:0}
-.timeline-activity-icon{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;color:#a6b47a;background:rgba(111,124,74,.12)}
+.timeline-activity-icon{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;color:#aebc7d;background:rgba(130,144,90,.14)}
 .timeline-activity-icon svg{width:16px;height:16px}
 .timeline-title{font-size:13px;font-weight:690;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .timeline-meta{font-size:10px;color:var(--muted);margin-top:2px}
@@ -262,14 +265,14 @@ textarea{resize:vertical;min-height:100px}
 }
 .modal-content{
     width:min(100%,560px);max-height:min(92dvh,820px);overflow:auto;
-    background:linear-gradient(180deg,#151a21,#0f1318 34%);
+    background:linear-gradient(180deg,#202a1c,#141b12 38%);
     border:1px solid var(--border);border-bottom:0;border-radius:26px 26px 0 0;
     padding:9px 18px calc(20px + env(safe-area-inset-bottom));
     box-shadow:0 -18px 60px rgba(0,0,0,.46);
     animation:sheetUp .22s cubic-bezier(.2,.75,.25,1) both;
     overscroll-behavior:contain
 }
-.sheet-handle{width:36px;height:4px;border-radius:999px;background:#3a424d;margin:2px auto 12px}
+.sheet-handle{width:36px;height:4px;border-radius:999px;background:#536048;margin:2px auto 12px}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
 .sheet-title-wrap{min-width:0}
 .sheet-eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
@@ -280,7 +283,7 @@ textarea{resize:vertical;min-height:100px}
 .form-label{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;font-weight:650;color:var(--text-2);margin:0 0 6px}
 .form-label span{font-size:10px;font-weight:500;color:var(--muted)}
 .modal-content input:not([type="range"]),.modal-content select,.modal-content textarea{
-    margin:0 0 16px;background:#0b0f14;border-color:#29323d;border-radius:13px;padding:13px 14px
+    margin:0 0 16px;background:#10170f;border-color:#33402d;border-radius:13px;padding:13px 14px
 }
 .modal-content input[type="date"],.modal-content input[type="time"]{min-height:47px}
 .modal-content textarea{min-height:94px;max-height:180px}
@@ -290,12 +293,12 @@ textarea{resize:vertical;min-height:100px}
     min-height:43px;padding:8px 6px;border-radius:12px;background:var(--surface-2);color:var(--text-2);
     border-color:var(--border);font-size:12px;font-weight:650
 }
-.duration-chip.active{background:var(--accent-soft);border-color:rgba(111,124,74,.8);color:#c4d09a;box-shadow:inset 0 0 0 1px rgba(111,124,74,.16)}
+.duration-chip.active{background:var(--accent-soft);border-color:rgba(130,144,90,.82);color:#d0d7ae;box-shadow:inset 0 0 0 1px rgba(130,144,90,.17)}
 .duration-custom{display:grid;grid-template-columns:1fr 86px auto;align-items:center;gap:8px;margin-bottom:16px;color:var(--muted);font-size:11px}
 .duration-custom input{margin:0!important;text-align:center;padding:10px!important;min-height:40px!important}
 .primary-action{
-    width:100%;min-height:50px;margin-top:2px;border-color:#397ad9;background:linear-gradient(180deg,#438bf4,#2f6fd0);
-    color:#fff;font-weight:730;box-shadow:0 8px 22px rgba(35,92,179,.22);display:flex;align-items:center;justify-content:center;gap:8px
+    width:100%;min-height:50px;margin-top:2px;border-color:#8b9861;background:linear-gradient(180deg,#84925c,#667344);
+    color:#f6f3e8;font-weight:730;box-shadow:0 8px 22px rgba(33,45,25,.34);display:flex;align-items:center;justify-content:center;gap:8px
 }
 .primary-action svg{width:18px;height:18px}
 .secondary-action{width:100%;min-height:46px}
@@ -323,9 +326,9 @@ textarea{resize:vertical;min-height:100px}
 .bottom-nav{
     position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:30;
     width:min(100%,var(--content));
-    display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
+    display:grid;grid-template-columns:repeat(4,1fr);align-items:end;
     padding:8px 10px calc(8px + env(safe-area-inset-bottom));
-    background:rgba(12,15,19,.94);border-top:1px solid var(--border-soft);
+    background:rgba(20,28,18,.95);border-top:1px solid var(--border-soft);
     backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
 }
 .nav-item{
@@ -336,13 +339,6 @@ textarea{resize:vertical;min-height:100px}
 .nav-item svg{width:19px;height:19px;stroke-width:1.9}
 .nav-item.active{color:var(--accent)}
 .nav-item:hover{border-color:transparent}
-.nav-item.add{position:relative;color:#f1eadc}
-.nav-item.add .add-orb{
-    width:42px;height:42px;margin-top:-22px;margin-bottom:2px;border-radius:50%;
-    display:grid;place-items:center;background:linear-gradient(180deg,#778653,#556238);
-    border:1px solid #879362;box-shadow:0 8px 20px rgba(0,0,0,.34)
-}
-.nav-item.add .add-orb svg{width:24px;height:24px}
 
 @media(min-width:620px){
     .activities-grid{grid-template-columns:repeat(6,minmax(0,1fr))}
@@ -364,7 +360,7 @@ body{-webkit-text-size-adjust:100%;touch-action:manipulation}
 button,.state-card,.activity-card,.calendar-day,.day-state-card,.timeline-card{touch-action:manipulation}
 button{min-height:44px}
 button:focus-visible,.state-card:focus-visible,.activity-card:focus-visible,.calendar-day:focus-visible,.day-state-card:focus-visible,.timeline-card:focus-visible,
-input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid rgba(143,157,94,.95);outline-offset:2px}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid rgba(151,164,102,.95);outline-offset:2px}
 .state-card,.activity-card,.day-state-card,.timeline-card{-webkit-tap-highlight-color:transparent}
 .timeline-notes{white-space:pre-wrap;overflow-wrap:anywhere}
 .modal-content{-webkit-overflow-scrolling:touch}
@@ -382,7 +378,7 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
 .reorder-btn svg{width:17px;height:17px}
 
 .toast-wrap{position:fixed;left:50%;bottom:calc(78px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;width:min(calc(100% - 32px),520px);pointer-events:none;display:grid;justify-items:center}
-.toast{max-width:100%;padding:11px 14px;border-radius:14px;border:1px solid var(--border);background:rgba(22,27,34,.97);box-shadow:0 12px 34px rgba(0,0,0,.34);color:var(--text-2);font-size:12px;font-weight:600;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:toastIn .18s ease both}
+.toast{max-width:100%;padding:11px 14px;border-radius:14px;border:1px solid var(--border);background:rgba(28,38,24,.97);box-shadow:0 12px 34px rgba(0,0,0,.34);color:var(--text-2);font-size:12px;font-weight:600;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);animation:toastIn .18s ease both}
 .toast.success{border-color:rgba(72,199,142,.3)}
 .toast.error{border-color:rgba(242,107,107,.35);color:#ffb0b0}
 @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -439,9 +435,6 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
     </button>
     <button class="nav-item" id="navHistory" onclick="showHistory()" aria-label="Histórico">
         <i data-lucide="calendar-days"></i><span>Histórico</span>
-    </button>
-    <button class="nav-item add" onclick="addActivity()" aria-label="Nova atividade">
-        <span class="add-orb"><i data-lucide="plus"></i></span><span>Adicionar</span>
     </button>
     <button class="nav-item" onclick="openDataMenu()" aria-label="Dados">
         <i data-lucide="chart-no-axes-column-increasing"></i><span>Dados</span>
@@ -1503,8 +1496,9 @@ function openDataMenu(){
 
 function openMoreMenu(){
     showModal('Mais', `
-        <p class="menu-note">Ações de manutenção do aplicativo.</p>
+        <p class="menu-note">Atividades e manutenção do aplicativo.</p>
         <div class="menu-stack">
+            <button onclick="closeModal();addActivity()"><i data-lucide="plus"></i> Adicionar atividade</button>
             <button onclick="closeModal();openReorderActivities()"><i data-lucide="list-restart"></i> Organizar atividades</button>
             <button onclick="importJSON();closeModal()"><i data-lucide="upload"></i> Importar backup (JSON)</button>
         </div>
