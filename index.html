@@ -955,25 +955,6 @@ function editRecord(id){
 
 }
 
-        <label>Data</label>
-        <input id="editDate" type="date" value="${record.date || ''}">
-
-        <label>Hora Inicial</label>
-        <input id="editStartTime" type="time" value="${record.startTime || ''}">
-
-        <label>Duração (min)</label>
-        <input id="editDuration" type="number" value="${record.duration || 30}">
-
-        <label>Notas</label>
-        <textarea id="editNotes">${record.notes || ''}</textarea>
-
-        <button onclick="saveEditedRecord(${id})">
-            Salvar Alterações
-        </button>
-
-    `);
-}
-
 function saveEditedRecord(id){
 
     const record = records.find(r => r.id === id);
