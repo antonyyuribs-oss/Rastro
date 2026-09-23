@@ -706,7 +706,19 @@ function nextMonth(){
     }
     renderCalendar();
 }
+function getEndTime(startTime, duration){
 
+    if(!startTime) return '--:--';
+
+    const [h,m] = startTime.split(':').map(Number);
+
+    const totalMinutes = h * 60 + m + duration;
+
+    const endH = Math.floor(totalMinutes / 60) % 24;
+    const endM = totalMinutes % 60;
+
+    return `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
+}
 function renderDay(date){
 
     const history=document.getElementById("historyScreen");
@@ -753,7 +765,9 @@ function renderDay(date){
                 .map(r=>`
 <div class="record">
 
-    <strong>${r.startTime||'--:--'}</strong>
+    <strong>
+${r.startTime||'--:--'}–${getEndTime(r.startTime,r.duration)}
+</strong>
     • ${r.activity}
     (${formatDuration(r.duration)})
 
