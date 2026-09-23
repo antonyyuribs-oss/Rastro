@@ -1093,13 +1093,31 @@ function handleImport(event){
 
             const data = JSON.parse(e.target.result);
 
-            if(data.atividades){
-                activities = data.atividades;
-            }
+          if(data.atividades){
 
-            if(data.registros){
-                records = data.registros;
-            }
+    data.atividades.forEach(novaAtividade => {
+
+        const existe = activities.some(
+            a => a.name === novaAtividade.name
+        );
+
+        if(!existe){
+            activities.push(novaAtividade);
+        }
+    });
+}
+
+if(data.registros){
+
+    data.registros.forEach(registro => {
+
+        records.push({
+            ...registro,
+            id: Date.now() + Math.random()
+        });
+
+    });
+}
 
             save();
 
