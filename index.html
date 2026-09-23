@@ -21,10 +21,12 @@
     --text:#f2f5f8;
     --text-2:#c4cbd4;
     --muted:#7f8a98;
-    --accent:#3b82f6;
-    --accent-soft:rgba(59,130,246,.14);
+    --accent:#6f7c4a;
+    --accent-soft:rgba(111,124,74,.18);
     --green:#48c78e;
-    --blue:#60a5fa;
+    --blue:#d6c39d;
+    --sand:#d6c39d;
+    --sand-muted:#aa9874;
     --amber:#f3b54a;
     --red:#f26b6b;
     --radius-sm:12px;
@@ -40,7 +42,7 @@ body{
     min-height:100vh;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,sans-serif;
     background:
-        radial-gradient(circle at 50% -12%,rgba(59,130,246,.075),transparent 27rem),
+        radial-gradient(circle at 50% -12%,rgba(111,124,74,.10),transparent 27rem),
         var(--bg);
     color:var(--text);
     line-height:1.45;
@@ -66,11 +68,9 @@ button{-webkit-tap-highlight-color:transparent}
     padding:calc(12px + env(safe-area-inset-top)) 18px 14px;
 }
 .brand-row{display:flex;align-items:center;gap:13px}
-.brand-mark{width:31px;height:28px;display:flex;flex-direction:column;justify-content:center;gap:5px;flex:none}
-.brand-mark span{display:block;height:4px;border-radius:999px;background:linear-gradient(90deg,#6aa3ff,#3b82f6)}
-.brand-mark span:nth-child(1){width:18px}
-.brand-mark span:nth-child(2){width:28px;background:#dfe8f5}
-.brand-mark span:nth-child(3){width:23px;opacity:.8}
+.brand-mark{width:34px;height:34px;display:grid;place-items:center;flex:none;color:var(--sand);background:rgba(214,195,157,.065);border:1px solid rgba(214,195,157,.16);border-radius:11px}
+.brand-mark svg{width:20px;height:20px;stroke-width:1.8}
+#screenTitle{color:var(--sand)}
 .header-copy{min-width:0}
 #screenTitle{font-size:24px;line-height:1.1;font-weight:760;letter-spacing:-.025em}
 #screenSubtitle{margin-top:4px;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -131,9 +131,20 @@ button{-webkit-tap-highlight-color:transparent}
     transition:border-color .16s ease,background .16s ease,transform .16s ease;
 }
 .activity-card:active{transform:scale(.98);background:#192029}
+.activity-card{-webkit-touch-callout:none}
+.activity-card.reorder-source{
+    transform:scale(.95);
+    border-color:var(--accent);
+    background:linear-gradient(180deg,rgba(111,124,74,.22),var(--surface));
+    box-shadow:0 12px 28px rgba(0,0,0,.34),0 0 0 2px rgba(111,124,74,.14);
+    position:relative;z-index:4
+}
+.activity-card.reorder-target{border-color:rgba(214,195,157,.52)}
+body.reordering{user-select:none;-webkit-user-select:none}
+body.reordering .activity-card:not(.reorder-source){transition:transform .12s ease,border-color .12s ease}
 .activity-icon{
     width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
-    color:#7fb0ff;background:rgba(59,130,246,.08)
+    color:#a6b47a;background:rgba(111,124,74,.12)
 }
 .activity-icon svg{width:18px;height:18px;stroke-width:1.9}
 .activity-title-btn{width:100%;font-size:11px;line-height:1.15;font-weight:590;color:var(--text-2);overflow-wrap:anywhere}
@@ -147,10 +158,10 @@ button{
     background:var(--surface-2);color:var(--text);border:1px solid var(--border);
     padding:10px 14px;border-radius:12px;cursor:pointer;transition:.16s ease;
 }
-button:hover{border-color:#3b4e68}
+button:hover{border-color:#56613c}
 button:active{transform:scale(.985)}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
-.restore-btn{border-color:rgba(59,130,246,.45);color:#9fc2ff}
+.restore-btn{border-color:rgba(111,124,74,.55);color:#b7c28e}
 input,select,textarea{
     width:100%;margin-top:8px;margin-bottom:14px;background:var(--surface-3);color:var(--text);
     border:1px solid var(--border);border-radius:12px;padding:12px;outline:none
@@ -181,7 +192,7 @@ textarea{resize:vertical;min-height:100px}
 .calendar-day.has-record{background:var(--surface-2);color:var(--text);font-weight:650}
 .calendar-day.has-record::after{
     content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:4px;height:4px;
-    border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(59,130,246,.12)
+    border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(111,124,74,.16)
 }
 .calendar-day.many-records::after{width:16px;border-radius:99px}
 .calendar-legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:15px;color:var(--muted);font-size:10px}
@@ -224,17 +235,17 @@ textarea{resize:vertical;min-height:100px}
 .timeline-item{display:grid;grid-template-columns:54px 18px minmax(0,1fr);gap:8px;position:relative;min-height:96px}
 .timeline-time{padding-top:14px;color:var(--text-2);font-size:11px;text-align:right;font-variant-numeric:tabular-nums}
 .timeline-rail{position:relative;display:flex;justify-content:center}
-.timeline-rail::before{content:'';position:absolute;top:0;bottom:0;width:1px;background:linear-gradient(var(--accent),rgba(59,130,246,.15))}
+.timeline-rail::before{content:'';position:absolute;top:0;bottom:0;width:1px;background:linear-gradient(var(--accent),rgba(111,124,74,.18))}
 .timeline-item:first-child .timeline-rail::before{top:20px}
 .timeline-item:last-child .timeline-rail::before{bottom:calc(100% - 21px)}
-.timeline-dot{position:relative;z-index:1;width:10px;height:10px;margin-top:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+.timeline-dot{position:relative;z-index:1;width:10px;height:10px;margin-top:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(111,124,74,.16)}
 .timeline-card{
     margin:5px 0 12px;background:var(--surface);border:1px solid var(--border-soft);border-radius:15px;
     padding:12px 13px;cursor:pointer;transition:.16s ease
 }
 .timeline-card:active{transform:scale(.992);background:var(--surface-2)}
 .timeline-title-row{display:flex;align-items:center;gap:9px;min-width:0}
-.timeline-activity-icon{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;color:#7fb0ff;background:rgba(59,130,246,.08)}
+.timeline-activity-icon{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;color:#a6b47a;background:rgba(111,124,74,.12)}
 .timeline-activity-icon svg{width:16px;height:16px}
 .timeline-title{font-size:13px;font-weight:690;color:var(--text);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .timeline-meta{font-size:10px;color:var(--muted);margin-top:2px}
@@ -279,7 +290,7 @@ textarea{resize:vertical;min-height:100px}
     min-height:43px;padding:8px 6px;border-radius:12px;background:var(--surface-2);color:var(--text-2);
     border-color:var(--border);font-size:12px;font-weight:650
 }
-.duration-chip.active{background:var(--accent-soft);border-color:rgba(59,130,246,.7);color:#b9d3ff;box-shadow:inset 0 0 0 1px rgba(59,130,246,.12)}
+.duration-chip.active{background:var(--accent-soft);border-color:rgba(111,124,74,.8);color:#c4d09a;box-shadow:inset 0 0 0 1px rgba(111,124,74,.16)}
 .duration-custom{display:grid;grid-template-columns:1fr 86px auto;align-items:center;gap:8px;margin-bottom:16px;color:var(--muted);font-size:11px}
 .duration-custom input{margin:0!important;text-align:center;padding:10px!important;min-height:40px!important}
 .primary-action{
@@ -325,11 +336,11 @@ textarea{resize:vertical;min-height:100px}
 .nav-item svg{width:19px;height:19px;stroke-width:1.9}
 .nav-item.active{color:var(--accent)}
 .nav-item:hover{border-color:transparent}
-.nav-item.add{position:relative;color:#dbeafe}
+.nav-item.add{position:relative;color:#f1eadc}
 .nav-item.add .add-orb{
     width:42px;height:42px;margin-top:-22px;margin-bottom:2px;border-radius:50%;
-    display:grid;place-items:center;background:linear-gradient(180deg,#2b5f98,#203c5d);
-    border:1px solid #416b97;box-shadow:0 8px 20px rgba(0,0,0,.34)
+    display:grid;place-items:center;background:linear-gradient(180deg,#778653,#556238);
+    border:1px solid #879362;box-shadow:0 8px 20px rgba(0,0,0,.34)
 }
 .nav-item.add .add-orb svg{width:24px;height:24px}
 
@@ -353,7 +364,7 @@ body{-webkit-text-size-adjust:100%;touch-action:manipulation}
 button,.state-card,.activity-card,.calendar-day,.day-state-card,.timeline-card{touch-action:manipulation}
 button{min-height:44px}
 button:focus-visible,.state-card:focus-visible,.activity-card:focus-visible,.calendar-day:focus-visible,.day-state-card:focus-visible,.timeline-card:focus-visible,
-input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid rgba(96,165,250,.9);outline-offset:2px}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid rgba(143,157,94,.95);outline-offset:2px}
 .state-card,.activity-card,.day-state-card,.timeline-card{-webkit-tap-highlight-color:transparent}
 .timeline-notes{white-space:pre-wrap;overflow-wrap:anywhere}
 .modal-content{-webkit-overflow-scrolling:touch}
@@ -394,7 +405,7 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
 <header class="app-header">
     <div class="header-inner">
         <div class="brand-row">
-            <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="brand-mark" aria-hidden="true"><i data-lucide="footprints"></i></div>
             <div class="header-copy">
                 <h1 id="screenTitle">Rastro</h1>
                 <div id="screenSubtitle"></div>
@@ -495,6 +506,9 @@ let selectedDate = null;
 let draggedIndex = null;
 let draggedActivity = null;
 let lastModalTrigger = null;
+let activityTouchState = null;
+let activityLongPressTimer = null;
+let suppressActivityClickUntil = 0;
 
 function escapeHTML(value){
     return String(value ?? '')
@@ -610,6 +624,108 @@ function formatStateValue(value){
     return n>0 ? `+${n}` : String(n);
 }
 
+function moveActivityObject(sourceActivity,targetActivity){
+    const from=activities.indexOf(sourceActivity);
+    const to=activities.indexOf(targetActivity);
+    if(from<0 || to<0 || from===to) return false;
+    const item=activities.splice(from,1)[0];
+    activities.splice(to,0,item);
+    return true;
+}
+
+function installLongPressReorder(card,activity){
+    const HOLD_MS=430;
+    const MOVE_TOLERANCE=11;
+
+    card.addEventListener('contextmenu',e=>e.preventDefault());
+
+    card.addEventListener('touchstart',e=>{
+        if(e.touches.length!==1) return;
+        clearTimeout(activityLongPressTimer);
+        const t=e.touches[0];
+        activityTouchState={
+            card,
+            activity,
+            startX:t.clientX,
+            startY:t.clientY,
+            active:false,
+            moved:false,
+            lastTarget:null
+        };
+
+        activityLongPressTimer=setTimeout(()=>{
+            if(!activityTouchState || activityTouchState.card!==card) return;
+            activityTouchState.active=true;
+            card.classList.add('reorder-source');
+            document.body.classList.add('reordering');
+            suppressActivityClickUntil=Date.now()+700;
+            if(navigator.vibrate) navigator.vibrate(12);
+        },HOLD_MS);
+    },{passive:true});
+
+    card.addEventListener('touchmove',e=>{
+        const state=activityTouchState;
+        if(!state || state.card!==card || e.touches.length!==1) return;
+        const t=e.touches[0];
+
+        if(!state.active){
+            const dx=t.clientX-state.startX;
+            const dy=t.clientY-state.startY;
+            if(Math.hypot(dx,dy)>MOVE_TOLERANCE){
+                clearTimeout(activityLongPressTimer);
+                activityLongPressTimer=null;
+                activityTouchState=null;
+            }
+            return;
+        }
+
+        e.preventDefault();
+        const hit=document.elementFromPoint(t.clientX,t.clientY);
+        const target=hit && hit.closest ? hit.closest('.activity-card') : null;
+        document.querySelectorAll('.activity-card.reorder-target').forEach(el=>el.classList.remove('reorder-target'));
+        if(!target || target===card || target.parentElement!==card.parentElement) return;
+        target.classList.add('reorder-target');
+        if(state.lastTarget===target) return;
+
+        const targetName=target.dataset.activityName;
+        const targetActivity=activities.find(a=>!a.archived && a.name===targetName && !STATE_ACTIVITIES.includes(a.name.toLowerCase()));
+        if(!targetActivity || !moveActivityObject(activity,targetActivity)) return;
+
+        const siblings=Array.from(card.parentElement.children);
+        const sourcePos=siblings.indexOf(card);
+        const targetPos=siblings.indexOf(target);
+        if(sourcePos<targetPos) target.after(card);
+        else target.before(card);
+
+        state.lastTarget=target;
+        state.moved=true;
+        if(navigator.vibrate) navigator.vibrate(5);
+    },{passive:false});
+
+    const finishTouchReorder=e=>{
+        const state=activityTouchState;
+        clearTimeout(activityLongPressTimer);
+        activityLongPressTimer=null;
+        if(!state || state.card!==card) return;
+
+        if(state.active){
+            if(e && e.cancelable) e.preventDefault();
+            suppressActivityClickUntil=Date.now()+650;
+            card.classList.remove('reorder-source');
+            document.querySelectorAll('.activity-card.reorder-target').forEach(el=>el.classList.remove('reorder-target'));
+            document.body.classList.remove('reordering');
+            if(state.moved){
+                save();
+                showToast('Ordem das atividades atualizada.');
+            }
+        }
+        activityTouchState=null;
+    };
+
+    card.addEventListener('touchend',finishTouchReorder,{passive:false});
+    card.addEventListener('touchcancel',finishTouchReorder,{passive:false});
+}
+
 function renderActivities(){
     const home=document.getElementById("homeScreen");
     const active=activities.filter(a=>!a.archived);
@@ -642,7 +758,7 @@ function renderActivities(){
         <section aria-labelledby="activityTitle">
             <div class="section-heading">
                 <h2 id="activityTitle">Registrar atividade</h2>
-                <span class="eyebrow">${normalActivities.length} atividades</span>
+                <span class="eyebrow">segure para reordenar</span>
             </div>
             <div class="activities-grid" id="activitiesGrid"></div>
         </section>
@@ -651,21 +767,29 @@ function renderActivities(){
     normalActivities.forEach(activity=>{
         const card=document.createElement("div");
         card.className="card activity-card";
-        card.draggable=true;
+        card.draggable=!window.matchMedia('(pointer:coarse)').matches;
+        card.dataset.activityName=activity.name;
 
-        card.addEventListener("dragstart",()=>{draggedActivity=activity;});
+        card.addEventListener("dragstart",()=>{
+            draggedActivity=activity;
+            card.classList.add('reorder-source');
+        });
+        card.addEventListener("dragend",()=>card.classList.remove('reorder-source'));
         card.addEventListener("dragover",e=>e.preventDefault());
         card.addEventListener("drop",()=>{
-            const from=activities.indexOf(draggedActivity);
-            const to=activities.indexOf(activity);
-            if(from<0 || to<0 || from===to) return;
-            const item=activities.splice(from,1)[0];
-            activities.splice(to,0,item);
+            if(!draggedActivity || !moveActivityObject(draggedActivity,activity)) return;
             save();
             renderActivities();
         });
 
-        card.onclick=()=>openRegister(activity.name);
+        installLongPressReorder(card,activity);
+        card.onclick=e=>{
+            if(Date.now()<suppressActivityClickUntil){
+                e.preventDefault();
+                return;
+            }
+            openRegister(activity.name);
+        };
         card.innerHTML=`
             <div class="activity-icon"><i data-lucide="${activityIcon(activity.name)}"></i></div>
             <div class="activity-title-btn">${escapeHTML(activity.name)}</div>
