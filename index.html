@@ -859,7 +859,7 @@ renderHistory();
 function exportCSV(){
 
 let csv =
-"Data,Atividade,HoraInicial,Duracao,Valor,Notas\n";
+"Data;Atividade;HoraInicial;Duracao;Valor;Notas\n";
 
 records.forEach(r=>{
 
@@ -870,14 +870,14 @@ r.startTime || "",
 r.duration || "",
 r.value || "",
 `"${(r.notes || "").replace(/"/g,'""')}"`
-].join(",");
+].join(";");
 
 csv += "\n";
 
 });
 
 const blob = new Blob(
-[csv],
+['\ufeff' + csv],
 {type:"text/csv;charset=utf-8;"}
 );
 
