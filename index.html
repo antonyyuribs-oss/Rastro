@@ -321,8 +321,8 @@ let activities =
 JSON.parse(localStorage.getItem("rastro_activities"))
 ||
 DEFAULT_ACTIVITIES.map(a=>({
-name:a,
-archived:false
+    name:a,
+    archived:false
 }));
 
 let records =
@@ -333,6 +333,9 @@ JSON.parse(localStorage.getItem("rastro_records"))
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let selectedDate = null;
+
+let draggedIndex = null;
+let draggedActivity = null;
 
 function save(){
 localStorage.setItem(
