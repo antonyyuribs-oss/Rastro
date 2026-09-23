@@ -387,7 +387,27 @@ const idx=activities.indexOf(activity);
 
 const card=document.createElement("div");
 card.className="card activity-card";
+card.draggable = true;
 
+card.addEventListener("dragstart", () => {
+    draggedActivity = activity;
+});
+
+card.addEventListener("dragover", (e) => {
+    e.preventDefault();
+});
+
+card.addEventListener("drop", () => {
+
+    const from = activities.indexOf(draggedActivity);
+    const to = activities.indexOf(activity);
+
+    const item = activities.splice(from, 1)[0];
+    activities.splice(to, 0, item);
+
+    save();
+    renderActivities();
+});
 card.innerHTML=`
 <div>
     <button
