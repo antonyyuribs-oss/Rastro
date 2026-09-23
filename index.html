@@ -765,7 +765,27 @@ function backToCalendar(){
     selectedDate=null;
     renderHistory();
 }
+function previousDay(){
 
+    const d = new Date(selectedDate);
+
+    d.setDate(d.getDate() - 1);
+
+    selectedDate = d.toLocaleDateString('en-CA');
+
+    renderHistory();
+}
+
+function nextDay(){
+
+    const d = new Date(selectedDate);
+
+    d.setDate(d.getDate() + 1);
+
+    selectedDate = d.toLocaleDateString('en-CA');
+
+    renderHistory();
+}
 function prevMonth(){
     currentMonth--;
     if(currentMonth<0){
@@ -813,11 +833,34 @@ function renderDay(date){
     history.innerHTML=`
     <div class="card">
 
-        <button class="back-btn" onclick="backToCalendar()">
+        history.innerHTML=`
+<div class="card">
+
+    <div style="
+        display:flex;
+        gap:10px;
+        align-items:center;
+        margin-bottom:16px;
+        flex-wrap:wrap;
+    ">
+
+        <button onclick="backToCalendar()">
             ← Calendário
         </button>
 
-        <h2>${date}</h2>
+        <button onclick="previousDay()">
+            ⬅️
+        </button>
+
+        <button onclick="nextDay()">
+            ➡️
+        </button>
+
+    </div>
+
+    <h2>${date}</h2>
+
+`;
 
 ${states.length
 ? states.map(r=>`
