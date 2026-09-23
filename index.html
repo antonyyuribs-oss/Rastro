@@ -558,6 +558,16 @@ content=`
 <button onclick="saveStateRecord('${activity}')">
 Salvar
 </button>
+
+<br><br>
+
+<button onclick="deleteByName('${activity}')">
+Excluir
+</button>
+
+<button onclick="archiveByName('${activity}')">
+Arquivar
+</button>
 `;
 
 }else{
@@ -797,19 +807,30 @@ function renderDay(date){
 
         <h2>${date}</h2>
 
-        ${states.length
-    ? states.map(r=>`
-        <div class="record">
-            <strong>${r.activity}</strong>: ${r.value}
+${states.length
+? states.map(r=>`
+    <div class="record">
 
-            ${r.notes ? `
-                <div style="margin-top:8px;color:#c9d2dc;">
-                    ${r.notes}
-                </div>
-            ` : ''}
+        <strong>${r.activity}</strong>: ${r.value}
 
-        </div>
-    `).join('')
+        ${r.notes ? `
+            <div style="margin-top:8px;color:#c9d2dc;">
+                ${r.notes}
+            </div>
+        ` : ''}
+
+        <br><br>
+
+        <button onclick="editRecord(${r.id})">
+            Editar
+        </button>
+
+        <button onclick="deleteRecord(${r.id})">
+            Excluir
+        </button>
+
+    </div>
+`).join('')
     : '<div class="small">Sem registros</div>'
 }
 
@@ -872,7 +893,67 @@ function editRecord(id){
 
     if(!record) return;
 
-    showModal("Editar Registro", `
+    const isState =
+    STATE_ACTIVITIES.includes(
+        record.activity.toLowerCase()
+    );
+
+    if(isState){
+
+        showModal("Editar Registro", `
+
+            <label>Data</label>
+            <input id="editDate"
+                   type="date"
+                   value="${record.date || ''}">
+
+            <label>Valor (-10 a +10)</label>
+            <input id="editValue"
+                   type="number"
+                   min="-10"
+                   max="10"
+                   value="${record.value || 0}">
+
+            <label>Notas</label>
+            <textarea id="editNotes">${record.notes || ''}</textarea>
+
+            <button onclick="saveEditedRecord(${id})">
+                Salvar Alterações
+            </button>
+
+        `);
+
+    }else{
+
+        showModal("Editar Registro", `
+
+            <label>Data</label>
+            <input id="editDate"
+                   type="date"
+                   value="${record.date || ''}">
+
+            <label>Hora Inicial</label>
+            <input id="editStartTime"
+                   type="time"
+                   value="${record.startTime || ''}">
+
+            <label>Duração (min)</label>
+            <input id="editDuration"
+                   type="number"
+                   value="${record.duration || 30}">
+
+            <label>Notas</label>
+            <textarea id="editNotes">${record.notes || ''}</textarea>
+
+            <button onclick="saveEditedRecord(${id})">
+                Salvar Alterações
+            </button>
+
+        `);
+
+    }
+
+}
 
         <label>Data</label>
         <input id="editDate" type="date" value="${record.date || ''}">
@@ -899,10 +980,33 @@ function saveEditedRecord(id){
 
     if(!record) return;
 
-    record.date = document.getElementById("editDate").value;
-    record.startTime = document.getElementById("editStartTime").value;
-    record.duration = Number(document.getElementById("editDuration").value);
-    record.notes = document.getElementById("editNotes").value;
+    const isState =
+    STATE_ACTIVITIES.includes(
+        record.activity.toLowerCase()
+    );
+
+    record.date =
+    document.getElementById("editDate").value;
+
+    record.notes =
+    document.getElementById("editNotes").value;
+
+    if(isState){
+
+        record.value = Number(
+            document.getElementById("editValue").value
+        );
+
+    }else{
+
+        record.startTime =
+        document.getElementById("editStartTime").value;
+
+        record.duration = Number(
+            document.getElementById("editDuration").value
+        );
+
+    }
 
     save();
     closeModal();
