@@ -61,7 +61,14 @@ button{
     cursor:pointer;
     transition:.18s ease;
 }
-
+.nav button{
+    width:40px;
+    height:40px;
+    padding:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
 button:hover{
     border-color:var(--accent);
     transform:translateY(-1px);
@@ -279,17 +286,33 @@ textarea{
 .back-btn{margin-bottom:16px}
 
 </style>
-
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
 <header>
     <div class="nav">
-    <button onclick="showHome()">Registro</button>
-    <button onclick="showHistory()">Histórico</button>
-    <button onclick="addActivity()">+</button>
-    <button onclick="exportCSV()">Excel</button>
-    <button onclick="exportJSON()">IA</button>
+
+    <button onclick="showHome()" title="Registro">
+        <i data-lucide="notebook-pen"></i>
+    </button>
+
+    <button onclick="showHistory()" title="Histórico">
+        <i data-lucide="history"></i>
+    </button>
+
+    <button onclick="addActivity()" title="Nova atividade">
+        <i data-lucide="square-plus"></i>
+    </button>
+
+    <button onclick="exportCSV()" title="Excel">
+        <i data-lucide="file-spreadsheet"></i>
+    </button>
+
+    <button onclick="exportJSON()" title="IA">
+        <i data-lucide="sparkles"></i>
+    </button>
+
 </div>
 </header>
 
