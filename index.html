@@ -845,25 +845,45 @@ renderHistory();
 
 function editRecord(id){
 
-const record=
-records.find(
-r=>r.id===id
-);
+    const record = records.find(r => r.id === id);
 
-if(!record) return;
+    if(!record) return;
 
-const notes=
-prompt(
-"Editar notas",
-record.notes || ""
-);
+    showModal("Editar Registro", `
 
-if(notes===null) return;
+        <label>Data</label>
+        <input id="editDate" type="date" value="${record.date || ''}">
 
-record.notes=notes;
+        <label>Hora Inicial</label>
+        <input id="editStartTime" type="time" value="${record.startTime || ''}">
 
-save();
-renderHistory();
+        <label>Duração (min)</label>
+        <input id="editDuration" type="number" value="${record.duration || 30}">
+
+        <label>Notas</label>
+        <textarea id="editNotes">${record.notes || ''}</textarea>
+
+        <button onclick="saveEditedRecord(${id})">
+            Salvar Alterações
+        </button>
+
+    `);
+}
+
+function saveEditedRecord(id){
+
+    const record = records.find(r => r.id === id);
+
+    if(!record) return;
+
+    record.date = document.getElementById("editDate").value;
+    record.startTime = document.getElementById("editStartTime").value;
+    record.duration = Number(document.getElementById("editDuration").value);
+    record.notes = document.getElementById("editNotes").value;
+
+    save();
+    closeModal();
+    renderHistory();
 }
 function exportCSV(){
 
