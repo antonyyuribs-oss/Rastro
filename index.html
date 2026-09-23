@@ -239,17 +239,10 @@ textarea{
 .activity-meta{color:var(--muted);font-size:12px;margin-top:4px}
 .activity-title-btn{
     width:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
     text-align:center;
-    background:none;
-    border:none;
-    padding:0;
-    color:var(--text);
     font-size:18px;
     font-weight:700;
-    cursor:pointer;
+    color:var(--text);
 }
 
 .activity-title-btn:hover{
@@ -394,15 +387,17 @@ JSON.stringify(records)
 }
 
 function showHome(){
-document.getElementById("homeScreen").classList.remove("hidden");
-document.getElementById("historyScreen").classList.add("hidden");
-renderActivities();
+    document.getElementById("homeScreen").classList.remove("hidden");
+    document.getElementById("historyScreen").classList.add("hidden");
+    renderActivities();
+    lucide.createIcons();
 }
 
 function showHistory(){
-document.getElementById("homeScreen").classList.add("hidden");
-document.getElementById("historyScreen").classList.remove("hidden");
-renderHistory();
+    document.getElementById("homeScreen").classList.add("hidden");
+    document.getElementById("historyScreen").classList.remove("hidden");
+    renderHistory();
+    lucide.createIcons();
 }
 
 
@@ -449,15 +444,11 @@ card.addEventListener("drop", () => {
     save();
     renderActivities();
 });
-card.innerHTML=`
-<div>
-    <button
-        class="activity-title-btn"
-        onclick="openRegister('${activity.name}')">
-        ${activity.name}
-    </button>
+card.onclick = () => openRegister(activity.name);
 
-    
+card.innerHTML = `
+<div class="activity-title-btn">
+    ${activity.name}
 </div>
 `;
 
@@ -983,7 +974,7 @@ link.click();
 
 }
 renderActivities();
-
+lucide.createIcons();
 </script>
 
 </body>
