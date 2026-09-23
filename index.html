@@ -763,22 +763,32 @@ function backToCalendar(){
 }
 function previousDay(){
 
-    const d = new Date(selectedDate);
+    const [year, month, day] = selectedDate.split('-').map(Number);
+
+    const d = new Date(year, month - 1, day);
 
     d.setDate(d.getDate() - 1);
 
-    selectedDate = d.toLocaleDateString('en-CA');
+    selectedDate =
+        d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
 
     renderHistory();
 }
 
 function nextDay(){
 
-    const d = new Date(selectedDate);
+    const [year, month, day] = selectedDate.split('-').map(Number);
+
+    const d = new Date(year, month - 1, day);
 
     d.setDate(d.getDate() + 1);
 
-    selectedDate = d.toLocaleDateString('en-CA');
+    selectedDate =
+        d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
 
     renderHistory();
 }
