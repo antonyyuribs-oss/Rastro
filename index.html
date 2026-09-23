@@ -68,18 +68,17 @@ button:hover{
 }
 
 .container{
-    max-width:980px;
+    max-width:1700px;
     margin:auto;
-    padding:28px 20px;
+    padding:20px;
 }
 
 .card{
     background:var(--card);
     border:1px solid var(--border);
-    border-radius:18px;
-    padding:18px;
-    margin-bottom:14px;
-    box-shadow:0 4px 18px rgba(0,0,0,.18);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:0;
 }
 
 .activity{
@@ -372,13 +371,15 @@ const archived=activities.filter(a=>a.archived);
 
 home.innerHTML=`
 <div class="hero">
-<div class="metrics">
-<div class="metric"><b>${records.length}</b>Registros</div>
-<div class="metric"><b>${active.length}</b>Ativas</div>
-<div class="metric"><b>${archived.length}</b>Arquivadas</div>
+...
 </div>
+
+<div class="section-label">
+Atividades Ativas
 </div>
-<div class="section-label">Atividades Ativas</div>
+
+<div class="activities-grid" id="activitiesGrid">
+</div>
 `;
 
 active.forEach(activity=>{
@@ -417,13 +418,13 @@ card.innerHTML=`
         ${activity.name}
     </button>
 
-    <div class="activity-meta">
-        ${total} registro(s)
-    </div>
+    
 </div>
 `;
 
-home.appendChild(card);
+document
+.getElementById("activitiesGrid")
+.appendChild(card);
 });
 
 if(archived.length){
