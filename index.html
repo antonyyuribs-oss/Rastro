@@ -370,9 +370,6 @@ const active=activities.filter(a=>!a.archived);
 const archived=activities.filter(a=>a.archived);
 
 home.innerHTML=`
-<div class="hero">
-...
-</div>
 
 <div class="section-label">
 Atividades Ativas
@@ -380,6 +377,7 @@ Atividades Ativas
 
 <div class="activities-grid" id="activitiesGrid">
 </div>
+
 `;
 
 active.forEach(activity=>{
