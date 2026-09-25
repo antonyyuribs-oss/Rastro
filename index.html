@@ -412,9 +412,9 @@ textarea{resize:vertical;min-height:100px}
 }
 
 .week-summary{display:grid;gap:8px}
-.week-summary-head{display:grid;grid-template-columns:minmax(0,1fr) 76px 76px;gap:8px;padding:0 8px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;text-align:center}
-.week-summary-head span:first-child{text-align:left}
-.week-summary-row{display:grid;grid-template-columns:minmax(0,1fr) 76px 76px;gap:8px;align-items:center;padding:10px 9px;border:1px solid var(--border-soft);border-radius:14px;background:rgba(27,36,24,.72)}
+.week-summary-head{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 8px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;text-align:center}
+.week-summary-row{display:grid;gap:9px;padding:11px 10px;border:1px solid var(--border-soft);border-radius:14px;background:rgba(27,36,24,.72)}
+.week-summary-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;align-items:center}
 .week-summary-activity{display:flex;align-items:center;gap:8px;min-width:0}
 .week-summary-icon{width:29px;height:29px;flex:none;border-radius:9px;display:grid;place-items:center;color:var(--accent-icon);background:rgba(var(--accent-rgb),.12)}
 .week-summary-icon svg{width:15px;height:15px}
@@ -424,6 +424,11 @@ textarea{resize:vertical;min-height:100px}
 .week-summary-value span{display:block;margin-top:3px;font-size:8px;color:var(--muted)}
 .week-summary-value.planned b{color:var(--sand)}
 .week-summary-value.actual b{color:#b5c184}
+.week-summary-value.progress b{color:var(--heading);font-size:14px}
+.week-summary-value.progress span{line-height:1.2}
+.week-summary-value.progress.over b{color:var(--accent)}
+.week-summary-value.progress.under b{color:var(--sand)}
+.week-summary-value.progress.none b{color:var(--muted)}
 .week-summary-empty{padding:20px 14px;border:1px dashed var(--border);border-radius:15px;color:var(--muted);font-size:11px;text-align:center}
 
 .day-tabs{display:flex;gap:6px;overflow-x:auto;padding:1px 1px 5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -1221,6 +1226,8 @@ select:focus-visible{
     border-color:rgba(var(--accent-rgb),.72);
     box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.14);
 }
+
+.week-summary-value:has(span:empty) span{display:none}
 
 </style>
 <script>
@@ -3110,6 +3117,50 @@ function mergedMinutes(items,activityName,weekStartISO,{clipNow=false}={}){
     return Math.round(total/60000);
 }
 
+function plannedMinutesForActivity(items,activityName,weekStartISO){
+    const key=planActivityKey(activityName);
+    const sameActivity=items.filter(item=>planActivityKey(item.activity)===key);
+
+    const timed=sameActivity.filter(item=>item.startTime);
+    const untimed=sameActivity.filter(item=>!item.startTime);
+
+    const timedMinutes=mergedMinutes(timed,activityName,weekStartISO);
+    const untimedMinutes=untimed.reduce(
+        (sum,item)=>sum+Math.max(0,Number(item.duration)||0),
+        0
+    );
+
+    return timedMinutes+untimedMinutes;
+}
+
+function plannedElapsedMinutesForActivity(items,activityName,weekStartISO){
+    const today=localDateISO();
+    const weekEndDate=addDaysLocal(parseLocalISO(weekStartISO),6);
+    const weekEndISO=localDateISO(weekEndDate);
+
+    // Semana ainda não começou: nada do planejamento entrou no denominador.
+    if(today < weekStartISO) return 0;
+
+    // Semana já terminou: usa todo o planejamento da semana.
+    const cutoff=today > weekEndISO ? weekEndISO : today;
+
+    // "Dias que passaram" inclui o dia atual inteiro.
+    // O horário planejado não interfere nesse percentual.
+    const elapsedItems=items.filter(item=>
+        String(item.date||'') >= weekStartISO &&
+        String(item.date||'') <= cutoff
+    );
+
+    return plannedMinutesForActivity(elapsedItems,activityName,weekStartISO);
+}
+
+function planProgressPercent(actualMinutes,elapsedPlannedMinutes){
+    const planned=Math.max(0,Number(elapsedPlannedMinutes)||0);
+    const actual=Math.max(0,Number(actualMinutes)||0);
+    if(planned<=0) return null;
+    return Math.round((actual/planned)*100);
+}
+
 function formatPlanMinutes(min){
     const n=Math.max(0,Math.round(Number(min)||0));
     const h=Math.floor(n/60), m=n%60;
@@ -3143,14 +3194,41 @@ function summaryRowsForWeek(startISO){
         if(key && !seen.has(key)){seen.add(key);names.push(item.activity);}
     });
 
-    return names.map(name=>({
-        name,
-        planned:mergedMinutes(planned,name,startISO),
-        actual:mergedMinutes(actual,name,startISO,{clipNow:true})
-    })).sort((a,b)=>{
+    return names.map(name=>{
+        const plannedTotal=plannedMinutesForActivity(planned,name,startISO);
+        const plannedElapsed=plannedElapsedMinutesForActivity(planned,name,startISO);
+        const actualMinutes=mergedMinutes(actual,name,startISO,{clipNow:true});
+
+        return {
+            name,
+            planned:plannedTotal,
+            plannedElapsed,
+            actual:actualMinutes,
+            progress:planProgressPercent(actualMinutes,plannedElapsed)
+        };
+    }).sort((a,b)=>{
         if((b.planned>0)!==(a.planned>0)) return b.planned-a.planned;
         return (b.planned+b.actual)-(a.planned+a.actual);
     });
+}
+
+function weekProgressLabel(startISO){
+    const today=localDateISO();
+    const endISO=localDateISO(addDaysLocal(parseLocalISO(startISO),6));
+    if(today < startISO) return 'a iniciar';
+    if(today > endISO) return 'semana';
+    return 'até hoje';
+}
+
+function progressCellClass(percent){
+    if(percent===null) return 'none';
+    if(percent>=100) return 'over';
+    return 'under';
+}
+
+function progressPlannedLabel(row,startISO){
+    if(row.progress===null) return '';
+    return '';
 }
 
 function startedRealRecord(record){
@@ -3483,7 +3561,7 @@ function renderPlanning(){
     const {planned,actual}=weekItems(selectedPlanWeekStart);
 
     const summaryHTML=rows.length ? `
-        <div class="week-summary-head"><span>Atividade</span><span>Planejado</span><span>Rastro</span></div>
+        <div class="week-summary-head"><span>Planejado</span><span>Rastro</span><span>Percentual</span></div>
         <div class="week-summary">
             ${rows.map(row=>`
                 <div class="week-summary-row">
@@ -3491,8 +3569,21 @@ function renderPlanning(){
                         <div class="week-summary-icon" style="${activityVisualStyle(row.name)}"><i data-lucide="${activityIcon(row.name)}"></i></div>
                         <div class="week-summary-name">${escapeHTML(row.name)}</div>
                     </div>
-                    <div class="week-summary-value planned"><b>${formatPlanMinutes(row.planned)}</b><span>planejado</span></div>
-                    <div class="week-summary-value actual"><b>${formatPlanMinutes(row.actual)}</b><span>Rastro</span></div>
+
+                    <div class="week-summary-metrics">
+                        <div class="week-summary-value planned">
+                            <b>${formatPlanMinutes(row.planned)}</b>
+                        </div>
+
+                        <div class="week-summary-value actual">
+                            <b>${formatPlanMinutes(row.actual)}</b>
+                        </div>
+
+                        <div class="week-summary-value progress ${progressCellClass(row.progress)}"
+                             title="${row.progress===null?'Sem planejamento decorrido para comparar':`${formatPlanMinutes(row.actual)} de ${formatPlanMinutes(row.plannedElapsed)} planejadas até este ponto da semana`}">
+                            <b>${row.progress===null?'—':`${row.progress}%`}</b>
+                        </div>
+                    </div>
                 </div>`).join('')}
         </div>` : `<div class="week-summary-empty">Ainda não há planejamento nem atividades registradas nesta semana.</div>`;
 
@@ -3551,7 +3642,7 @@ function renderPlanning(){
             </div>
 
             <section>
-                <div class="section-heading"><h2>Comparativo semanal</h2><span class="eyebrow">quantidade de horas</span></div>
+                <div class="section-heading"><h2>Comparativo semanal</h2><span class="eyebrow">Planejado × Rastro</span></div>
                 ${summaryHTML}
             </section>
 
