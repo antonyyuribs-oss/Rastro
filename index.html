@@ -322,11 +322,49 @@ textarea{resize:vertical;min-height:100px}
 @keyframes sheetUp{from{transform:translateY(22px);opacity:.4}to{transform:translateY(0);opacity:1}}
 @media(min-width:700px){.modal{padding:24px;align-items:flex-end}.modal-content{border-bottom:1px solid var(--border);border-radius:26px}}
 
+
+/* CONTADORES — sequências de dias */
+.counter-page{display:grid;gap:16px}
+.counter-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:2px}
+.counter-toolbar-copy h2{font-size:17px;line-height:1.2;font-weight:730;letter-spacing:-.015em}
+.counter-toolbar-copy p{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.4}
+.counter-add-btn{min-width:44px;height:44px;padding:0 13px;display:flex;align-items:center;justify-content:center;gap:7px;color:var(--sand);border-color:rgba(214,195,157,.18);background:rgba(214,195,157,.055)}
+.counter-add-btn svg{width:17px;height:17px}
+.counter-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.counter-card{position:relative;overflow:hidden;min-height:222px;padding:17px 17px 16px;border:1px solid var(--border-soft);border-radius:22px;cursor:pointer;background:linear-gradient(145deg,rgba(40,53,34,.98),rgba(22,30,20,.98));box-shadow:0 15px 34px rgba(0,0,0,.18);isolation:isolate}
+.counter-card::before{content:'';position:absolute;z-index:-1;width:210px;height:210px;border-radius:50%;right:-92px;top:-92px;background:radial-gradient(circle,rgba(130,144,90,.19),rgba(130,144,90,0) 68%)}
+.counter-card.without::before{background:radial-gradient(circle,rgba(214,195,157,.15),rgba(214,195,157,0) 68%)}
+.counter-card::after{content:attr(data-days);position:absolute;z-index:-2;right:-8px;bottom:-36px;font-size:150px;line-height:1;font-weight:850;letter-spacing:-.09em;color:rgba(255,255,255,.018);font-variant-numeric:tabular-nums;pointer-events:none}
+.counter-card:active{transform:scale(.992)}
+.counter-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.counter-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;color:#b5c184;background:rgba(130,144,90,.14);border:1px solid rgba(130,144,90,.12)}
+.counter-card.without .counter-icon{color:var(--sand);background:rgba(214,195,157,.08);border-color:rgba(214,195,157,.11)}
+.counter-icon svg{width:20px;height:20px;stroke-width:1.9}
+.counter-kind{font-size:9px;font-weight:760;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-radius:999px;background:rgba(0,0,0,.11);border:1px solid var(--border-soft)}
+.counter-number{margin-top:22px;font-size:72px;line-height:.86;font-weight:820;letter-spacing:-.07em;color:var(--text);font-variant-numeric:tabular-nums}
+.counter-card.without .counter-number{color:var(--sand)}
+.counter-card.doing .counter-number{color:#b5c184}
+.counter-unit{margin-top:6px;font-size:12px;font-weight:720;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.counter-title{margin-top:18px;font-size:16px;line-height:1.28;font-weight:700;color:var(--text);letter-spacing:-.012em}
+.counter-since{margin-top:5px;font-size:10px;color:var(--muted)}
+.counter-empty{padding:34px 18px;border:1px dashed var(--border);border-radius:20px;text-align:center;background:rgba(27,36,24,.54)}
+.counter-empty-icon{width:48px;height:48px;margin:0 auto 12px;border-radius:15px;display:grid;place-items:center;color:var(--sand-muted);background:rgba(214,195,157,.055)}
+.counter-empty-icon svg{width:23px;height:23px}
+.counter-empty h3{font-size:15px;margin-bottom:6px}
+.counter-empty p{max-width:300px;margin:0 auto;color:var(--muted);font-size:11px;line-height:1.5}
+.counter-empty button{margin-top:15px}
+.counter-form-note{margin:-4px 0 15px;color:var(--muted);font-size:11px;line-height:1.5}
+.counter-form-note~.management-zone .management-actions{grid-template-columns:1fr 1fr}
+.counter-preview{margin:1px 0 17px;padding:14px;border-radius:16px;border:1px solid var(--border-soft);background:linear-gradient(145deg,var(--surface-2),var(--surface));text-align:center}
+.counter-preview strong{display:block;font-size:34px;line-height:1;color:var(--sand);letter-spacing:-.05em}
+.counter-preview span{display:block;margin-top:4px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}
+@media(min-width:620px){.counter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 /* navegação inferior */
 .bottom-nav{
     position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:30;
     width:min(100%,var(--content));
-    display:grid;grid-template-columns:repeat(3,1fr);align-items:end;
+    display:grid;grid-template-columns:repeat(4,1fr);align-items:end;
     padding:8px 10px calc(8px + env(safe-area-inset-bottom));
     background:rgba(20,28,18,.95);border-top:1px solid var(--border-soft);
     backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
@@ -429,6 +467,8 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
 
     <div id="historyScreen" class="hidden"></div>
 
+    <div id="countersScreen" class="hidden"></div>
+
 </div>
 
 <div id="modalContainer"></div>
@@ -440,6 +480,9 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
     </button>
     <button class="nav-item" id="navHistory" onclick="showHistory()" aria-label="Histórico">
         <i data-lucide="calendar-days"></i><span>Histórico</span>
+    </button>
+    <button class="nav-item" id="navCounters" onclick="showCounters()" aria-label="Contadores">
+        <i data-lucide="tally-5"></i><span>Contadores</span>
     </button>
     <button class="nav-item" onclick="openMoreMenu()" aria-label="Mais opções">
         <i data-lucide="ellipsis"></i><span>Mais</span>
@@ -494,6 +537,11 @@ JSON.parse(localStorage.getItem("rastro_records"))
 ||
 [];
 
+let counters =
+JSON.parse(localStorage.getItem("rastro_counters"))
+||
+[];
+
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let selectedDate = null;
@@ -545,6 +593,11 @@ localStorage.setItem(
 "rastro_records",
 JSON.stringify(records)
 );
+
+localStorage.setItem(
+"rastro_counters",
+JSON.stringify(counters)
+);
 }
 
 function formatHeaderDate(){
@@ -557,6 +610,7 @@ function formatHeaderDate(){
 function setActiveNav(screen){
     document.getElementById('navHome')?.classList.toggle('active',screen==='home');
     document.getElementById('navHistory')?.classList.toggle('active',screen==='history');
+    document.getElementById('navCounters')?.classList.toggle('active',screen==='counters');
 }
 
 function setScreenHeader(title,subtitle=''){
@@ -569,6 +623,7 @@ function setScreenHeader(title,subtitle=''){
 function showHome(){
     document.getElementById("homeScreen").classList.remove("hidden");
     document.getElementById("historyScreen").classList.add("hidden");
+    document.getElementById("countersScreen").classList.add("hidden");
     setScreenHeader('Rastro',formatHeaderDate());
     setActiveNav('home');
     renderActivities();
@@ -578,9 +633,20 @@ function showHome(){
 function showHistory(){
     document.getElementById("homeScreen").classList.add("hidden");
     document.getElementById("historyScreen").classList.remove("hidden");
+    document.getElementById("countersScreen").classList.add("hidden");
     setScreenHeader('Histórico','Seu rastro ao longo do tempo');
     setActiveNav('history');
     renderHistory();
+    lucide.createIcons();
+}
+
+function showCounters(){
+    document.getElementById("homeScreen").classList.add("hidden");
+    document.getElementById("historyScreen").classList.add("hidden");
+    document.getElementById("countersScreen").classList.remove("hidden");
+    setScreenHeader('Contadores','Dias que continuam deixando rastro');
+    setActiveNav('counters');
+    renderCounters();
     lucide.createIcons();
 }
 
@@ -594,6 +660,8 @@ const STATE_UI = [
 
 const ACTIVITY_ICON_OPTIONS = [
     ['circle-dot','Padrão'],
+    ['tally-5','Contador'],
+    ['shield-check','Proteção'],
     ['briefcase-business','Trabalho'],
     ['moon','Sono'],
     ['armchair','Descanso'],
@@ -1178,8 +1246,10 @@ function updateStateRange(inputId='value',outputId='stateReadout'){
 function refreshAfterRecordSave(){
     const home=document.getElementById('homeScreen');
     const history=document.getElementById('historyScreen');
+    const countersScreen=document.getElementById('countersScreen');
     if(home && !home.classList.contains('hidden')) renderActivities();
     if(history && !history.classList.contains('hidden')) renderHistory();
+    if(countersScreen && !countersScreen.classList.contains('hidden')) renderCounters();
 }
 
 function saveStateRecord(activity){
@@ -1254,6 +1324,242 @@ function closeModal(){
     lastModalTrigger=null;
 }
 
+
+
+const COUNTER_DEFAULT_ICONS = {
+    without:'shield-check',
+    doing:'flame'
+};
+
+function counterIcon(counter){
+    return counter?.icon || COUNTER_DEFAULT_ICONS[counter?.mode] || 'tally-5';
+}
+
+function counterDays(startDate){
+    if(!startDate) return 0;
+    const parts=String(startDate).split('-').map(Number);
+    if(parts.length!==3 || parts.some(Number.isNaN)) return 0;
+    const start=Date.UTC(parts[0],parts[1]-1,parts[2]);
+    const todayRaw=localDateISO().split('-').map(Number);
+    const today=Date.UTC(todayRaw[0],todayRaw[1]-1,todayRaw[2]);
+    if(start>today) return 0;
+    return Math.floor((today-start)/86400000)+1;
+}
+
+function formatCounterDate(date){
+    if(!date) return '';
+    const [y,m,d]=date.split('-').map(Number);
+    const dt=new Date(y,m-1,d);
+    const raw=new Intl.DateTimeFormat('pt-BR',{day:'numeric',month:'short',year:'numeric'}).format(dt);
+    return raw.replace(/\./g,'');
+}
+
+function counterDisplayTitle(counter){
+    const title=String(counter?.title || '').trim();
+    if(counter?.mode==='without') return `Sem ${title}`;
+    return title;
+}
+
+function renderCounters(){
+    const host=document.getElementById('countersScreen');
+    if(!host) return;
+
+    const sorted=[...counters].sort((a,b)=>{
+        const da=counterDays(a.startDate), db=counterDays(b.startDate);
+        return db-da || String(a.title||'').localeCompare(String(b.title||''),'pt-BR');
+    });
+
+    const cards=sorted.map(counter=>{
+        const days=counterDays(counter.startDate);
+        const unit=days===1?'dia':'dias';
+        const cls=counter.mode==='without'?'without':'doing';
+        const kind=counter.mode==='without'?'Sem fazer':'Fazendo';
+        return `
+            <article class="counter-card ${cls}" data-days="${days}" onclick="openCounterEditor(${inlineArg(counter.id)})" tabindex="0" role="button" aria-label="${escapeHTML(counterDisplayTitle(counter))}, ${days} ${unit}">
+                <div class="counter-card-top">
+                    <div class="counter-icon"><i data-lucide="${counterIcon(counter)}"></i></div>
+                    <div class="counter-kind">${kind}</div>
+                </div>
+                <div class="counter-number">${days}</div>
+                <div class="counter-unit">${unit}</div>
+                <div class="counter-title">${escapeHTML(counterDisplayTitle(counter))}</div>
+                <div class="counter-since">desde ${escapeHTML(formatCounterDate(counter.startDate))}</div>
+            </article>`;
+    }).join('');
+
+    host.innerHTML=`
+        <div class="counter-page">
+            <div class="counter-toolbar">
+                <div class="counter-toolbar-copy">
+                    <h2>Seus dias</h2>
+                    <p>Sequências que seguem em andamento.</p>
+                </div>
+                <button class="counter-add-btn" onclick="openNewCounter()"><i data-lucide="plus"></i> Novo</button>
+            </div>
+            ${cards
+                ? `<div class="counter-grid">${cards}</div>`
+                : `<div class="counter-empty">
+                    <div class="counter-empty-icon"><i data-lucide="tally-5"></i></div>
+                    <h3>Nenhum contador ainda</h3>
+                    <p>Crie um contador para acompanhar há quantos dias algo continua acontecendo — ou deixou de acontecer.</p>
+                    <button onclick="openNewCounter()"><i data-lucide="plus"></i> Criar contador</button>
+                  </div>`}
+        </div>`;
+    lucide.createIcons();
+}
+
+function newCounterId(){
+    return `counter_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+}
+
+function counterFormHTML(counter=null){
+    const mode=counter?.mode || 'without';
+    const title=counter?.title || '';
+    const startDate=counter?.startDate || localDateISO();
+    const icon=counter?.icon || COUNTER_DEFAULT_ICONS[mode];
+    const editing=!!counter;
+
+    return `
+        <div class="sheet-form">
+            <p class="counter-form-note">O contador continua avançando até você alterar a data ou reiniciar a sequência.</p>
+
+            <label class="form-label" for="counterMode">Tipo</label>
+            <select id="counterMode" onchange="syncCounterForm()">
+                <option value="without" ${mode==='without'?'selected':''}>Sem fazer algo</option>
+                <option value="doing" ${mode==='doing'?'selected':''}>Fazendo algo</option>
+            </select>
+
+            <label class="form-label" for="counterTitle">Descrição</label>
+            <input id="counterTitle" type="text" maxlength="60" autocomplete="off" value="${escapeHTML(title)}" placeholder="Ex.: pedir iFood ou correr todos os dias" oninput="syncCounterPreview()">
+
+            <div class="form-row">
+                <div>
+                    <label class="form-label" for="counterStartDate">Desde</label>
+                    <input id="counterStartDate" type="date" value="${startDate}" onchange="syncCounterPreview()">
+                </div>
+                <div>
+                    <label class="form-label" for="counterIcon">Ícone</label>
+                    <select id="counterIcon" onchange="syncCounterPreview()">
+                        ${iconOptionsHTML(icon)}
+                    </select>
+                </div>
+            </div>
+
+            <div class="counter-preview">
+                <strong id="counterPreviewDays">${counterDays(startDate)}</strong>
+                <span id="counterPreviewUnit">${counterDays(startDate)===1?'dia':'dias'}</span>
+            </div>
+
+            <button class="primary-action" onclick="${editing?`saveCounterEdit(${inlineArg(counter.id)})`:'createCounter()'}">
+                <i data-lucide="check"></i> ${editing?'Salvar alterações':'Criar contador'}
+            </button>
+
+            ${editing?`
+            <div class="management-zone">
+                <div class="management-title">Sequência</div>
+                <div class="management-actions">
+                    <button onclick="resetCounterToday(${inlineArg(counter.id)})"><i data-lucide="rotate-ccw"></i> Reiniciar hoje</button>
+                    <button class="danger-action" onclick="deleteCounter(${inlineArg(counter.id)})"><i data-lucide="trash-2"></i> Excluir</button>
+                </div>
+            </div>`:''}
+        </div>`;
+}
+
+function openNewCounter(){
+    showModal('Novo contador',counterFormHTML(null),'Contadores');
+    syncCounterForm();
+    setTimeout(()=>document.getElementById('counterTitle')?.focus(),220);
+}
+
+function openCounterEditor(id){
+    const counter=counters.find(c=>String(c.id)===String(id));
+    if(!counter) return;
+    showModal('Editar contador',counterFormHTML(counter),'Contadores');
+    syncCounterForm(false);
+}
+
+function syncCounterForm(changeDefaultIcon=true){
+    const mode=document.getElementById('counterMode')?.value || 'without';
+    const iconSelect=document.getElementById('counterIcon');
+    if(changeDefaultIcon && iconSelect){
+        const oldDefault=mode==='without'?COUNTER_DEFAULT_ICONS.doing:COUNTER_DEFAULT_ICONS.without;
+        if(!iconSelect.value || iconSelect.value===oldDefault){
+            iconSelect.value=COUNTER_DEFAULT_ICONS[mode];
+        }
+    }
+    syncCounterPreview();
+}
+
+function syncCounterPreview(){
+    const date=document.getElementById('counterStartDate')?.value || localDateISO();
+    const days=counterDays(date);
+    const out=document.getElementById('counterPreviewDays');
+    const unit=document.getElementById('counterPreviewUnit');
+    if(out) out.textContent=days;
+    if(unit) unit.textContent=days===1?'dia':'dias';
+}
+
+function counterFormData(){
+    return {
+        mode:document.getElementById('counterMode')?.value || 'without',
+        title:(document.getElementById('counterTitle')?.value || '').trim(),
+        startDate:document.getElementById('counterStartDate')?.value || localDateISO(),
+        icon:document.getElementById('counterIcon')?.value || 'tally-5'
+    };
+}
+
+function createCounter(){
+    const data=counterFormData();
+    if(!data.title){
+        document.getElementById('counterTitle')?.focus();
+        showToast('Informe o que você quer contar.','error');
+        return;
+    }
+    counters.push({id:newCounterId(),...data,createdAt:new Date().toISOString()});
+    save();
+    closeModal();
+    renderCounters();
+    showToast('Contador criado.');
+}
+
+function saveCounterEdit(id){
+    const counter=counters.find(c=>String(c.id)===String(id));
+    if(!counter) return;
+    const data=counterFormData();
+    if(!data.title){
+        document.getElementById('counterTitle')?.focus();
+        showToast('Informe o que você quer contar.','error');
+        return;
+    }
+    Object.assign(counter,data, {updatedAt:new Date().toISOString()});
+    save();
+    closeModal();
+    renderCounters();
+    showToast('Contador atualizado.');
+}
+
+function resetCounterToday(id){
+    const counter=counters.find(c=>String(c.id)===String(id));
+    if(!counter) return;
+    if(!confirm('Reiniciar este contador a partir de hoje?')) return;
+    counter.history=Array.isArray(counter.history)?counter.history:[];
+    counter.history.push({startDate:counter.startDate,endDate:localDateISO(),resetAt:new Date().toISOString()});
+    counter.startDate=localDateISO();
+    counter.updatedAt=new Date().toISOString();
+    save();
+    closeModal();
+    renderCounters();
+    showToast('Contador reiniciado.');
+}
+
+function deleteCounter(id){
+    if(!confirm('Excluir este contador?')) return;
+    counters=counters.filter(c=>String(c.id)!==String(id));
+    save();
+    closeModal();
+    renderCounters();
+    showToast('Contador excluído.');
+}
 
 function formatDateBR(date){
     const [y,m,d]=date.split('-').map(Number);
@@ -1723,7 +2029,9 @@ exportadoEm:new Date(),
 
 atividades:activities,
 
-registros:records
+registros:records,
+
+contadores:counters
 
 };
 
@@ -1801,6 +2109,8 @@ function handleImport(event){
             let importedRecords = 0;
             let ignoredRecords = 0;
             let importedActivities = 0;
+            let importedCounters = 0;
+            let ignoredCounters = 0;
 
             if(data.atividades){
 
@@ -1862,8 +2172,36 @@ function handleImport(event){
                 });
             }
 
+
+            if(data.contadores){
+                const counterIds=new Set(counters.map(c=>String(c.id||'')));
+                const counterKeys=new Set(counters.map(c=>JSON.stringify([
+                    String(c.mode||''),
+                    String(c.title||'').trim().toLowerCase(),
+                    String(c.startDate||'')
+                ])));
+
+                data.contadores.forEach(contador=>{
+                    const id=String(contador.id||'');
+                    const key=JSON.stringify([
+                        String(contador.mode||''),
+                        String(contador.title||'').trim().toLowerCase(),
+                        String(contador.startDate||'')
+                    ]);
+                    if((id && counterIds.has(id)) || counterKeys.has(key)){
+                        ignoredCounters++;
+                        return;
+                    }
+                    const novo={...contador,id:id || newCounterId()};
+                    counters.push(novo);
+                    counterIds.add(String(novo.id));
+                    counterKeys.add(key);
+                    importedCounters++;
+                });
+            }
+
             save();
-            renderActivities();
+            refreshAfterRecordSave();
 
             const parts = [];
 
@@ -1877,6 +2215,14 @@ function handleImport(event){
 
             if(importedActivities){
                 parts.push(`${importedActivities} ${importedActivities === 1 ? 'atividade nova' : 'atividades novas'}`);
+            }
+
+            if(importedCounters){
+                parts.push(`${importedCounters} ${importedCounters === 1 ? 'contador novo' : 'contadores novos'}`);
+            }
+
+            if(ignoredCounters){
+                parts.push(`${ignoredCounters} ${ignoredCounters === 1 ? 'contador repetido ignorado' : 'contadores repetidos ignorados'}`);
             }
 
             showToast(
@@ -1901,6 +2247,7 @@ function handleImport(event){
 document.addEventListener('keydown',e=>{
     if(e.key==='Escape' && document.querySelector('.modal')) closeModal();
     if(e.key==='Enter' && e.target?.id==='newActivityName') createActivity();
+    if((e.key==='Enter' || e.key===' ') && e.target?.classList?.contains('counter-card')){e.preventDefault();e.target.click();}
 });
 
 document.addEventListener('focusin',e=>{
