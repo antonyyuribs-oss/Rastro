@@ -305,7 +305,7 @@ textarea{resize:vertical;min-height:100px}
 .danger-action{color:#ff9b9b;border-color:rgba(242,107,107,.3);background:rgba(242,107,107,.065)}
 .management-zone{margin-top:22px;padding-top:16px;border-top:1px solid var(--border-soft)}
 .management-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
-.management-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.management-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .management-actions button{min-height:42px;font-size:11px}
 .state-control{padding:4px 0 18px}
 .state-readout{font-size:48px;line-height:1;font-weight:780;letter-spacing:-.055em;text-align:center;color:var(--text);font-variant-numeric:tabular-nums;margin:2px 0 18px}
@@ -880,6 +880,91 @@ function createActivity(){
     showToast('Atividade adicionada.');
 }
 
+function openRenameActivity(activityName){
+    const isState = STATE_ACTIVITIES.includes(String(activityName || '').toLowerCase());
+
+    if(isState){
+        showToast('Os quatro estados fixos não podem ser renomeados.','error');
+        return;
+    }
+
+    showModal('Renomear atividade', `
+        <div class="sheet-form">
+            <p class="add-activity-note">
+                O novo nome também será aplicado aos registros anteriores dessa atividade.
+            </p>
+
+            <label class="form-label" for="renameActivityName">Novo nome</label>
+            <input id="renameActivityName"
+                   type="text"
+                   maxlength="40"
+                   autocomplete="off"
+                   value="${escapeHTML(activityName)}">
+
+            <button class="primary-action"
+                    onclick="saveRenamedActivity(${inlineArg(activityName)})">
+                <i data-lucide="pencil"></i> Salvar novo nome
+            </button>
+        </div>
+    `,'Gerenciar atividade');
+
+    setTimeout(()=>{
+        const input=document.getElementById('renameActivityName');
+        if(input){
+            input.focus();
+            input.select();
+        }
+    },220);
+}
+
+function saveRenamedActivity(oldName){
+    const input=document.getElementById('renameActivityName');
+    const newName=(input?.value || '').trim();
+
+    if(!newName){
+        input?.focus();
+        showToast('Informe o novo nome.','error');
+        return;
+    }
+
+    if(newName.toLowerCase()===String(oldName).trim().toLowerCase()){
+        closeModal();
+        showToast('O nome não foi alterado.');
+        return;
+    }
+
+    const duplicate=activities.some(a=>
+        a.name.trim().toLowerCase()===newName.toLowerCase() &&
+        a.name.trim().toLowerCase()!==String(oldName).trim().toLowerCase()
+    );
+
+    if(duplicate){
+        input?.focus();
+        showToast('Já existe uma atividade com esse nome.','error');
+        return;
+    }
+
+    const activity=activities.find(a=>a.name===oldName);
+
+    if(!activity){
+        showToast('Atividade não encontrada.','error');
+        return;
+    }
+
+    activity.name=newName;
+
+    records.forEach(record=>{
+        if(record.activity===oldName){
+            record.activity=newName;
+        }
+    });
+
+    save();
+    closeModal();
+    refreshAfterRecordSave();
+    showToast(`Atividade renomeada para "${newName}".`);
+}
+
 function openRegister(activity){
 
     const isState = STATE_ACTIVITIES.includes(activity.toLowerCase());
@@ -951,6 +1036,7 @@ function openRegister(activity){
             <div class="management-zone">
                 <div class="management-title">Gerenciar atividade</div>
                 <div class="management-actions">
+                    <button onclick="openRenameActivity(${inlineArg(activity)})"><i data-lucide="pencil"></i> Renomear</button>
                     <button onclick="archiveByName(${inlineArg(activity)})"><i data-lucide="archive"></i> Arquivar</button>
                     <button class="danger-action" onclick="deleteByName(${inlineArg(activity)})"><i data-lucide="trash-2"></i> Excluir</button>
                 </div>
@@ -1581,6 +1667,34 @@ function importJSON(){
     document.getElementById("importFile").click();
 }
 
+function recordImportKey(record){
+
+    const activity = String(record.activity || '').trim().toLowerCase();
+    const date = String(record.date || '');
+    const notes = String(record.notes || '');
+
+    const isState = STATE_ACTIVITIES.includes(activity);
+
+    if(isState){
+        return JSON.stringify([
+            'state',
+            activity,
+            date,
+            Number(record.value),
+            notes
+        ]);
+    }
+
+    return JSON.stringify([
+        'activity',
+        activity,
+        date,
+        String(record.startTime || ''),
+        Number(record.duration) || 0,
+        notes
+    ]);
+}
+
 function handleImport(event){
 
     const file = event.target.files[0];
@@ -1595,37 +1709,93 @@ function handleImport(event){
 
             const data = JSON.parse(e.target.result);
 
-          if(data.atividades){
+            let importedRecords = 0;
+            let ignoredRecords = 0;
+            let importedActivities = 0;
 
-    data.atividades.forEach(novaAtividade => {
+            if(data.atividades){
 
-        const existe = activities.some(
-            a => a.name === novaAtividade.name
-        );
+                data.atividades.forEach(novaAtividade => {
 
-        if(!existe){
-            activities.push(novaAtividade);
-        }
-    });
-}
+                    const existe = activities.some(
+                        a => String(a.name || '').trim().toLowerCase() ===
+                             String(novaAtividade.name || '').trim().toLowerCase()
+                    );
 
-if(data.registros){
+                    if(!existe){
+                        activities.push(novaAtividade);
+                        importedActivities++;
+                    }
+                });
+            }
 
-    data.registros.forEach(registro => {
+            if(data.registros){
 
-        records.push({
-            ...registro,
-            id: Date.now() + Math.random()
-        });
+                const existingIds = new Set(
+                    records
+                        .filter(r => r.id !== undefined && r.id !== null)
+                        .map(r => String(r.id))
+                );
 
-    });
-}
+                const existingKeys = new Set(
+                    records.map(recordImportKey)
+                );
+
+                data.registros.forEach(registro => {
+
+                    const sameId =
+                        registro.id !== undefined &&
+                        registro.id !== null &&
+                        existingIds.has(String(registro.id));
+
+                    const key = recordImportKey(registro);
+                    const sameContent = existingKeys.has(key);
+
+                    if(sameId || sameContent){
+                        ignoredRecords++;
+                        return;
+                    }
+
+                    let id = registro.id;
+
+                    if(id === undefined || id === null || existingIds.has(String(id))){
+                        id = Date.now() + Math.random();
+                    }
+
+                    records.push({
+                        ...registro,
+                        id
+                    });
+
+                    existingIds.add(String(id));
+                    existingKeys.add(key);
+                    importedRecords++;
+                });
+            }
 
             save();
-
             renderActivities();
 
-            showToast("Importação concluída com sucesso.");
+            const parts = [];
+
+            if(importedRecords){
+                parts.push(`${importedRecords} ${importedRecords === 1 ? 'registro novo' : 'registros novos'}`);
+            }
+
+            if(ignoredRecords){
+                parts.push(`${ignoredRecords} ${ignoredRecords === 1 ? 'duplicado ignorado' : 'duplicados ignorados'}`);
+            }
+
+            if(importedActivities){
+                parts.push(`${importedActivities} ${importedActivities === 1 ? 'atividade nova' : 'atividades novas'}`);
+            }
+
+            showToast(
+                parts.length
+                    ? `Importação concluída: ${parts.join(' · ')}.`
+                    : "Importação concluída: nenhum dado novo."
+            );
+
             event.target.value="";
 
         }catch(error){
