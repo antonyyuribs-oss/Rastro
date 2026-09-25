@@ -442,6 +442,8 @@ textarea{resize:vertical;min-height:100px}
 .compare-add-mini{width:100%;margin-top:7px;padding:7px;font-size:9px;min-height:34px;background:transparent;border-style:dashed;color:var(--sand-muted)}
 
 .plan-form-help{margin:-5px 0 14px;color:var(--muted);font-size:10px;line-height:1.45}
+.plan-activity-custom{margin-top:9px}
+.plan-activity-custom.hidden{display:none}
 .plan-repeat-label{margin:1px 0 7px;font-size:11px;font-weight:650;color:var(--text-2)}
 .plan-repeat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:17px}
 .plan-repeat-day{position:relative;min-width:0}
@@ -2390,8 +2392,36 @@ function planningItemMeta(item){
     return parts.join(' · ');
 }
 
-function planSuggestionsHTML(){
-    return normalActiveActivities().map(a=>`<option value="${escapeHTML(a.name)}"></option>`).join('');
+function planActivityOptionsHTML(currentActivity=''){
+    const active=normalActiveActivities();
+    const current=String(currentActivity||'').trim();
+    const match=active.find(a=>a.name.toLowerCase()===current.toLowerCase());
+    const selectedName=match?.name || '';
+    const customSelected=!!current && !match;
+
+    return `
+        <option value="" ${!current?'selected':''}>Selecione uma atividade</option>
+        ${active.map(a=>`
+            <option value="${escapeHTML(a.name)}" ${a.name===selectedName?'selected':''}>
+                ${escapeHTML(a.name)}
+            </option>`).join('')}
+        <option value="__custom__" ${customSelected?'selected':''}>Outro / evento livre</option>
+    `;
+}
+
+function syncPlanActivityChoice(){
+    const select=document.getElementById('planActivitySelect');
+    const customWrap=document.getElementById('planActivityCustomWrap');
+    const customInput=document.getElementById('planActivityCustom');
+
+    if(!select || !customWrap) return;
+
+    const isCustom=select.value==='__custom__';
+    customWrap.classList.toggle('hidden',!isCustom);
+
+    if(isCustom && customInput && !customInput.value){
+        setTimeout(()=>customInput.focus(),30);
+    }
 }
 
 function repeatDaysHTML(){
@@ -2406,7 +2436,7 @@ function repeatDaysHTML(){
 function openPlanEditor(id=null,dateOverride=null){
     const plan=id ? weeklyPlans.find(p=>String(p.id)===String(id)) : null;
     const date=plan?.date || dateOverride || selectedPlanDay || selectedPlanWeekStart;
-    const activity=plan?.activity || normalActiveActivities()[0]?.name || '';
+    const activity=plan?.activity || '';
     const startTime=plan?.startTime || '';
     const duration=Math.max(0,Number(plan?.duration)||0);
     const notes=plan?.notes || '';
@@ -2415,9 +2445,20 @@ function openPlanEditor(id=null,dateOverride=null){
         <div class="sheet-form">
             <p class="plan-form-help">Use o nome de uma atividade do Rastro para que a comparação semanal seja automática. Você também pode escrever outro nome.</p>
 
-            <label class="form-label" for="planActivity">Atividade ou evento</label>
-            <input id="planActivity" type="text" list="planActivitySuggestions" maxlength="60" autocomplete="off" value="${escapeHTML(activity)}" placeholder="Ex.: Trabalho, Treino, Acordar">
-            <datalist id="planActivitySuggestions">${planSuggestionsHTML()}</datalist>
+            <label class="form-label" for="planActivitySelect">Atividade ou evento</label>
+            <select id="planActivitySelect" onchange="syncPlanActivityChoice()">
+                ${planActivityOptionsHTML(activity)}
+            </select>
+
+            <div id="planActivityCustomWrap"
+                 class="plan-activity-custom ${activity && !normalActiveActivities().some(a=>a.name.toLowerCase()===String(activity).toLowerCase()) ? '' : 'hidden'}">
+                <input id="planActivityCustom"
+                       type="text"
+                       maxlength="60"
+                       autocomplete="off"
+                       value="${activity && !normalActiveActivities().some(a=>a.name.toLowerCase()===String(activity).toLowerCase()) ? escapeHTML(activity) : ''}"
+                       placeholder="Digite o nome do evento ou atividade">
+            </div>
 
             <div class="form-row">
                 <div>
@@ -2464,6 +2505,7 @@ function openPlanEditor(id=null,dateOverride=null){
     `,plan?'Planejado':'Semana');
 
     syncPlanDurationChips();
+    syncPlanActivityChoice();
 }
 
 function setPlanDuration(v){
@@ -2481,7 +2523,13 @@ function syncPlanDurationChips(){
 }
 
 function readPlanForm(){
-    const activity=(document.getElementById('planActivity')?.value || '').trim();
+    const choice=document.getElementById('planActivitySelect')?.value || '';
+    const activity=(
+        choice==='__custom__'
+            ? (document.getElementById('planActivityCustom')?.value || '')
+            : choice
+    ).trim();
+
     const date=document.getElementById('planDate')?.value || '';
     const startTime=document.getElementById('planStartTime')?.value || '';
     const duration=Math.max(0,Number(document.getElementById('planDuration')?.value)||0);
