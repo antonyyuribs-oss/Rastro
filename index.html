@@ -358,6 +358,17 @@ textarea{resize:vertical;min-height:100px}
 .counter-preview{margin:1px 0 17px;padding:14px;border-radius:16px;border:1px solid var(--border-soft);background:linear-gradient(145deg,var(--surface-2),var(--surface));text-align:center}
 .counter-preview strong{display:block;font-size:34px;line-height:1;color:var(--sand);letter-spacing:-.05em}
 .counter-preview span{display:block;margin-top:4px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}
+.counter-history{margin-top:18px;padding-top:16px;border-top:1px solid var(--border-soft)}
+.counter-history-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.counter-history-head strong{font-size:12px;letter-spacing:.02em}
+.counter-history-head span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.11em}
+.counter-history-list{display:grid;gap:8px}
+.counter-history-item{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--border-soft);border-radius:14px;background:var(--surface-3)}
+.counter-history-days{font-size:24px;line-height:1;font-weight:800;letter-spacing:-.05em;color:var(--sand);font-variant-numeric:tabular-nums}
+.counter-history-days small{display:block;margin-top:4px;font-size:8px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.counter-history-period{font-size:11px;color:var(--text-2);line-height:1.4}
+.counter-history-reset{margin-top:2px;font-size:9px;color:var(--muted)}
+.counter-history-empty{padding:12px;border:1px dashed var(--border);border-radius:13px;color:var(--muted);font-size:10px;line-height:1.45}
 
 @media(min-width:620px){.counter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
@@ -1491,6 +1502,80 @@ function counterDisplayTitle(counter){
     return title;
 }
 
+function counterHistoryDays(item){
+    if(!item?.startDate || !item?.endDate) return 0;
+
+    const s=String(item.startDate).split('-').map(Number);
+    const e=String(item.endDate).split('-').map(Number);
+
+    if(s.length!==3 || e.length!==3 || s.some(Number.isNaN) || e.some(Number.isNaN)) return 0;
+
+    const start=Date.UTC(s[0],s[1]-1,s[2]);
+    const resetDay=Date.UTC(e[0],e[1]-1,e[2]);
+
+    // endDate é o dia em que a contagem foi reiniciada.
+    // A sequência anterior vale até o dia imediatamente anterior.
+    return Math.max(0,Math.floor((resetDay-start)/86400000));
+}
+
+function counterHistoryEndDate(item){
+    if(!item?.endDate) return '';
+    const [y,m,d]=String(item.endDate).split('-').map(Number);
+    if([y,m,d].some(Number.isNaN)) return '';
+    const dt=new Date(y,m-1,d);
+    dt.setDate(dt.getDate()-1);
+    return localDateISO(dt);
+}
+
+function renderCounterHistoryHTML(counter){
+    const history=Array.isArray(counter?.history) ? [...counter.history] : [];
+
+    if(!history.length){
+        return `
+            <div class="counter-history">
+                <div class="counter-history-head">
+                    <strong>Histórico</strong>
+                    <span>0 sequências encerradas</span>
+                </div>
+                <div class="counter-history-empty">
+                    Quando você reiniciar este contador, a sequência encerrada ficará registrada aqui.
+                </div>
+            </div>`;
+    }
+
+    history.sort((a,b)=>String(b.resetAt||b.endDate||'').localeCompare(String(a.resetAt||a.endDate||'')));
+
+    const items=history.map(item=>{
+        const days=counterHistoryDays(item);
+        const endDate=counterHistoryEndDate(item);
+        const period=days>0
+            ? `${formatCounterDate(item.startDate)} — ${formatCounterDate(endDate)}`
+            : `Iniciada e reiniciada em ${formatCounterDate(item.endDate)}`;
+        const resetDate=item.endDate || (item.resetAt ? localDateISO(new Date(item.resetAt)) : '');
+
+        return `
+            <div class="counter-history-item">
+                <div class="counter-history-days">
+                    ${days}
+                    <small>${days===1?'dia':'dias'}</small>
+                </div>
+                <div>
+                    <div class="counter-history-period">${escapeHTML(period)}</div>
+                    ${resetDate?`<div class="counter-history-reset">Reiniciado em ${escapeHTML(formatCounterDate(resetDate))}</div>`:''}
+                </div>
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="counter-history">
+            <div class="counter-history-head">
+                <strong>Histórico</strong>
+                <span>${history.length} ${history.length===1?'sequência encerrada':'sequências encerradas'}</span>
+            </div>
+            <div class="counter-history-list">${items}</div>
+        </div>`;
+}
+
 function renderCounters(){
     const host=document.getElementById('countersScreen');
     if(!host) return;
@@ -1592,7 +1677,9 @@ function counterFormHTML(counter=null){
                     <button onclick="resetCounterToday(${inlineArg(counter.id)})"><i data-lucide="rotate-ccw"></i> Reiniciar hoje</button>
                     <button class="danger-action" onclick="deleteCounter(${inlineArg(counter.id)})"><i data-lucide="trash-2"></i> Excluir</button>
                 </div>
-            </div>`:''}
+            </div>
+            ${renderCounterHistoryHTML(counter)}
+            `:''}
         </div>`;
 }
 
