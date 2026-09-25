@@ -358,13 +358,101 @@ textarea{resize:vertical;min-height:100px}
 .counter-preview{margin:1px 0 17px;padding:14px;border-radius:16px;border:1px solid var(--border-soft);background:linear-gradient(145deg,var(--surface-2),var(--surface));text-align:center}
 .counter-preview strong{display:block;font-size:34px;line-height:1;color:var(--sand);letter-spacing:-.05em}
 .counter-preview span{display:block;margin-top:4px;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.1em}
+
 @media(min-width:620px){.counter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* PLANEJAMENTO SEMANAL */
+.planning-page{display:grid;gap:18px}
+.plan-month-card{padding:15px 14px 14px}
+.plan-month-top{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:10px;margin-bottom:13px}
+.plan-month-title{text-align:center;font-size:18px;font-weight:740;letter-spacing:-.02em}
+.week-strip{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.week-strip::-webkit-scrollbar{display:none}
+.week-chip{flex:0 0 auto;min-width:62px;min-height:49px;padding:7px 9px;border-radius:13px;background:var(--surface-3);border:1px solid var(--border-soft);color:var(--muted);display:grid;place-items:center;gap:1px}
+.week-chip b{font-size:11px;color:var(--text-2);font-weight:700}
+.week-chip span{font-size:9px}
+.week-chip.active{border-color:rgba(214,195,157,.48);background:rgba(214,195,157,.085);box-shadow:inset 0 0 0 1px rgba(214,195,157,.055)}
+.week-chip.active b{color:var(--sand)}
+.plan-week-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.plan-week-copy h2{font-size:18px;line-height:1.15;letter-spacing:-.02em}
+.plan-week-copy p{margin-top:4px;color:var(--muted);font-size:10px}
+.plan-week-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.plan-add-btn{height:44px;padding:0 13px;display:flex;align-items:center;justify-content:center;gap:7px;color:var(--sand);border-color:rgba(214,195,157,.22);background:rgba(214,195,157,.06)}
+.plan-add-btn svg{width:17px;height:17px}
+.plan-copy-btn{height:44px;padding:0 11px;display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text-2);border-color:var(--border);background:var(--surface-3);font-size:10px}
+.plan-copy-btn svg{width:16px;height:16px}
+@media(max-width:430px){
+  .plan-week-header{align-items:flex-start}
+  .plan-week-actions{max-width:168px}
+  .plan-copy-btn,.plan-add-btn{min-height:40px;height:40px;padding-left:9px;padding-right:9px}
+}
+
+.week-summary{display:grid;gap:8px}
+.week-summary-head{display:grid;grid-template-columns:minmax(0,1fr) 76px 76px;gap:8px;padding:0 8px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;text-align:center}
+.week-summary-head span:first-child{text-align:left}
+.week-summary-row{display:grid;grid-template-columns:minmax(0,1fr) 76px 76px;gap:8px;align-items:center;padding:10px 9px;border:1px solid var(--border-soft);border-radius:14px;background:rgba(27,36,24,.72)}
+.week-summary-activity{display:flex;align-items:center;gap:8px;min-width:0}
+.week-summary-icon{width:29px;height:29px;flex:none;border-radius:9px;display:grid;place-items:center;color:#aebc7d;background:rgba(130,144,90,.12)}
+.week-summary-icon svg{width:15px;height:15px}
+.week-summary-name{min-width:0;font-size:11px;font-weight:650;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.week-summary-value{text-align:center;min-width:0}
+.week-summary-value b{display:block;font-size:13px;line-height:1.1;font-variant-numeric:tabular-nums}
+.week-summary-value span{display:block;margin-top:3px;font-size:8px;color:var(--muted)}
+.week-summary-value.planned b{color:var(--sand)}
+.week-summary-value.actual b{color:#b5c184}
+.week-summary-empty{padding:20px 14px;border:1px dashed var(--border);border-radius:15px;color:var(--muted);font-size:11px;text-align:center}
+
+.day-tabs{display:flex;gap:6px;overflow-x:auto;padding:1px 1px 5px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.day-tabs::-webkit-scrollbar{display:none}
+.day-tab{flex:1 0 44px;min-width:44px;padding:8px 5px;border-radius:12px;background:var(--surface-3);border:1px solid var(--border-soft);color:var(--muted);text-align:center}
+.day-tab strong{display:block;font-size:9px;letter-spacing:.06em}
+.day-tab span{display:block;margin-top:3px;font-size:13px;font-weight:730;color:var(--text-2)}
+.day-tab.active{background:rgba(130,144,90,.13);border-color:rgba(130,144,90,.5)}
+.day-tab.active strong,.day-tab.active span{color:#c5cea1}
+.day-tab.today{box-shadow:inset 0 0 0 1px rgba(214,195,157,.15)}
+
+.daily-compare-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.compare-column{min-width:0;border:1px solid var(--border-soft);border-radius:17px;padding:10px 8px 9px;background:rgba(20,27,18,.7)}
+.compare-column.planned{border-color:rgba(214,195,157,.15);background:linear-gradient(180deg,rgba(214,195,157,.045),rgba(20,27,18,.7))}
+.compare-column.actual{border-color:rgba(130,144,90,.18);background:linear-gradient(180deg,rgba(130,144,90,.05),rgba(20,27,18,.7))}
+.compare-heading{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 2px 8px;border-bottom:1px solid var(--border-soft);margin-bottom:7px}
+.compare-heading strong{font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.compare-column.planned .compare-heading strong{color:var(--sand)}
+.compare-column.actual .compare-heading strong{color:#b5c184}
+.compare-heading span{font-size:8px;color:var(--muted)}
+.compare-list{display:grid;gap:6px}
+.compare-item{min-width:0;padding:8px;border-radius:11px;border:1px solid var(--border-soft);background:rgba(0,0,0,.08);cursor:pointer}
+.compare-item.planned-item{border-color:rgba(214,195,157,.11)}
+.compare-item.actual-item{border-color:rgba(130,144,90,.11)}
+.compare-time{font-size:9px;font-weight:730;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compare-title{margin-top:3px;font-size:10px;font-weight:680;line-height:1.18;color:var(--text);overflow-wrap:anywhere}
+.compare-meta{margin-top:3px;font-size:8px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+.compare-empty{padding:15px 5px;text-align:center;color:var(--muted);font-size:9px;line-height:1.4}
+.compare-add-mini{width:100%;margin-top:7px;padding:7px;font-size:9px;min-height:34px;background:transparent;border-style:dashed;color:var(--sand-muted)}
+
+.plan-form-help{margin:-5px 0 14px;color:var(--muted);font-size:10px;line-height:1.45}
+.plan-repeat-label{margin:1px 0 7px;font-size:11px;font-weight:650;color:var(--text-2)}
+.plan-repeat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:17px}
+.plan-repeat-day{position:relative;min-width:0}
+.plan-repeat-day input{position:absolute;opacity:0;pointer-events:none}
+.plan-repeat-day span{display:grid;place-items:center;min-height:37px;border:1px solid var(--border);border-radius:10px;background:var(--surface-3);color:var(--muted);font-size:9px;font-weight:700}
+.plan-repeat-day input:checked+span{border-color:rgba(214,195,157,.5);background:rgba(214,195,157,.09);color:var(--sand)}
+.plan-manage{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;padding-top:15px;border-top:1px solid var(--border-soft)}
+.plan-manage button{font-size:11px}
+
+@media(max-width:380px){
+  .week-summary-head,.week-summary-row{grid-template-columns:minmax(0,1fr) 66px 66px}
+  .week-summary-row{gap:5px;padding-left:7px;padding-right:7px}
+  .daily-compare-grid{gap:6px}
+  .compare-column{padding-left:6px;padding-right:6px}
+}
+
 
 /* navegação inferior */
 .bottom-nav{
     position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:30;
     width:min(100%,var(--content));
-    display:grid;grid-template-columns:repeat(4,1fr);align-items:end;
+    display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
     padding:8px 10px calc(8px + env(safe-area-inset-bottom));
     background:rgba(20,28,18,.95);border-top:1px solid var(--border-soft);
     backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
@@ -469,6 +557,8 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
 
     <div id="countersScreen" class="hidden"></div>
 
+    <div id="planningScreen" class="hidden"></div>
+
 </div>
 
 <div id="modalContainer"></div>
@@ -480,6 +570,9 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
     </button>
     <button class="nav-item" id="navHistory" onclick="showHistory()" aria-label="Histórico">
         <i data-lucide="calendar-days"></i><span>Histórico</span>
+    </button>
+    <button class="nav-item" id="navPlanning" onclick="showPlanning()" aria-label="Semana">
+        <i data-lucide="calendar-range"></i><span>Semana</span>
     </button>
     <button class="nav-item" id="navCounters" onclick="showCounters()" aria-label="Contadores">
         <i data-lucide="tally-5"></i><span>Contadores</span>
@@ -542,9 +635,19 @@ JSON.parse(localStorage.getItem("rastro_counters"))
 ||
 [];
 
+let weeklyPlans =
+JSON.parse(localStorage.getItem("rastro_weekly_plans"))
+||
+[];
+
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let selectedDate = null;
+
+let planViewMonth = new Date().getMonth();
+let planViewYear = new Date().getFullYear();
+let selectedPlanWeekStart = localDateISO(startOfWeekDate(new Date()));
+let selectedPlanDay = localDateISO();
 
 let draggedIndex = null;
 let draggedActivity = null;
@@ -598,6 +701,11 @@ localStorage.setItem(
 "rastro_counters",
 JSON.stringify(counters)
 );
+
+localStorage.setItem(
+"rastro_weekly_plans",
+JSON.stringify(weeklyPlans)
+);
 }
 
 function formatHeaderDate(){
@@ -610,6 +718,7 @@ function formatHeaderDate(){
 function setActiveNav(screen){
     document.getElementById('navHome')?.classList.toggle('active',screen==='home');
     document.getElementById('navHistory')?.classList.toggle('active',screen==='history');
+    document.getElementById('navPlanning')?.classList.toggle('active',screen==='planning');
     document.getElementById('navCounters')?.classList.toggle('active',screen==='counters');
 }
 
@@ -624,6 +733,7 @@ function showHome(){
     document.getElementById("homeScreen").classList.remove("hidden");
     document.getElementById("historyScreen").classList.add("hidden");
     document.getElementById("countersScreen").classList.add("hidden");
+    document.getElementById("planningScreen").classList.add("hidden");
     setScreenHeader('Rastro',formatHeaderDate());
     setActiveNav('home');
     renderActivities();
@@ -634,6 +744,7 @@ function showHistory(){
     document.getElementById("homeScreen").classList.add("hidden");
     document.getElementById("historyScreen").classList.remove("hidden");
     document.getElementById("countersScreen").classList.add("hidden");
+    document.getElementById("planningScreen").classList.add("hidden");
     setScreenHeader('Histórico','Seu rastro ao longo do tempo');
     setActiveNav('history');
     renderHistory();
@@ -644,9 +755,21 @@ function showCounters(){
     document.getElementById("homeScreen").classList.add("hidden");
     document.getElementById("historyScreen").classList.add("hidden");
     document.getElementById("countersScreen").classList.remove("hidden");
+    document.getElementById("planningScreen").classList.add("hidden");
     setScreenHeader('Contadores','Dias que continuam deixando rastro');
     setActiveNav('counters');
     renderCounters();
+    lucide.createIcons();
+}
+
+function showPlanning(){
+    document.getElementById("homeScreen").classList.add("hidden");
+    document.getElementById("historyScreen").classList.add("hidden");
+    document.getElementById("countersScreen").classList.add("hidden");
+    document.getElementById("planningScreen").classList.remove("hidden");
+    setScreenHeader('Semana','Planejado × Rastro');
+    setActiveNav('planning');
+    renderPlanning();
     lucide.createIcons();
 }
 
@@ -1114,6 +1237,12 @@ function saveRenamedActivity(oldName){
                 record.activity=newName;
             }
         });
+        weeklyPlans.forEach(plan=>{
+            if(plan.activity===oldName){
+                plan.activity=newName;
+                plan.updatedAt=new Date().toISOString();
+            }
+        });
     }
 
     save();
@@ -1247,9 +1376,11 @@ function refreshAfterRecordSave(){
     const home=document.getElementById('homeScreen');
     const history=document.getElementById('historyScreen');
     const countersScreen=document.getElementById('countersScreen');
+    const planningScreen=document.getElementById('planningScreen');
     if(home && !home.classList.contains('hidden')) renderActivities();
     if(history && !history.classList.contains('hidden')) renderHistory();
     if(countersScreen && !countersScreen.classList.contains('hidden')) renderCounters();
+    if(planningScreen && !planningScreen.classList.contains('hidden')) renderPlanning();
 }
 
 function saveStateRecord(activity){
@@ -1819,7 +1950,7 @@ r => r.id !== id
 
 save();
 if(document.querySelector('.modal')) closeModal();
-renderHistory();
+refreshAfterRecordSave();
 }
 
 function editRecord(id){
@@ -1927,9 +2058,604 @@ function saveEditedRecord(id){
 
     save();
     closeModal();
-    renderHistory();
+    refreshAfterRecordSave();
     showToast('Alterações salvas.');
 }
+
+/* ===========================
+   PLANEJAMENTO SEMANAL
+=========================== */
+
+function parseLocalISO(iso){
+    const [y,m,d]=String(iso||'').split('-').map(Number);
+    return new Date(y,m-1,d);
+}
+
+function addDaysLocal(date,days){
+    const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+    d.setDate(d.getDate()+days);
+    return d;
+}
+
+function startOfWeekDate(date){
+    const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+    const shift=(d.getDay()+6)%7;
+    d.setDate(d.getDate()-shift);
+    return d;
+}
+
+function endOfWeekDate(date){
+    return addDaysLocal(startOfWeekDate(date),6);
+}
+
+function weekEndExclusive(startISO){
+    return addDaysLocal(parseLocalISO(startISO),7);
+}
+
+function isoInRange(iso,startISO,endExclusiveISO){
+    return iso>=startISO && iso<endExclusiveISO;
+}
+
+function weeksForMonth(year,month){
+    const first=new Date(year,month,1);
+    const last=new Date(year,month+1,0);
+    let cursor=startOfWeekDate(first);
+    const lastWeek=startOfWeekDate(last);
+    const weeks=[];
+    while(cursor<=lastWeek){
+        weeks.push(localDateISO(cursor));
+        cursor=addDaysLocal(cursor,7);
+    }
+    return weeks;
+}
+
+function monthName(year,month){
+    const raw=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(new Date(year,month,1));
+    return raw.charAt(0).toUpperCase()+raw.slice(1);
+}
+
+function shortMonth(date){
+    return new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(date).replace('.','');
+}
+
+function weekChipRange(startISO){
+    const s=parseLocalISO(startISO);
+    const e=addDaysLocal(s,6);
+    if(s.getMonth()===e.getMonth()) return `${s.getDate()}–${e.getDate()}`;
+    return `${s.getDate()} ${shortMonth(s)}–${e.getDate()} ${shortMonth(e)}`;
+}
+
+function weekLongRange(startISO){
+    const s=parseLocalISO(startISO);
+    const e=addDaysLocal(s,6);
+    if(s.getMonth()===e.getMonth() && s.getFullYear()===e.getFullYear()){
+        return `${s.getDate()}–${e.getDate()} de ${new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(s)}`;
+    }
+    return `${s.getDate()} ${shortMonth(s)} – ${e.getDate()} ${shortMonth(e)} ${e.getFullYear()}`;
+}
+
+function planWeekStatus(startISO){
+    const start=parseLocalISO(startISO);
+    const end=addDaysLocal(start,7);
+    const now=new Date();
+    if(now<start) return 'planejamento';
+    if(now>=end) return 'semana encerrada';
+    return 'em andamento';
+}
+
+function ensureSelectedPlanDay(){
+    const start=selectedPlanWeekStart;
+    const end=localDateISO(weekEndExclusive(start));
+    const today=localDateISO();
+    if(!selectedPlanDay || !isoInRange(selectedPlanDay,start,end)){
+        selectedPlanDay=isoInRange(today,start,end) ? today : start;
+    }
+}
+
+function changePlanMonth(delta){
+    planViewMonth+=delta;
+    if(planViewMonth<0){planViewMonth=11;planViewYear--;}
+    if(planViewMonth>11){planViewMonth=0;planViewYear++;}
+    const weeks=weeksForMonth(planViewYear,planViewMonth);
+    if(weeks.length){
+        const today=localDateISO();
+        const containingToday=weeks.find(w=>isoInRange(today,w,localDateISO(weekEndExclusive(w))));
+        selectedPlanWeekStart=containingToday || weeks[0];
+        selectedPlanDay=selectedPlanWeekStart;
+    }
+    renderPlanning();
+}
+
+function selectPlanWeek(startISO){
+    selectedPlanWeekStart=startISO;
+    ensureSelectedPlanDay();
+    renderPlanning();
+}
+
+function selectPlanDay(dateISO){
+    selectedPlanDay=dateISO;
+    renderPlanning();
+}
+
+function newPlanId(){
+    return `plan_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+}
+
+function planActivityKey(name){
+    return String(name||'').trim().toLowerCase();
+}
+
+function intervalForItem(item,weekStartISO,{clipNow=false}={}){
+    const duration=Math.max(0,Number(item?.duration)||0);
+    if(!item?.date || !item?.startTime || duration<=0) return null;
+
+    const [y,m,d]=item.date.split('-').map(Number);
+    const [hh,mm]=item.startTime.split(':').map(Number);
+    const start=new Date(y,m-1,d,hh||0,mm||0,0,0);
+    let end=new Date(start.getTime()+duration*60000);
+
+    const weekStart=parseLocalISO(weekStartISO);
+    const weekEnd=addDaysLocal(weekStart,7);
+
+    let a=Math.max(start.getTime(),weekStart.getTime());
+    let b=Math.min(end.getTime(),weekEnd.getTime());
+
+    if(clipNow){
+        const now=Date.now();
+        if(a>=now) return null;
+        b=Math.min(b,now);
+    }
+
+    if(b<=a) return null;
+    return [a,b];
+}
+
+function mergedMinutes(items,activityName,weekStartISO,{clipNow=false}={}){
+    const key=planActivityKey(activityName);
+    const intervals=items
+        .filter(item=>planActivityKey(item.activity)===key)
+        .map(item=>intervalForItem(item,weekStartISO,{clipNow}))
+        .filter(Boolean)
+        .sort((a,b)=>a[0]-b[0]);
+
+    if(!intervals.length) return 0;
+
+    let total=0;
+    let [curStart,curEnd]=intervals[0];
+
+    for(let i=1;i<intervals.length;i++){
+        const [start,end]=intervals[i];
+        if(start<=curEnd){
+            curEnd=Math.max(curEnd,end);
+        }else{
+            total+=curEnd-curStart;
+            curStart=start;
+            curEnd=end;
+        }
+    }
+    total+=curEnd-curStart;
+    return Math.round(total/60000);
+}
+
+function formatPlanMinutes(min){
+    const n=Math.max(0,Math.round(Number(min)||0));
+    const h=Math.floor(n/60), m=n%60;
+    if(h && m) return `${h}h${String(m).padStart(2,'0')}`;
+    if(h) return `${h}h`;
+    return `${m}min`;
+}
+
+function weekItems(startISO){
+    const endISO=localDateISO(weekEndExclusive(startISO));
+    return {
+        planned:weeklyPlans.filter(p=>isoInRange(String(p.date||''),startISO,endISO)),
+        actual:records.filter(r=>
+            !STATE_ACTIVITIES.includes(String(r.activity||'').toLowerCase()) &&
+            isoInRange(String(r.date||''),startISO,endISO)
+        )
+    };
+}
+
+function summaryRowsForWeek(startISO){
+    const {planned,actual}=weekItems(startISO);
+    const names=[];
+    const seen=new Set();
+
+    planned.forEach(item=>{
+        const key=planActivityKey(item.activity);
+        if(key && !seen.has(key)){seen.add(key);names.push(item.activity);}
+    });
+    actual.forEach(item=>{
+        const key=planActivityKey(item.activity);
+        if(key && !seen.has(key)){seen.add(key);names.push(item.activity);}
+    });
+
+    return names.map(name=>({
+        name,
+        planned:mergedMinutes(planned,name,startISO),
+        actual:mergedMinutes(actual,name,startISO,{clipNow:true})
+    })).sort((a,b)=>{
+        if((b.planned>0)!==(a.planned>0)) return b.planned-a.planned;
+        return (b.planned+b.actual)-(a.planned+a.actual);
+    });
+}
+
+function startedRealRecord(record){
+    if(!record?.date) return false;
+    if(!record.startTime) return record.date<=localDateISO();
+    const [y,m,d]=record.date.split('-').map(Number);
+    const [hh,mm]=record.startTime.split(':').map(Number);
+    return new Date(y,m-1,d,hh||0,mm||0,0,0).getTime()<=Date.now();
+}
+
+function planningItemTime(item){
+    const duration=Math.max(0,Number(item.duration)||0);
+    if(!item.startTime) return duration ? `Sem horário · ${formatPlanMinutes(duration)}` : 'Sem horário';
+    if(!duration) return item.startTime;
+    return `${item.startTime}–${getEndTime(item.startTime,duration)}`;
+}
+
+function planningItemMeta(item){
+    const parts=[];
+    const duration=Math.max(0,Number(item.duration)||0);
+    if(duration) parts.push(formatPlanMinutes(duration));
+    if(item.notes) parts.push(item.notes);
+    return parts.join(' · ');
+}
+
+function planSuggestionsHTML(){
+    return normalActiveActivities().map(a=>`<option value="${escapeHTML(a.name)}"></option>`).join('');
+}
+
+function repeatDaysHTML(){
+    const labels=['SEG','TER','QUA','QUI','SEX','SÁB','DOM'];
+    return labels.map((label,i)=>`
+        <label class="plan-repeat-day">
+            <input type="checkbox" class="planRepeatDay" value="${i}">
+            <span>${label}</span>
+        </label>`).join('');
+}
+
+function openPlanEditor(id=null,dateOverride=null){
+    const plan=id ? weeklyPlans.find(p=>String(p.id)===String(id)) : null;
+    const date=plan?.date || dateOverride || selectedPlanDay || selectedPlanWeekStart;
+    const activity=plan?.activity || normalActiveActivities()[0]?.name || '';
+    const startTime=plan?.startTime || '';
+    const duration=Math.max(0,Number(plan?.duration)||0);
+    const notes=plan?.notes || '';
+
+    showModal(plan?'Editar planejamento':'Novo planejamento',`
+        <div class="sheet-form">
+            <p class="plan-form-help">Use o nome de uma atividade do Rastro para que a comparação semanal seja automática. Você também pode escrever outro nome.</p>
+
+            <label class="form-label" for="planActivity">Atividade ou evento</label>
+            <input id="planActivity" type="text" list="planActivitySuggestions" maxlength="60" autocomplete="off" value="${escapeHTML(activity)}" placeholder="Ex.: Trabalho, Treino, Acordar">
+            <datalist id="planActivitySuggestions">${planSuggestionsHTML()}</datalist>
+
+            <div class="form-row">
+                <div>
+                    <label class="form-label" for="planDate">Data</label>
+                    <input id="planDate" type="date" value="${date}">
+                </div>
+                <div>
+                    <label class="form-label" for="planStartTime">Hora <span>opcional</span></label>
+                    <input id="planStartTime" type="time" value="${startTime}">
+                </div>
+            </div>
+
+            <label class="form-label" for="planDuration">Duração <span>0 = apenas marcador</span></label>
+            <div class="duration-chips">
+                ${[0,15,30,60,120,240].map(v=>
+                    `<button type="button" class="duration-chip ${v===duration?'active':''}" data-duration="${v}" onclick="setPlanDuration(${v})">${v===0?'Marcador':formatDuration(v)}</button>`
+                ).join('')}
+            </div>
+            <div class="duration-custom">
+                <span>Outra duração</span>
+                <input id="planDuration" type="number" min="0" step="5" value="${duration}" oninput="syncPlanDurationChips()">
+                <span>min</span>
+            </div>
+
+            <label class="form-label" for="planNotes">Notas <span>opcional</span></label>
+            <textarea id="planNotes" placeholder="Algum detalhe do planejamento?">${escapeHTML(notes)}</textarea>
+
+            ${plan ? '' : `
+                <div class="plan-repeat-label">Repetir também nesta semana</div>
+                <div class="plan-repeat-grid">${repeatDaysHTML()}</div>
+            `}
+
+            <button class="primary-action" onclick="${plan?`savePlanEdit(${inlineArg(plan.id)})`:'createPlanItems()'}">
+                <i data-lucide="check"></i> ${plan?'Salvar alterações':'Adicionar ao planejamento'}
+            </button>
+
+            ${plan ? `
+                <div class="plan-manage">
+                    <button onclick="duplicatePlan(${inlineArg(plan.id)})"><i data-lucide="copy"></i> Duplicar</button>
+                    <button class="danger-action" onclick="deletePlan(${inlineArg(plan.id)})"><i data-lucide="trash-2"></i> Excluir</button>
+                </div>
+            ` : ''}
+        </div>
+    `,plan?'Planejado':'Semana');
+
+    syncPlanDurationChips();
+}
+
+function setPlanDuration(v){
+    const input=document.getElementById('planDuration');
+    if(input) input.value=v;
+    syncPlanDurationChips();
+}
+
+function syncPlanDurationChips(){
+    const input=document.getElementById('planDuration');
+    if(!input) return;
+    document.querySelectorAll('.modal-content .duration-chip').forEach(btn=>{
+        btn.classList.toggle('active',Number(btn.dataset.duration)===Number(input.value));
+    });
+}
+
+function readPlanForm(){
+    const activity=(document.getElementById('planActivity')?.value || '').trim();
+    const date=document.getElementById('planDate')?.value || '';
+    const startTime=document.getElementById('planStartTime')?.value || '';
+    const duration=Math.max(0,Number(document.getElementById('planDuration')?.value)||0);
+    const notes=document.getElementById('planNotes')?.value || '';
+    return {activity,date,startTime,duration,notes};
+}
+
+function createPlanItems(){
+    const base=readPlanForm();
+    if(!base.activity){showToast('Informe a atividade ou evento.','error');return;}
+    if(!base.date){showToast('Informe a data.','error');return;}
+
+    const targetDates=new Set([base.date]);
+    const baseWeek=startOfWeekDate(parseLocalISO(base.date));
+    document.querySelectorAll('.planRepeatDay:checked').forEach(box=>{
+        targetDates.add(localDateISO(addDaysLocal(baseWeek,Number(box.value)||0)));
+    });
+
+    const now=new Date().toISOString();
+    [...targetDates].sort().forEach(date=>{
+        weeklyPlans.push({
+            id:newPlanId(),
+            ...base,
+            date,
+            createdAt:now,
+            updatedAt:now
+        });
+    });
+
+    selectedPlanWeekStart=localDateISO(startOfWeekDate(parseLocalISO(base.date)));
+    selectedPlanDay=base.date;
+    planViewMonth=parseLocalISO(base.date).getMonth();
+    planViewYear=parseLocalISO(base.date).getFullYear();
+    save();
+    closeModal();
+    renderPlanning();
+    showToast(targetDates.size===1?'Planejamento adicionado.':`${targetDates.size} itens adicionados ao planejamento.`);
+}
+
+function savePlanEdit(id){
+    const plan=weeklyPlans.find(p=>String(p.id)===String(id));
+    if(!plan) return;
+    const data=readPlanForm();
+    if(!data.activity){showToast('Informe a atividade ou evento.','error');return;}
+    if(!data.date){showToast('Informe a data.','error');return;}
+
+    Object.assign(plan,data,{updatedAt:new Date().toISOString()});
+    selectedPlanWeekStart=localDateISO(startOfWeekDate(parseLocalISO(data.date)));
+    selectedPlanDay=data.date;
+    planViewMonth=parseLocalISO(data.date).getMonth();
+    planViewYear=parseLocalISO(data.date).getFullYear();
+    save();
+    closeModal();
+    renderPlanning();
+    showToast('Planejamento atualizado.');
+}
+
+function duplicatePlan(id){
+    const plan=weeklyPlans.find(p=>String(p.id)===String(id));
+    if(!plan) return;
+    const now=new Date().toISOString();
+    weeklyPlans.push({...plan,id:newPlanId(),createdAt:now,updatedAt:now});
+    save();
+    closeModal();
+    renderPlanning();
+    showToast('Item duplicado. Toque nele para editar.');
+}
+
+function copyPreviousWeekPlan(){
+    const currentStart=parseLocalISO(selectedPlanWeekStart);
+    const previousStart=addDaysLocal(currentStart,-7);
+    const previousStartISO=localDateISO(previousStart);
+    const previousEndISO=selectedPlanWeekStart;
+
+    const previousPlans=weeklyPlans
+        .filter(p=>isoInRange(String(p.date||''),previousStartISO,previousEndISO))
+        .sort((a,b)=>{
+            const dateCompare=String(a.date||'').localeCompare(String(b.date||''));
+            if(dateCompare!==0) return dateCompare;
+            return String(a.startTime||'99:99').localeCompare(String(b.startTime||'99:99'));
+        });
+
+    if(!previousPlans.length){
+        showToast('A semana anterior não tem planejamento para copiar.','error');
+        return;
+    }
+
+    const targetEndISO=localDateISO(weekEndExclusive(selectedPlanWeekStart));
+
+    const planKey=p=>JSON.stringify([
+        planActivityKey(p.activity),
+        String(p.date||''),
+        String(p.startTime||''),
+        Number(p.duration)||0,
+        String(p.notes||'')
+    ]);
+
+    const existingKeys=new Set(
+        weeklyPlans
+            .filter(p=>isoInRange(String(p.date||''),selectedPlanWeekStart,targetEndISO))
+            .map(planKey)
+    );
+
+    const now=new Date().toISOString();
+    let copied=0;
+    let ignored=0;
+
+    previousPlans.forEach(source=>{
+        const targetDate=localDateISO(addDaysLocal(parseLocalISO(source.date),7));
+
+        const copy={
+            activity:source.activity,
+            date:targetDate,
+            startTime:source.startTime || '',
+            duration:Math.max(0,Number(source.duration)||0),
+            notes:source.notes || ''
+        };
+
+        const key=planKey(copy);
+
+        if(existingKeys.has(key)){
+            ignored++;
+            return;
+        }
+
+        weeklyPlans.push({
+            id:newPlanId(),
+            ...copy,
+            createdAt:now,
+            updatedAt:now
+        });
+
+        existingKeys.add(key);
+        copied++;
+    });
+
+    save();
+    renderPlanning();
+
+    if(!copied){
+        showToast('O planejamento da semana anterior já está nesta semana.');
+        return;
+    }
+
+    const ignoredText=ignored ? ` · ${ignored} ${ignored===1?'repetido ignorado':'repetidos ignorados'}` : '';
+    showToast(`${copied} ${copied===1?'item copiado':'itens copiados'} da semana anterior${ignoredText}.`);
+}
+
+function deletePlan(id){
+    if(!confirm('Excluir este item do planejamento?')) return;
+    weeklyPlans=weeklyPlans.filter(p=>String(p.id)!==String(id));
+    save();
+    closeModal();
+    renderPlanning();
+    showToast('Item removido do planejamento.');
+}
+
+function renderPlanning(){
+    const host=document.getElementById('planningScreen');
+    if(!host) return;
+
+    ensureSelectedPlanDay();
+
+    const weeks=weeksForMonth(planViewYear,planViewMonth);
+    const weekEndISO=localDateISO(weekEndExclusive(selectedPlanWeekStart));
+    const rows=summaryRowsForWeek(selectedPlanWeekStart);
+    const {planned,actual}=weekItems(selectedPlanWeekStart);
+
+    const summaryHTML=rows.length ? `
+        <div class="week-summary-head"><span>Atividade</span><span>Planejado</span><span>Rastro</span></div>
+        <div class="week-summary">
+            ${rows.map(row=>`
+                <div class="week-summary-row">
+                    <div class="week-summary-activity">
+                        <div class="week-summary-icon"><i data-lucide="${activityIcon(row.name)}"></i></div>
+                        <div class="week-summary-name">${escapeHTML(row.name)}</div>
+                    </div>
+                    <div class="week-summary-value planned"><b>${formatPlanMinutes(row.planned)}</b><span>planejado</span></div>
+                    <div class="week-summary-value actual"><b>${formatPlanMinutes(row.actual)}</b><span>Rastro</span></div>
+                </div>`).join('')}
+        </div>` : `<div class="week-summary-empty">Ainda não há planejamento nem atividades registradas nesta semana.</div>`;
+
+    const weekdays=['SEG','TER','QUA','QUI','SEX','SÁB','DOM'];
+    const weekStartDate=parseLocalISO(selectedPlanWeekStart);
+    const dayTabs=weekdays.map((label,i)=>{
+        const d=addDaysLocal(weekStartDate,i);
+        const iso=localDateISO(d);
+        const cls=[iso===selectedPlanDay?'active':'',iso===localDateISO()?'today':''].filter(Boolean).join(' ');
+        return `<button class="day-tab ${cls}" onclick="selectPlanDay('${iso}')"><strong>${label}</strong><span>${d.getDate()}</span></button>`;
+    }).join('');
+
+    const dayPlans=planned.filter(p=>p.date===selectedPlanDay).sort((a,b)=>(a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
+    const dayActual=actual.filter(r=>r.date===selectedPlanDay && startedRealRecord(r)).sort((a,b)=>(a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
+
+    const planList=dayPlans.length ? dayPlans.map(p=>`
+        <div class="compare-item planned-item" onclick="openPlanEditor(${inlineArg(p.id)})">
+            <div class="compare-time">${escapeHTML(planningItemTime(p))}</div>
+            <div class="compare-title">${escapeHTML(p.activity)}</div>
+            ${planningItemMeta(p)?`<div class="compare-meta">${escapeHTML(planningItemMeta(p))}</div>`:''}
+        </div>`).join('') : `<div class="compare-empty">Nada planejado para este dia.</div>`;
+
+    const actualList=dayActual.length ? dayActual.map(r=>`
+        <div class="compare-item actual-item" onclick="openRecordMenu(${r.id})">
+            <div class="compare-time">${escapeHTML(planningItemTime(r))}</div>
+            <div class="compare-title">${escapeHTML(r.activity)}</div>
+            ${planningItemMeta(r)?`<div class="compare-meta">${escapeHTML(planningItemMeta(r))}</div>`:''}
+        </div>`).join('') : `<div class="compare-empty">Nenhum registro realizado neste dia.</div>`;
+
+    host.innerHTML=`
+        <div class="planning-page">
+            <div class="card plan-month-card">
+                <div class="plan-month-top">
+                    <button class="icon-button" onclick="changePlanMonth(-1)" aria-label="Mês anterior"><i data-lucide="chevron-left"></i></button>
+                    <div class="plan-month-title">${monthName(planViewYear,planViewMonth)}</div>
+                    <button class="icon-button" onclick="changePlanMonth(1)" aria-label="Próximo mês"><i data-lucide="chevron-right"></i></button>
+                </div>
+                <div class="week-strip">
+                    ${weeks.map((w,i)=>`<button class="week-chip ${w===selectedPlanWeekStart?'active':''}" onclick="selectPlanWeek('${w}')"><b>S${i+1}</b><span>${weekChipRange(w)}</span></button>`).join('')}
+                </div>
+            </div>
+
+            <div class="plan-week-header">
+                <div class="plan-week-copy">
+                    <h2>${weekLongRange(selectedPlanWeekStart)}</h2>
+                    <p>${planWeekStatus(selectedPlanWeekStart)} · ${planned.length} ${planned.length===1?'item planejado':'itens planejados'}</p>
+                </div>
+                <div class="plan-week-actions">
+                    <button class="plan-copy-btn" onclick="copyPreviousWeekPlan()" title="Copiar todo o planejamento da semana anterior">
+                        <i data-lucide="copy"></i> Semana anterior
+                    </button>
+                    <button class="plan-add-btn" onclick="openPlanEditor(null,selectedPlanDay)">
+                        <i data-lucide="plus"></i> Planejar
+                    </button>
+                </div>
+            </div>
+
+            <section>
+                <div class="section-heading"><h2>Comparativo semanal</h2><span class="eyebrow">quantidade de horas</span></div>
+                ${summaryHTML}
+            </section>
+
+            <section>
+                <div class="section-heading"><h2>Comparativo por dia</h2><span class="eyebrow">horários</span></div>
+                <div class="day-tabs">${dayTabs}</div>
+                <div class="daily-compare-grid">
+                    <div class="compare-column planned">
+                        <div class="compare-heading"><strong>Planejado</strong><span>${dayPlans.length}</span></div>
+                        <div class="compare-list">${planList}</div>
+                        <button class="compare-add-mini" onclick="openPlanEditor(null,'${selectedPlanDay}')">+ adicionar</button>
+                    </div>
+                    <div class="compare-column actual">
+                        <div class="compare-heading"><strong>Rastro</strong><span>${dayActual.length}</span></div>
+                        <div class="compare-list">${actualList}</div>
+                    </div>
+                </div>
+            </section>
+        </div>`;
+
+    lucide.createIcons();
+}
+
 function normalActiveActivities(){
     const stateSet=new Set(STATE_ACTIVITIES.map(x=>x.toLowerCase()));
     return activities.filter(a=>!a.archived && !stateSet.has(a.name.toLowerCase()));
@@ -2031,7 +2757,9 @@ atividades:activities,
 
 registros:records,
 
-contadores:counters
+contadores:counters,
+
+planejamentoSemanal:weeklyPlans
 
 };
 
@@ -2111,6 +2839,9 @@ function handleImport(event){
             let importedActivities = 0;
             let importedCounters = 0;
             let ignoredCounters = 0;
+            let importedPlans = 0;
+            let ignoredPlans = 0;
+            let updatedPlans = 0;
 
             if(data.atividades){
 
@@ -2200,6 +2931,59 @@ function handleImport(event){
                 });
             }
 
+            if(data.planejamentoSemanal){
+                const planById=new Map(weeklyPlans.map((p,i)=>[String(p.id||''),i]));
+                const planKeys=new Set(weeklyPlans.map(p=>JSON.stringify([
+                    planActivityKey(p.activity),
+                    String(p.date||''),
+                    String(p.startTime||''),
+                    Number(p.duration)||0,
+                    String(p.notes||'')
+                ])));
+
+                data.planejamentoSemanal.forEach(incoming=>{
+                    const incomingId=String(incoming.id||'');
+                    const key=JSON.stringify([
+                        planActivityKey(incoming.activity),
+                        String(incoming.date||''),
+                        String(incoming.startTime||''),
+                        Number(incoming.duration)||0,
+                        String(incoming.notes||'')
+                    ]);
+
+                    if(incomingId && planById.has(incomingId)){
+                        const index=planById.get(incomingId);
+                        const local=weeklyPlans[index];
+                        const incomingTime=Date.parse(incoming.updatedAt||incoming.createdAt||0)||0;
+                        const localTime=Date.parse(local.updatedAt||local.createdAt||0)||0;
+                        if(incomingTime>localTime){
+                            weeklyPlans[index]={...local,...incoming,id:incomingId};
+                            updatedPlans++;
+                        }else{
+                            ignoredPlans++;
+                        }
+                        return;
+                    }
+
+                    if(planKeys.has(key)){
+                        ignoredPlans++;
+                        return;
+                    }
+
+                    const id=incomingId || newPlanId();
+                    const now=new Date().toISOString();
+                    weeklyPlans.push({
+                        ...incoming,
+                        id,
+                        createdAt:incoming.createdAt||now,
+                        updatedAt:incoming.updatedAt||incoming.createdAt||now
+                    });
+                    planById.set(id,weeklyPlans.length-1);
+                    planKeys.add(key);
+                    importedPlans++;
+                });
+            }
+
             save();
             refreshAfterRecordSave();
 
@@ -2223,6 +3007,18 @@ function handleImport(event){
 
             if(ignoredCounters){
                 parts.push(`${ignoredCounters} ${ignoredCounters === 1 ? 'contador repetido ignorado' : 'contadores repetidos ignorados'}`);
+            }
+
+            if(importedPlans){
+                parts.push(`${importedPlans} ${importedPlans === 1 ? 'planejamento novo' : 'planejamentos novos'}`);
+            }
+
+            if(updatedPlans){
+                parts.push(`${updatedPlans} ${updatedPlans === 1 ? 'planejamento atualizado' : 'planejamentos atualizados'}`);
+            }
+
+            if(ignoredPlans){
+                parts.push(`${ignoredPlans} ${ignoredPlans === 1 ? 'planejamento repetido ignorado' : 'planejamentos repetidos ignorados'}`);
             }
 
             showToast(
