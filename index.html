@@ -370,6 +370,11 @@ body.keyboard-open .bottom-nav{opacity:0;pointer-events:none;transform:translate
 .bottom-nav{transition:opacity .18s ease,transform .18s ease}
 
 .add-activity-note{margin:-4px 0 14px;color:var(--muted);font-size:11px;line-height:1.45}
+.icon-picker-row{display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:end;margin-bottom:16px}
+.icon-picker-preview{width:58px;height:48px;border:1px solid var(--border);border-radius:13px;background:var(--surface-3);display:grid;place-items:center;color:#aebc7d}
+.icon-picker-preview svg{width:22px;height:22px;stroke-width:1.9}
+.icon-picker-field select{margin-bottom:0!important}
+
 .reorder-list{display:grid;gap:8px}
 .reorder-item{display:grid;grid-template-columns:1fr 44px 44px;gap:7px;align-items:center;background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:7px 7px 7px 12px}
 .reorder-name{min-width:0;font-size:13px;font-weight:620;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -587,6 +592,49 @@ const STATE_UI = [
     {name:'Disposição Física', short:'Disp. Física', icon:'flame', cls:'disp-body'}
 ];
 
+const ACTIVITY_ICON_OPTIONS = [
+    ['circle-dot','Padrão'],
+    ['briefcase-business','Trabalho'],
+    ['moon','Sono'],
+    ['armchair','Descanso'],
+    ['dumbbell','Treino'],
+    ['book-open','Livro aberto'],
+    ['book-marked','Livro marcado'],
+    ['library','Biblioteca'],
+    ['chess-knight','Xadrez'],
+    ['music','Música'],
+    ['guitar','Instrumento'],
+    ['headphones','Fones'],
+    ['heart','Coração'],
+    ['users','Família'],
+    ['baby','Filhos'],
+    ['house','Casa'],
+    ['church','Igreja'],
+    ['cross','Oração'],
+    ['smartphone','Celular'],
+    ['play','Vídeo'],
+    ['tv','TV'],
+    ['brain','Mente'],
+    ['flame','Energia'],
+    ['person-standing','Corpo'],
+    ['footprints','Caminhada'],
+    ['bike','Bicicleta'],
+    ['car','Carro'],
+    ['map','Mapa'],
+    ['utensils','Alimentação'],
+    ['coffee','Café'],
+    ['sun','Sol'],
+    ['clock-3','Tempo'],
+    ['calendar-days','Agenda'],
+    ['pencil','Escrita'],
+    ['graduation-cap','Estudo'],
+    ['laptop','Computador'],
+    ['gamepad-2','Jogo'],
+    ['camera','Foto'],
+    ['shopping-bag','Compras'],
+    ['hammer','Trabalho manual']
+];
+
 const ACTIVITY_ICONS = {
     'Trabalho':'briefcase-business','Sono':'moon','Descanso':'armchair','Treino':'dumbbell',
     'Leitura':'book-open','Xadrez':'chess-knight','Bíblia':'book-marked','Oração':'cross',
@@ -596,7 +644,22 @@ const ACTIVITY_ICONS = {
 };
 
 function activityIcon(name){
-    return ACTIVITY_ICONS[name] || 'circle-dot';
+    const saved=activities.find(a=>a.name===name)?.icon;
+    return saved || ACTIVITY_ICONS[name] || 'circle-dot';
+}
+
+function iconOptionsHTML(selected='circle-dot'){
+    return ACTIVITY_ICON_OPTIONS.map(([value,label])=>
+        `<option value="${value}" ${value===selected?'selected':''}>${escapeHTML(label)}</option>`
+    ).join('');
+}
+
+function updateIconPreview(selectId,previewId){
+    const select=document.getElementById(selectId);
+    const preview=document.getElementById(previewId);
+    if(!select || !preview) return;
+    preview.innerHTML=`<i data-lucide="${select.value}"></i>`;
+    lucide.createIcons();
 }
 
 function todayISO(){
@@ -852,8 +915,20 @@ function addActivity(){
     showModal('Nova atividade', `
         <div class="sheet-form">
             <p class="add-activity-note">Crie uma atividade para aparecer na grade de registro.</p>
+
             <label class="form-label" for="newActivityName">Nome da atividade</label>
             <input id="newActivityName" type="text" maxlength="40" autocomplete="off" placeholder="Ex.: Estudo, Caminhada, Projeto">
+
+            <label class="form-label" for="newActivityIcon">Ícone</label>
+            <div class="icon-picker-row">
+                <div class="icon-picker-preview" id="newActivityIconPreview"><i data-lucide="circle-dot"></i></div>
+                <div class="icon-picker-field">
+                    <select id="newActivityIcon" onchange="updateIconPreview('newActivityIcon','newActivityIconPreview')">
+                        ${iconOptionsHTML('circle-dot')}
+                    </select>
+                </div>
+            </div>
+
             <button class="primary-action" onclick="createActivity()"><i data-lucide="plus"></i> Adicionar atividade</button>
         </div>
     `,'Adicionar');
@@ -873,7 +948,8 @@ function createActivity(){
         showToast('Essa atividade já existe.','error');
         return;
     }
-    activities.push({name,archived:false});
+    const icon=document.getElementById('newActivityIcon')?.value || 'circle-dot';
+    activities.push({name,icon,archived:false});
     save();
     closeModal();
     renderActivities();
@@ -888,22 +964,35 @@ function openRenameActivity(activityName){
         return;
     }
 
-    showModal('Renomear atividade', `
+    const currentActivity=activities.find(a=>a.name===activityName);
+    const currentIcon=currentActivity?.icon || ACTIVITY_ICONS[activityName] || 'circle-dot';
+
+    showModal('Editar atividade', `
         <div class="sheet-form">
             <p class="add-activity-note">
-                O novo nome também será aplicado aos registros anteriores dessa atividade.
+                Você pode alterar o nome e o ícone. O novo nome também será aplicado aos registros anteriores dessa atividade.
             </p>
 
-            <label class="form-label" for="renameActivityName">Novo nome</label>
+            <label class="form-label" for="renameActivityName">Nome</label>
             <input id="renameActivityName"
                    type="text"
                    maxlength="40"
                    autocomplete="off"
                    value="${escapeHTML(activityName)}">
 
+            <label class="form-label" for="renameActivityIcon">Ícone</label>
+            <div class="icon-picker-row">
+                <div class="icon-picker-preview" id="renameActivityIconPreview"><i data-lucide="${currentIcon}"></i></div>
+                <div class="icon-picker-field">
+                    <select id="renameActivityIcon" onchange="updateIconPreview('renameActivityIcon','renameActivityIconPreview')">
+                        ${iconOptionsHTML(currentIcon)}
+                    </select>
+                </div>
+            </div>
+
             <button class="primary-action"
                     onclick="saveRenamedActivity(${inlineArg(activityName)})">
-                <i data-lucide="pencil"></i> Salvar novo nome
+                <i data-lucide="check"></i> Salvar alterações
             </button>
         </div>
     `,'Gerenciar atividade');
@@ -927,11 +1016,8 @@ function saveRenamedActivity(oldName){
         return;
     }
 
-    if(newName.toLowerCase()===String(oldName).trim().toLowerCase()){
-        closeModal();
-        showToast('O nome não foi alterado.');
-        return;
-    }
+    const newIcon=document.getElementById('renameActivityIcon')?.value || 'circle-dot';
+    const sameName=newName.toLowerCase()===String(oldName).trim().toLowerCase();
 
     const duplicate=activities.some(a=>
         a.name.trim().toLowerCase()===newName.toLowerCase() &&
@@ -952,17 +1038,20 @@ function saveRenamedActivity(oldName){
     }
 
     activity.name=newName;
+    activity.icon=newIcon;
 
-    records.forEach(record=>{
-        if(record.activity===oldName){
-            record.activity=newName;
-        }
-    });
+    if(!sameName){
+        records.forEach(record=>{
+            if(record.activity===oldName){
+                record.activity=newName;
+            }
+        });
+    }
 
     save();
     closeModal();
     refreshAfterRecordSave();
-    showToast(`Atividade renomeada para "${newName}".`);
+    showToast(sameName ? 'Atividade atualizada.' : `Atividade renomeada para "${newName}".`);
 }
 
 function openRegister(activity){
@@ -1036,7 +1125,7 @@ function openRegister(activity){
             <div class="management-zone">
                 <div class="management-title">Gerenciar atividade</div>
                 <div class="management-actions">
-                    <button onclick="openRenameActivity(${inlineArg(activity)})"><i data-lucide="pencil"></i> Renomear</button>
+                    <button onclick="openRenameActivity(${inlineArg(activity)})"><i data-lucide="pencil"></i> Editar</button>
                     <button onclick="archiveByName(${inlineArg(activity)})"><i data-lucide="archive"></i> Arquivar</button>
                     <button class="danger-action" onclick="deleteByName(${inlineArg(activity)})"><i data-lucide="trash-2"></i> Excluir</button>
                 </div>
