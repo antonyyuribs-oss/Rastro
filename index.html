@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rastro">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#151c13">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1229,12 +1236,206 @@ select:focus-visible{
 
 .week-summary-value:has(span:empty) span{display:none}
 
+
+/* =========================================================
+   RASTRO — MODO LAMA
+   Camada visual opcional. Não altera dados nem cálculos.
+========================================================= */
+html[data-effect="mud"] .brand-mark,
+html[data-effect="mud"] .activity-icon,
+html[data-effect="mud"] .timeline-activity-icon,
+html[data-effect="mud"] .week-summary-icon{
+    position:relative;
+    isolation:isolate;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 28% 18%,rgba(255,255,255,.13),transparent 24%),
+        linear-gradient(145deg,rgba(var(--accent-rgb),.12),rgba(16,15,11,.92) 58%);
+    border-color:rgba(var(--accent-rgb),.28);
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 -8px 14px rgba(0,0,0,.20),
+        0 5px 15px rgba(0,0,0,.22);
+    backdrop-filter:blur(10px) saturate(1.08);
+    -webkit-backdrop-filter:blur(10px) saturate(1.08);
+}
+html[data-effect="mud"] .brand-mark{
+    border-radius:42% 58% 48% 52% / 54% 43% 57% 46%;
+    transform:translateZ(0);
+    box-shadow:
+        inset 2px 2px 5px rgba(255,255,255,.14),
+        inset -4px -6px 12px rgba(0,0,0,.28),
+        0 8px 20px rgba(0,0,0,.28),
+        0 0 18px rgba(var(--accent-rgb),.09);
+    animation:mudShell 8s ease-in-out infinite alternate;
+}
+html[data-effect="mud"] .brand-mark::before,
+html[data-effect="mud"] .activity-icon::before,
+html[data-effect="mud"] .timeline-activity-icon::before,
+html[data-effect="mud"] .week-summary-icon::before{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    width:145%;
+    height:145%;
+    left:-25%;
+    top:28%;
+    border-radius:38% 62% 56% 44% / 52% 40% 60% 48%;
+    background:
+        radial-gradient(circle at 34% 28%,rgba(255,255,255,.18) 0 5%,transparent 13%),
+        radial-gradient(circle at 68% 55%,rgba(255,255,255,.07) 0 4%,transparent 10%),
+        linear-gradient(135deg,
+            rgba(var(--accent-rgb),.78),
+            rgba(var(--accent-rgb),.42) 45%,
+            rgba(62,48,26,.68) 76%,
+            rgba(25,22,16,.88));
+    filter:blur(.35px) saturate(.82);
+    animation:mudFlow 7.5s cubic-bezier(.45,.05,.55,.95) infinite alternate;
+}
+html[data-effect="mud"] .brand-mark::after,
+html[data-effect="mud"] .activity-icon::after,
+html[data-effect="mud"] .timeline-activity-icon::after,
+html[data-effect="mud"] .week-summary-icon::after{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    width:80%;
+    height:45%;
+    left:8%;
+    top:-8%;
+    border-radius:50%;
+    background:linear-gradient(180deg,rgba(255,255,255,.20),rgba(255,255,255,0));
+    transform:rotate(-12deg);
+    opacity:.62;
+    filter:blur(1.2px);
+}
+html[data-effect="mud"] .brand-mark svg,
+html[data-effect="mud"] .activity-icon svg,
+html[data-effect="mud"] .timeline-activity-icon svg,
+html[data-effect="mud"] .week-summary-icon svg{
+    position:relative;
+    z-index:2;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.65));
+}
+html[data-effect="mud"] .brand-mark svg{
+    color:var(--accent);
+    stroke-width:2;
+    filter:
+        drop-shadow(0 1px 1px rgba(0,0,0,.72))
+        drop-shadow(0 0 5px rgba(var(--accent-rgb),.20));
+}
+
+/* O nome RASTRO recebe um reflexo úmido discreto no modo lama. */
+html[data-effect="mud"] .brand-title{
+    text-shadow:0 1px 0 rgba(255,255,255,.05),0 5px 18px rgba(0,0,0,.28);
+}
+html[data-effect="mud"] .brand-title::after{
+    content:"";
+    display:inline-block;
+    width:6px;height:6px;
+    margin-left:7px;
+    vertical-align:middle;
+    border-radius:55% 45% 62% 38%;
+    background:var(--accent);
+    box-shadow:0 0 10px rgba(var(--accent-rgb),.30);
+    animation:mudDrop 5.5s ease-in-out infinite alternate;
+}
+
+/* Reação tátil: a massa parece ceder quando o cartão é pressionado. */
+html[data-effect="mud"] .activity-card:active .activity-icon::before{
+    transform:translate(5%,12%) rotate(10deg) scale(1.08);
+    transition:transform .28s cubic-bezier(.2,.8,.2,1);
+}
+html[data-effect="mud"] .activity-card:active .activity-icon{
+    transform:scale(.96);
+    transition:transform .18s ease;
+}
+
+@keyframes mudFlow{
+    0%{transform:translate(-8%,5%) rotate(-7deg) scale(1.02)}
+    38%{transform:translate(5%,-8%) rotate(7deg) scale(1.08)}
+    72%{transform:translate(-2%,-16%) rotate(14deg) scale(1.03)}
+    100%{transform:translate(9%,-5%) rotate(22deg) scale(1.10)}
+}
+@keyframes mudShell{
+    0%{border-radius:42% 58% 48% 52% / 54% 43% 57% 46%;transform:rotate(-1deg)}
+    55%{border-radius:54% 46% 57% 43% / 45% 56% 44% 55%;transform:rotate(1deg)}
+    100%{border-radius:47% 53% 43% 57% / 58% 46% 54% 42%;transform:rotate(-.5deg)}
+}
+@keyframes mudDrop{
+    from{transform:translateY(-2px) scale(.82);opacity:.62}
+    to{transform:translateY(2px) scale(1.08);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+    html[data-effect="mud"] .brand-mark,
+    html[data-effect="mud"] .brand-mark::before,
+    html[data-effect="mud"] .activity-icon::before,
+    html[data-effect="mud"] .timeline-activity-icon::before,
+    html[data-effect="mud"] .week-summary-icon::before,
+    html[data-effect="mud"] .brand-title::after{
+        animation:none!important;
+    }
+}
+
+/* Seletor do material visual */
+.effect-section-title{
+    margin:18px 0 8px;
+    color:var(--heading);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+}
+.effect-choice{
+    width:100%;
+    min-height:62px;
+    margin-top:8px;
+    padding:10px 12px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    text-align:left;
+    background:var(--surface-3);
+    border:1px solid var(--border);
+    position:relative;
+}
+.effect-choice.active{
+    border-color:rgba(var(--accent-rgb),.72);
+    box-shadow:inset 0 0 0 1px rgba(var(--accent-rgb),.16);
+}
+.effect-preview{
+    width:38px;height:38px;flex:none;
+    display:grid;place-items:center;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--accent);
+    overflow:hidden;
+    position:relative;
+}
+.effect-preview.mud{
+    border-radius:44% 56% 49% 51% / 57% 43% 57% 43%;
+    background:
+        radial-gradient(circle at 30% 20%,rgba(255,255,255,.20),transparent 22%),
+        linear-gradient(145deg,rgba(var(--accent-rgb),.62),rgba(70,53,28,.56) 60%,#17150f);
+    box-shadow:inset -4px -6px 10px rgba(0,0,0,.25),inset 2px 2px 4px rgba(255,255,255,.12);
+    animation:mudShell 6s ease-in-out infinite alternate;
+}
+.effect-preview svg{width:19px;height:19px;position:relative;z-index:2}
+.effect-choice-copy{min-width:0}
+.effect-choice-name{display:block;color:var(--text);font-size:12px;font-weight:750}
+.effect-choice-desc{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.35}
+.effect-choice .theme-check{display:none}
+.effect-choice.active .theme-check{display:grid}
+
 </style>
 <script>
 (function(){
     const allowed=['green','blue','black','yellow','wine','purple'];
     const saved=localStorage.getItem('rastro_theme') || 'green';
     document.documentElement.dataset.theme=allowed.includes(saved)?saved:'green';
+    const savedEffect=localStorage.getItem('rastro_effect') || 'classic';
+    document.documentElement.dataset.effect=['classic','mud'].includes(savedEffect)?savedEffect:'classic';
 })();
 </script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -1383,6 +1584,30 @@ function applyTheme(theme,persist=true){
     });
 }
 
+
+const EFFECT_META={
+    classic:{name:'Clássico',desc:'Interface sóbria, estática e limpa.'},
+    mud:{name:'Lama',desc:'Ícones viscosos, reflexos úmidos e movimento orgânico.'}
+};
+
+let currentEffect=['classic','mud'].includes(document.documentElement.dataset.effect)
+    ? document.documentElement.dataset.effect
+    : 'classic';
+
+function applyEffect(effect,persist=true){
+    if(!EFFECT_META[effect]) effect='classic';
+    currentEffect=effect;
+    document.documentElement.dataset.effect=effect;
+
+    if(persist){
+        localStorage.setItem('rastro_effect',effect);
+    }
+
+    document.querySelectorAll('[data-effect-choice]').forEach(btn=>{
+        btn.classList.toggle('active',btn.dataset.effectChoice===effect);
+    });
+}
+
 function openAppearanceMenu(){
     const options=Object.entries(THEME_META).map(([key,item])=>`
         <button class="theme-choice ${currentTheme===key?'active':''}"
@@ -1412,6 +1637,30 @@ function openAppearanceMenu(){
                 <span><i data-lucide="heart"></i></span>
             </div>
         </div>
+
+        <div class="effect-section-title">Material dos ícones</div>
+
+        <button class="effect-choice ${currentEffect==='classic'?'active':''}"
+                data-effect-choice="classic"
+                onclick="applyEffect('classic')">
+            <span class="effect-preview"><i data-lucide="circle-dot"></i></span>
+            <span class="effect-choice-copy">
+                <span class="effect-choice-name">Clássico</span>
+                <span class="effect-choice-desc">Visual atual, limpo e sem movimento orgânico.</span>
+            </span>
+            <span class="theme-check"><i data-lucide="check"></i></span>
+        </button>
+
+        <button class="effect-choice ${currentEffect==='mud'?'active':''}"
+                data-effect-choice="mud"
+                onclick="applyEffect('mud')">
+            <span class="effect-preview mud"><i data-lucide="footprints"></i></span>
+            <span class="effect-choice-copy">
+                <span class="effect-choice-name">Lama</span>
+                <span class="effect-choice-desc">Massa viscosa em movimento, reflexos úmidos e reação ao toque.</span>
+            </span>
+            <span class="theme-check"><i data-lucide="check"></i></span>
+        </button>
     `,'Personalização');
 
     lucide.createIcons();
@@ -3772,7 +4021,7 @@ contadores:counters,
 
 planejamentoSemanal:weeklyPlans,
 
-aparencia:{theme:currentTheme}
+aparencia:{theme:currentTheme,effect:currentEffect}
 
 };
 
@@ -3858,6 +4107,9 @@ function handleImport(event){
 
             if(data.aparencia && THEME_META[data.aparencia.theme]){
                 applyTheme(data.aparencia.theme,true);
+            }
+            if(data.aparencia && EFFECT_META[data.aparencia.effect]){
+                applyEffect(data.aparencia.effect,true);
             }
 
             if(data.atividades){
@@ -4079,6 +4331,7 @@ if(window.visualViewport){
 }
 
 applyTheme(currentTheme,false);
+applyEffect(currentEffect,false);
 showHome();
 </script>
 
