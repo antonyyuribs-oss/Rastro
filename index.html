@@ -3395,16 +3395,26 @@ function plannedElapsedMinutesForActivity(items,activityName,weekStartISO){
     if(today < weekStartISO) return 0;
 
     // Semana já terminou: usa todo o planejamento da semana.
-    const cutoff=today > weekEndISO ? weekEndISO : today;
+    if(today > weekEndISO){
+        return plannedMinutesForActivity(items,activityName,weekStartISO);
+    }
 
-    // "Dias que passaram" inclui o dia atual inteiro.
-    // O horário planejado não interfere nesse percentual.
-    const elapsedItems=items.filter(item=>
-        String(item.date||'') >= weekStartISO &&
-        String(item.date||'') <= cutoff
-    );
+    const key=planActivityKey(activityName);
+    const sameActivity=items.filter(item=>planActivityKey(item.activity)===key);
 
-    return plannedMinutesForActivity(elapsedItems,activityName,weekStartISO);
+    // Itens com horário entram proporcionalmente conforme o relógio avança.
+    // Isso também trata corretamente atividades que atravessam a meia-noite,
+    // como Sono: 22:30–06:10.
+    const timed=sameActivity.filter(item=>item.startTime);
+    const timedElapsed=mergedMinutes(timed,activityName,weekStartISO,{clipNow:true});
+
+    // Itens sem horário não podem ser fracionados pelo relógio.
+    // No dia em que estão planejados, entram integralmente.
+    const untimedElapsed=sameActivity
+        .filter(item=>!item.startTime && String(item.date||'')<=today)
+        .reduce((sum,item)=>sum+Math.max(0,Number(item.duration)||0),0);
+
+    return timedElapsed+untimedElapsed;
 }
 
 function planProgressPercent(actualMinutes,elapsedPlannedMinutes){
