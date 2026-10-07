@@ -3532,12 +3532,22 @@ function summaryRowsForWeek(startISO){
         const plannedElapsed=plannedElapsedMinutesForActivity(planned,name,startISO);
         const actualMinutes=mergedMinutes(actual,name,startISO,{clipNow:true});
 
+        // Normalmente o percentual compara o realizado com o planejado já
+        // decorrido. Se ainda não houver minutos planejados decorridos, mas
+        // já existir execução da atividade, usa o total semanal como base
+        // para não deixar uma atividade executada sem percentual.
+        const progressUsesWeeklyTotal=
+            plannedElapsed<=0 && actualMinutes>0 && plannedTotal>0;
+        const progressBase=progressUsesWeeklyTotal ? plannedTotal : plannedElapsed;
+
         return {
             name,
             planned:plannedTotal,
             plannedElapsed,
+            progressBase,
+            progressUsesWeeklyTotal,
             actual:actualMinutes,
-            progress:planProgressPercent(actualMinutes,plannedElapsed)
+            progress:planProgressPercent(actualMinutes,progressBase)
         };
     }).sort((a,b)=>{
         if((b.planned>0)!==(a.planned>0)) return b.planned-a.planned;
@@ -3911,7 +3921,11 @@ function renderPlanning(){
                         </div>
 
                         <div class="week-summary-value progress ${progressCellClass(row.progress)}"
-                             title="${row.progress===null?'Sem planejamento decorrido para comparar':`${formatPlanMinutes(row.actual)} de ${formatPlanMinutes(row.plannedElapsed)} planejadas até este ponto da semana`}">
+                             title="${row.progress===null
+                                ? 'Sem planejamento para comparar'
+                                : row.progressUsesWeeklyTotal
+                                    ? `${formatPlanMinutes(row.actual)} de ${formatPlanMinutes(row.progressBase)} planejadas na semana`
+                                    : `${formatPlanMinutes(row.actual)} de ${formatPlanMinutes(row.progressBase)} planejadas até este ponto da semana`}">
                             <b>${row.progress===null?'—':`${row.progress}%`}</b>
                         </div>
                     </div>
