@@ -2988,13 +2988,13 @@ function latestStateForDate(name,date){
 }
 
 function openRecordMenu(id){
-    const r=records.find(x=>x.id===id);
+    const r=records.find(x=>String(x.id)===String(id));
     if(!r) return;
     showModal(r.activity,`
         <p class="menu-note">Escolha uma ação para este registro.</p>
         <div class="menu-stack">
-            <button class="secondary-action" onclick="closeModal();editRecord(${id})"><i data-lucide="pencil"></i> Editar registro</button>
-            <button class="secondary-action danger-action" onclick="closeModal();deleteRecord(${id})"><i data-lucide="trash-2"></i> Excluir registro</button>
+            <button class="secondary-action" onclick="closeModal();editRecord(${inlineArg(id)})"><i data-lucide="pencil"></i> Editar registro</button>
+            <button class="secondary-action danger-action" onclick="closeModal();deleteRecord(${inlineArg(id)})"><i data-lucide="trash-2"></i> Excluir registro</button>
         </div>
     `,'Registro');
 }
@@ -3010,7 +3010,7 @@ function renderDay(date){
         const r=latestStateForDate(cfg.name,date);
         const value=r ? formatStateValue(r.value) : '—';
         return `
-            <div class="day-state-card ${cfg.cls} ${r?'':'empty-state'}" ${r?`onclick="openRecordMenu(${r.id})"`:''}>
+            <div class="day-state-card ${cfg.cls} ${r?'':'empty-state'}" ${r?`onclick="openRecordMenu(${inlineArg(r.id)})"`:''}>
                 <div class="state-icon"><i data-lucide="${cfg.icon}"></i></div>
                 <div class="state-name">${cfg.short}</div>
                 <div class="state-value ${r?'':'empty'}">${value}</div>
@@ -3020,7 +3020,7 @@ function renderDay(date){
     const stateNotes=STATE_UI.map(cfg=>{
         const r=latestStateForDate(cfg.name,date);
         if(!r || !r.notes) return '';
-        return `<div class="timeline-card" onclick="openRecordMenu(${r.id})">
+        return `<div class="timeline-card" onclick="openRecordMenu(${inlineArg(r.id)})">
             <div class="timeline-title">${escapeHTML(cfg.name)}</div>
             <div class="timeline-notes">${escapeHTML(r.notes)}</div>
         </div>`;
@@ -3031,7 +3031,7 @@ function renderDay(date){
             <div class="timeline-item">
                 <div class="timeline-time">${r.startTime||'--:--'}</div>
                 <div class="timeline-rail"><span class="timeline-dot"></span></div>
-                <div class="timeline-card" onclick="openRecordMenu(${r.id})">
+                <div class="timeline-card" onclick="openRecordMenu(${inlineArg(r.id)})">
                     <div class="timeline-title-row">
                         <div class="timeline-activity-icon" style="${activityVisualStyle(r.activity)}"><i data-lucide="${activityIcon(r.activity)}"></i></div>
                         <div style="min-width:0">
@@ -3078,7 +3078,7 @@ function deleteRecord(id){
 if(!confirm("Excluir este registro?")) return;
 
 records = records.filter(
-r => r.id !== id
+r => String(r.id) !== String(id)
 );
 
 save();
@@ -3087,7 +3087,7 @@ refreshAfterRecordSave();
 }
 
 function editRecord(id){
-    const record = records.find(r => r.id === id);
+    const record = records.find(r => String(r.id) === String(id));
     if(!record) return;
 
     const isState = STATE_ACTIVITIES.includes(record.activity.toLowerCase());
@@ -3109,9 +3109,9 @@ function editRecord(id){
                 <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
                 <textarea id="editNotes">${record.notes || ''}</textarea>
 
-                <button class="primary-action" onclick="saveEditedRecord(${id})"><i data-lucide="check"></i> Salvar alterações</button>
+                <button class="primary-action" onclick="saveEditedRecord(${inlineArg(id)})"><i data-lucide="check"></i> Salvar alterações</button>
                 <div class="management-zone">
-                    <button class="secondary-action danger-action" onclick="deleteRecord(${id})"><i data-lucide="trash-2"></i> Excluir este registro</button>
+                    <button class="secondary-action danger-action" onclick="deleteRecord(${inlineArg(id)})"><i data-lucide="trash-2"></i> Excluir este registro</button>
                 </div>
             </div>
         `,'Editar registro');
@@ -3146,9 +3146,9 @@ function editRecord(id){
                 <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
                 <textarea id="editNotes">${record.notes || ''}</textarea>
 
-                <button class="primary-action" onclick="saveEditedRecord(${id})"><i data-lucide="check"></i> Salvar alterações</button>
+                <button class="primary-action" onclick="saveEditedRecord(${inlineArg(id)})"><i data-lucide="check"></i> Salvar alterações</button>
                 <div class="management-zone">
-                    <button class="secondary-action danger-action" onclick="deleteRecord(${id})"><i data-lucide="trash-2"></i> Excluir este registro</button>
+                    <button class="secondary-action danger-action" onclick="deleteRecord(${inlineArg(id)})"><i data-lucide="trash-2"></i> Excluir este registro</button>
                 </div>
             </div>
         `,'Editar registro');
@@ -3157,7 +3157,7 @@ function editRecord(id){
 
 function saveEditedRecord(id){
 
-    const record = records.find(r => r.id === id);
+    const record = records.find(r => String(r.id) === String(id));
 
     if(!record) return;
 
@@ -3860,7 +3860,7 @@ function renderPlanning(){
         </div>`).join('') : `<div class="compare-empty">Nada planejado para este dia.</div>`;
 
     const actualList=dayActual.length ? dayActual.map(r=>`
-        <div class="compare-item actual-item" onclick="openRecordMenu(${r.id})">
+        <div class="compare-item actual-item" onclick="openRecordMenu(${inlineArg(r.id)})">
             <div class="compare-time">${escapeHTML(planningItemTime(r))}</div>
             <div class="compare-title">${escapeHTML(r.activity)}</div>
             ${planningItemMeta(r)?`<div class="compare-meta">${escapeHTML(planningItemMeta(r))}</div>`:''}
@@ -4159,6 +4159,8 @@ function handleImport(event){
                         return;
                     }
 
+                    // IDs importados podem ser texto ou número. A interface agora aceita ambos.
+                    // Se o backup não trouxer ID, geramos um novo ID local.
                     let id = registro.id;
 
                     if(id === undefined || id === null || existingIds.has(String(id))){
