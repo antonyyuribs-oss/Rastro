@@ -504,6 +504,25 @@ textarea{resize:vertical;min-height:100px}
 .compare-empty{padding:15px 5px;text-align:center;color:var(--muted);font-size:9px;line-height:1.4}
 .compare-add-mini{width:100%;margin-top:7px;padding:7px;font-size:9px;min-height:34px;background:transparent;border-style:dashed;color:var(--sand-muted)}
 
+/* Dia atual/futuro — planejamento em destaque */
+.plan-focus-shell{border:1px solid rgba(var(--sand-rgb),.18);border-radius:17px;padding:11px;background:linear-gradient(180deg,rgba(var(--sand-rgb),.045),rgba(var(--header-rgb),.72))}
+.plan-focus-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1px 2px 10px;border-bottom:1px solid var(--border-soft);margin-bottom:8px}
+.plan-focus-heading strong{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--sand)}
+.plan-focus-heading span{font-size:9px;color:var(--muted)}
+.plan-focus-list{display:grid;gap:8px}
+.plan-focus-item{padding:13px 14px;border:1px solid rgba(var(--sand-rgb),.13);border-radius:14px;background:rgba(0,0,0,.10);cursor:pointer}
+.plan-focus-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.plan-focus-time{font-size:11px;font-weight:760;color:var(--sand);font-variant-numeric:tabular-nums}
+.plan-focus-duration{font-size:9px;color:var(--muted);white-space:nowrap}
+.plan-focus-main{display:flex;align-items:center;gap:10px;margin-top:8px}
+.plan-focus-icon{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:var(--surface-3);border:1px solid var(--border);color:var(--activity-color,var(--accent-icon))}
+.plan-focus-icon svg{width:18px;height:18px;stroke:currentColor}
+.plan-focus-title{font-size:14px;font-weight:720;line-height:1.2;color:var(--text)}
+.plan-focus-note{margin-top:10px;padding:9px 10px;border-radius:10px;background:rgba(var(--sand-rgb),.055);border:1px solid rgba(var(--sand-rgb),.10);color:var(--text-2);font-size:11px;line-height:1.4}
+.plan-focus-note span{display:block;margin-bottom:3px;color:var(--sand-muted);font-size:8px;font-weight:760;letter-spacing:.09em;text-transform:uppercase}
+.plan-focus-empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:11px}
+.plan-focus-add{width:100%;margin-top:9px;min-height:40px;border-style:dashed;color:var(--sand-muted);background:transparent}
+
 .plan-form-help{margin:-5px 0 14px;color:var(--muted);font-size:10px;line-height:1.45}
 .plan-activity-custom{margin-top:9px}
 .plan-activity-custom.hidden{display:none}
@@ -3951,6 +3970,23 @@ function renderPlanning(){
             ${planningItemMeta(p)?`<div class="compare-meta">${escapeHTML(planningItemMeta(p))}</div>`:''}
         </div>`).join('') : `<div class="compare-empty">Nada planejado para este dia.</div>`;
 
+    const focusedPlanList=dayPlans.length ? dayPlans.map(p=>{
+        const duration=Math.max(0,Number(p.duration)||0);
+        const notes=String(p.notes||'').trim();
+        return `
+        <div class="plan-focus-item" onclick="openPlanEditor(${inlineArg(p.id)})">
+            <div class="plan-focus-top">
+                <div class="plan-focus-time">${escapeHTML(planningItemTime(p))}</div>
+                <div class="plan-focus-duration">${duration?escapeHTML(formatPlanMinutes(duration)):''}</div>
+            </div>
+            <div class="plan-focus-main">
+                <div class="plan-focus-icon" style="${activityVisualStyle(p.activity)}"><i data-lucide="${activityIcon(p.activity)}"></i></div>
+                <div class="plan-focus-title">${escapeHTML(p.activity)}</div>
+            </div>
+            ${notes?`<div class="plan-focus-note"><span>Observação</span>${escapeHTML(notes)}</div>`:''}
+        </div>`;
+    }).join('') : `<div class="plan-focus-empty">Nada planejado para este dia.</div>`;
+
     const actualList=dayActual.length ? dayActual.map(r=>`
         <div class="compare-item actual-item" onclick="openRecordMenu(${inlineArg(r.id)})">
             <div class="compare-time">${escapeHTML(planningItemTime(r))}</div>
@@ -3964,6 +4000,8 @@ function renderPlanning(){
     const dayDate=parseLocalISO(selectedPlanDay);
     const dayDateRaw=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(dayDate);
     const dayDateLabel=dayDateRaw.charAt(0).toUpperCase()+dayDateRaw.slice(1);
+    const todayISO=localDateISO();
+    const isTodayOrFutureDay=selectedPlanDay>=todayISO;
 
     const summaryView=`
         <section class="plan-view-section">
@@ -3991,38 +4029,66 @@ function renderPlanning(){
         <section class="plan-view-section">
             <div class="day-tabs">${dayTabs}</div>
 
-            <div class="plan-day-overview">
-                <div class="plan-day-overview-date">
-                    <strong>${escapeHTML(dayDateLabel)}</strong>
-                    <span>Planejado × Rastro do dia</span>
-                </div>
-                <div class="plan-day-overview-metrics">
-                    <div class="plan-day-metric">
-                        <b>${formatPlanMinutes(dayPlannedMinutes)}</b>
-                        <span>Planejado</span>
+            ${isTodayOrFutureDay ? `
+                <div class="plan-day-overview">
+                    <div class="plan-day-overview-date">
+                        <strong>${escapeHTML(dayDateLabel)}</strong>
+                        <span>${selectedPlanDay===todayISO?'Planejamento de hoje':'Planejamento do dia'}</span>
                     </div>
-                    <div class="plan-day-metric">
-                        <b>${formatPlanMinutes(dayActualMinutes)}</b>
-                        <span>Rastro</span>
-                    </div>
-                    <div class="plan-day-metric progress">
-                        <b>${dayProgress===null?'—':`${dayProgress}%`}</b>
-                        <span>Percentual</span>
+                    <div class="plan-day-overview-metrics">
+                        <div class="plan-day-metric">
+                            <b>${dayPlans.length}</b>
+                            <span>${dayPlans.length===1?'Item':'Itens'}</span>
+                        </div>
+                        <div class="plan-day-metric progress">
+                            <b>${formatPlanMinutes(dayPlannedMinutes)}</b>
+                            <span>Planejado</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="daily-compare-grid">
-                <div class="compare-column planned">
-                    <div class="compare-heading"><strong>Planejado</strong><span>${dayPlans.length}</span></div>
-                    <div class="compare-list">${planList}</div>
-                    <button class="compare-add-mini" onclick="openPlanEditor(null,'${selectedPlanDay}')">+ adicionar</button>
+                <div class="plan-focus-shell">
+                    <div class="plan-focus-heading">
+                        <strong>Planejado</strong>
+                        <span>${dayPlans.length} ${dayPlans.length===1?'item':'itens'}</span>
+                    </div>
+                    <div class="plan-focus-list">${focusedPlanList}</div>
+                    <button class="plan-focus-add" onclick="openPlanEditor(null,'${selectedPlanDay}')">+ adicionar</button>
                 </div>
-                <div class="compare-column actual">
-                    <div class="compare-heading"><strong>Rastro</strong><span>${dayActual.length}</span></div>
-                    <div class="compare-list">${actualList}</div>
+            ` : `
+                <div class="plan-day-overview">
+                    <div class="plan-day-overview-date">
+                        <strong>${escapeHTML(dayDateLabel)}</strong>
+                        <span>Planejado × Rastro do dia</span>
+                    </div>
+                    <div class="plan-day-overview-metrics">
+                        <div class="plan-day-metric">
+                            <b>${formatPlanMinutes(dayPlannedMinutes)}</b>
+                            <span>Planejado</span>
+                        </div>
+                        <div class="plan-day-metric">
+                            <b>${formatPlanMinutes(dayActualMinutes)}</b>
+                            <span>Rastro</span>
+                        </div>
+                        <div class="plan-day-metric progress">
+                            <b>${dayProgress===null?'—':`${dayProgress}%`}</b>
+                            <span>Percentual</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <div class="daily-compare-grid">
+                    <div class="compare-column planned">
+                        <div class="compare-heading"><strong>Planejado</strong><span>${dayPlans.length}</span></div>
+                        <div class="compare-list">${planList}</div>
+                        <button class="compare-add-mini" onclick="openPlanEditor(null,'${selectedPlanDay}')">+ adicionar</button>
+                    </div>
+                    <div class="compare-column actual">
+                        <div class="compare-heading"><strong>Rastro</strong><span>${dayActual.length}</span></div>
+                        <div class="compare-list">${actualList}</div>
+                    </div>
+                </div>
+            `}
         </section>`;
 
     host.innerHTML=`
