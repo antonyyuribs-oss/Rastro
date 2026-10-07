@@ -393,7 +393,45 @@ textarea{resize:vertical;min-height:100px}
 @media(min-width:620px){.counter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 /* PLANEJAMENTO SEMANAL */
-.planning-page{display:grid;gap:18px}
+.planning-page{display:grid;gap:16px}
+.plan-week-nav{
+    display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:10px;
+    padding:10px;border:1px solid var(--border-soft);border-radius:17px;background:rgba(var(--header-rgb),.62)
+}
+.plan-week-nav-button{width:44px;height:44px;padding:0;display:grid;place-items:center;background:var(--surface-3)}
+.plan-week-nav-button svg{width:18px;height:18px}
+.plan-week-nav-copy{text-align:center;min-width:0}
+.plan-week-nav-copy strong{display:block;color:var(--heading);font-size:15px;line-height:1.2;letter-spacing:-.015em}
+.plan-week-nav-copy span{display:block;margin-top:4px;color:var(--muted);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plan-view-switch{
+    display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border:1px solid var(--border-soft);
+    border-radius:14px;background:var(--surface-3)
+}
+.plan-view-tab{
+    min-height:40px;padding:8px 12px;border:0;border-radius:10px;background:transparent;color:var(--muted);
+    font-size:11px;font-weight:700
+}
+.plan-view-tab.active{
+    color:var(--heading);background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--border-soft)
+}
+.plan-view-section{display:grid;gap:14px}
+.plan-view-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.plan-view-toolbar-copy{min-width:0}
+.plan-view-toolbar-copy h2{font-size:16px;line-height:1.18;letter-spacing:-.015em}
+.plan-view-toolbar-copy p{margin-top:4px;color:var(--muted);font-size:9px}
+.plan-view-toolbar .plan-week-actions{flex:none}
+.plan-day-overview{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;
+    border:1px solid var(--border-soft);border-radius:14px;background:rgba(27,36,24,.58)
+}
+.plan-day-overview-date{min-width:0}
+.plan-day-overview-date strong{display:block;font-size:12px;line-height:1.2;text-transform:capitalize}
+.plan-day-overview-date span{display:block;margin-top:3px;color:var(--muted);font-size:9px}
+.plan-day-overview-metrics{display:flex;align-items:center;justify-content:flex-end;gap:13px;flex-wrap:wrap}
+.plan-day-metric{text-align:right;white-space:nowrap}
+.plan-day-metric b{display:block;font-size:11px;line-height:1.1;color:var(--text-2);font-variant-numeric:tabular-nums}
+.plan-day-metric span{display:block;margin-top:3px;color:var(--muted);font-size:8px}
+.plan-day-metric.progress b{color:var(--sand)}
 .plan-month-card{padding:15px 14px 14px}
 .plan-month-top{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:10px;margin-bottom:13px}
 .plan-month-title{text-align:center;font-size:18px;font-weight:740;letter-spacing:-.02em}
@@ -478,6 +516,13 @@ textarea{resize:vertical;min-height:100px}
 .plan-manage{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;padding-top:15px;border-top:1px solid var(--border-soft)}
 .plan-manage button{font-size:11px}
 
+@media(max-width:480px){
+  .plan-day-overview{align-items:flex-start;flex-direction:column}
+  .plan-day-overview-metrics{width:100%;justify-content:space-between}
+  .plan-day-metric{text-align:left}
+  .plan-view-toolbar{align-items:flex-start}
+  .plan-view-toolbar .plan-week-actions{max-width:160px}
+}
 @media(max-width:380px){
   .week-summary-head,.week-summary-row{grid-template-columns:minmax(0,1fr) 66px 66px}
   .week-summary-row{gap:5px;padding-left:7px;padding-right:7px}
@@ -1678,6 +1723,7 @@ let planViewMonth = new Date().getMonth();
 let planViewYear = new Date().getFullYear();
 let selectedPlanWeekStart = localDateISO(startOfWeekDate(new Date()));
 let selectedPlanDay = localDateISO();
+let planViewMode = 'summary';
 
 let draggedIndex = null;
 let draggedActivity = null;
@@ -3310,6 +3356,30 @@ function selectPlanDay(dateISO){
     renderPlanning();
 }
 
+function setPlanViewMode(mode){
+    if(mode!=='summary' && mode!=='day') return;
+    planViewMode=mode;
+    ensureSelectedPlanDay();
+    renderPlanning();
+}
+
+function changePlanWeek(delta){
+    const oldStart=parseLocalISO(selectedPlanWeekStart);
+    let dayOffset=0;
+    if(selectedPlanDay){
+        const selected=parseLocalISO(selectedPlanDay);
+        dayOffset=Math.round((selected-oldStart)/86400000);
+        dayOffset=Math.max(0,Math.min(6,dayOffset));
+    }
+
+    const nextStart=addDaysLocal(oldStart,delta*7);
+    selectedPlanWeekStart=localDateISO(nextStart);
+    selectedPlanDay=localDateISO(addDaysLocal(nextStart,dayOffset));
+    planViewMonth=nextStart.getMonth();
+    planViewYear=nextStart.getFullYear();
+    renderPlanning();
+}
+
 function newPlanId(){
     return `plan_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
 }
@@ -3818,8 +3888,6 @@ function renderPlanning(){
 
     ensureSelectedPlanDay();
 
-    const weeks=weeksForMonth(planViewYear,planViewMonth);
-    const weekEndISO=localDateISO(weekEndExclusive(selectedPlanWeekStart));
     const rows=summaryRowsForWeek(selectedPlanWeekStart);
     const {planned,actual}=weekItems(selectedPlanWeekStart);
 
@@ -3876,22 +3944,18 @@ function renderPlanning(){
             ${planningItemMeta(r)?`<div class="compare-meta">${escapeHTML(planningItemMeta(r))}</div>`:''}
         </div>`).join('') : `<div class="compare-empty">Nenhum registro realizado neste dia.</div>`;
 
-    host.innerHTML=`
-        <div class="planning-page">
-            <div class="card plan-month-card">
-                <div class="plan-month-top">
-                    <button class="icon-button" onclick="changePlanMonth(-1)" aria-label="Mês anterior"><i data-lucide="chevron-left"></i></button>
-                    <div class="plan-month-title">${monthName(planViewYear,planViewMonth)}</div>
-                    <button class="icon-button" onclick="changePlanMonth(1)" aria-label="Próximo mês"><i data-lucide="chevron-right"></i></button>
-                </div>
-                <div class="week-strip">
-                    ${weeks.map((w,i)=>`<button class="week-chip ${w===selectedPlanWeekStart?'active':''}" onclick="selectPlanWeek('${w}')"><b>S${i+1}</b><span>${weekChipRange(w)}</span></button>`).join('')}
-                </div>
-            </div>
+    const dayPlannedMinutes=dayPlans.reduce((sum,item)=>sum+Math.max(0,Number(item.duration)||0),0);
+    const dayActualMinutes=dayActual.reduce((sum,item)=>sum+Math.max(0,Number(item.duration)||0),0);
+    const dayProgress=dayPlannedMinutes>0 ? Math.round((dayActualMinutes/dayPlannedMinutes)*100) : null;
+    const dayDate=parseLocalISO(selectedPlanDay);
+    const dayDateRaw=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(dayDate);
+    const dayDateLabel=dayDateRaw.charAt(0).toUpperCase()+dayDateRaw.slice(1);
 
-            <div class="plan-week-header">
-                <div class="plan-week-copy">
-                    <h2>${weekLongRange(selectedPlanWeekStart)}</h2>
+    const summaryView=`
+        <section class="plan-view-section">
+            <div class="plan-view-toolbar">
+                <div class="plan-view-toolbar-copy">
+                    <h2>Visão geral da semana</h2>
                     <p>${planWeekStatus(selectedPlanWeekStart)} · ${planned.length} ${planned.length===1?'item planejado':'itens planejados'}</p>
                 </div>
                 <div class="plan-week-actions">
@@ -3903,27 +3967,67 @@ function renderPlanning(){
                     </button>
                 </div>
             </div>
-
-            <section>
+            <div>
                 <div class="section-heading"><h2>Comparativo semanal</h2><span class="eyebrow">Planejado × Rastro</span></div>
                 ${summaryHTML}
-            </section>
+            </div>
+        </section>`;
 
-            <section>
-                <div class="section-heading"><h2>Comparativo por dia</h2><span class="eyebrow">horários</span></div>
-                <div class="day-tabs">${dayTabs}</div>
-                <div class="daily-compare-grid">
-                    <div class="compare-column planned">
-                        <div class="compare-heading"><strong>Planejado</strong><span>${dayPlans.length}</span></div>
-                        <div class="compare-list">${planList}</div>
-                        <button class="compare-add-mini" onclick="openPlanEditor(null,'${selectedPlanDay}')">+ adicionar</button>
+    const dayView=`
+        <section class="plan-view-section">
+            <div class="day-tabs">${dayTabs}</div>
+
+            <div class="plan-day-overview">
+                <div class="plan-day-overview-date">
+                    <strong>${escapeHTML(dayDateLabel)}</strong>
+                    <span>Planejado × Rastro do dia</span>
+                </div>
+                <div class="plan-day-overview-metrics">
+                    <div class="plan-day-metric">
+                        <b>${formatPlanMinutes(dayPlannedMinutes)}</b>
+                        <span>Planejado</span>
                     </div>
-                    <div class="compare-column actual">
-                        <div class="compare-heading"><strong>Rastro</strong><span>${dayActual.length}</span></div>
-                        <div class="compare-list">${actualList}</div>
+                    <div class="plan-day-metric">
+                        <b>${formatPlanMinutes(dayActualMinutes)}</b>
+                        <span>Rastro</span>
+                    </div>
+                    <div class="plan-day-metric progress">
+                        <b>${dayProgress===null?'—':`${dayProgress}%`}</b>
+                        <span>Percentual</span>
                     </div>
                 </div>
-            </section>
+            </div>
+
+            <div class="daily-compare-grid">
+                <div class="compare-column planned">
+                    <div class="compare-heading"><strong>Planejado</strong><span>${dayPlans.length}</span></div>
+                    <div class="compare-list">${planList}</div>
+                    <button class="compare-add-mini" onclick="openPlanEditor(null,'${selectedPlanDay}')">+ adicionar</button>
+                </div>
+                <div class="compare-column actual">
+                    <div class="compare-heading"><strong>Rastro</strong><span>${dayActual.length}</span></div>
+                    <div class="compare-list">${actualList}</div>
+                </div>
+            </div>
+        </section>`;
+
+    host.innerHTML=`
+        <div class="planning-page">
+            <div class="plan-week-nav">
+                <button class="plan-week-nav-button" onclick="changePlanWeek(-1)" aria-label="Semana anterior"><i data-lucide="chevron-left"></i></button>
+                <div class="plan-week-nav-copy">
+                    <strong>${weekLongRange(selectedPlanWeekStart)}</strong>
+                    <span>${planWeekStatus(selectedPlanWeekStart)} · ${planned.length} ${planned.length===1?'item planejado':'itens planejados'}</span>
+                </div>
+                <button class="plan-week-nav-button" onclick="changePlanWeek(1)" aria-label="Próxima semana"><i data-lucide="chevron-right"></i></button>
+            </div>
+
+            <div class="plan-view-switch" role="tablist" aria-label="Visualização da semana">
+                <button class="plan-view-tab ${planViewMode==='summary'?'active':''}" onclick="setPlanViewMode('summary')" role="tab" aria-selected="${planViewMode==='summary'}">Resumo</button>
+                <button class="plan-view-tab ${planViewMode==='day'?'active':''}" onclick="setPlanViewMode('day')" role="tab" aria-selected="${planViewMode==='day'}">Dia</button>
+            </div>
+
+            ${planViewMode==='day' ? dayView : summaryView}
         </div>`;
 
     lucide.createIcons();
