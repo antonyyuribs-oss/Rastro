@@ -307,6 +307,10 @@ textarea{resize:vertical;min-height:100px}
 }
 .modal-content input[type="date"],.modal-content input[type="time"]{min-height:47px}
 .modal-content textarea{min-height:94px;max-height:180px}
+/* Botão de modelo das notas, visível apenas nas atividades configuradas. */
+.notes-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.notes-heading .form-label{margin:0}
+.notes-model-btn{min-height:36px;padding:6px 13px;font-size:11px;font-weight:700;background:var(--surface-2);color:var(--accent-text);border:1px solid var(--border);border-radius:10px;flex-shrink:0}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .quick-buttons,.duration-chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
 .duration-chip{
@@ -2373,6 +2377,45 @@ function saveRenamedActivity(oldName){
     showToast(sameName ? 'Atividade atualizada.' : `Atividade renomeada para "${newName}".`);
 }
 
+// Modelos de notas por atividade. Não são salvos até o usuário registrar a atividade.
+const NOTES_TEMPLATES = {
+    'trabalho': [
+        'Pressão (0–10):',
+        'Demandas atrasados/urgentes/ordinária:',
+        'Sintomas (vertigem, sonolência, irritação, fuga):',
+        'Intensidade (0–10):',
+        'Fugi da atividade? Para qual?'
+    ].join('\n'),
+    'estudo musical': [
+        'Fugi de alguma atividade? De qual?',
+        'Alívio após fugir:',
+        'Atividade: envolvido / automático / restaurador',
+        'Encerrei: por limite / por cansaço / por bloqueio'
+    ].join('\n')
+};
+NOTES_TEMPLATES['xadrez'] = NOTES_TEMPLATES['estudo musical'];
+
+function notesModelButtonHTML(activity, textareaId){
+    const name=String(activity||'').trim().toLocaleLowerCase('pt-BR');
+    if(!Object.prototype.hasOwnProperty.call(NOTES_TEMPLATES,name)) return '';
+    return `<button type="button" class="notes-model-btn" onclick="insertNotesModel(${inlineArg(activity)},${inlineArg(textareaId)})">Modelo</button>`;
+}
+
+function insertNotesModel(activity, textareaId){
+    const textarea=document.getElementById(textareaId);
+    const template=NOTES_TEMPLATES[String(activity||'').trim().toLocaleLowerCase('pt-BR')];
+    if(!textarea || !template) return;
+    const existing=textarea.value;
+    if(existing.includes(template)){
+        showToast('O modelo já está nas observações.');
+        textarea.focus();
+        return;
+    }
+    textarea.value=existing.trim() ? existing.replace(/\s*$/,'')+'\n\n'+template : template;
+    textarea.dispatchEvent(new Event('input',{bubbles:true}));
+    textarea.focus();
+}
+
 function openRegister(activity){
 
     const isState = STATE_ACTIVITIES.includes(activity.toLowerCase());
@@ -2434,7 +2477,10 @@ function openRegister(activity){
                 <span>min</span>
             </div>
 
-            <label class="form-label" for="notes">Notas <span>opcional</span></label>
+            <div class="notes-heading">
+                <label class="form-label" for="notes">Notas <span>opcional</span></label>
+                ${notesModelButtonHTML(activity,'notes')}
+            </div>
             <textarea id="notes" placeholder="O que vale a pena deixar registrado?"></textarea>
 
             <button class="primary-action" onclick="saveActivityRecord(${inlineArg(activity)})">
@@ -2571,10 +2617,11 @@ function showModal(title,content,eyebrow='Rastro'){
 function closeModal(){
     document.body.classList.remove('modal-open','keyboard-open');
     document.getElementById('modalContainer').innerHTML="";
-    if(lastModalTrigger && document.contains(lastModalTrigger)){
-        setTimeout(()=>lastModalTrigger.focus({preventScroll:true}),0);
-    }
+    const focusTarget=lastModalTrigger;
     lastModalTrigger=null;
+    if(focusTarget && document.contains(focusTarget)){
+        setTimeout(()=>{if(document.contains(focusTarget)) focusTarget.focus({preventScroll:true});},0);
+    }
 }
 
 
@@ -3208,8 +3255,11 @@ function editRecord(id){
                     <span>min</span>
                 </div>
 
-                <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
-                <textarea id="editNotes">${record.notes || ''}</textarea>
+                <div class="notes-heading">
+                    <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
+                    ${notesModelButtonHTML(record.activity,'editNotes')}
+                </div>
+                <textarea id="editNotes">${escapeHTML(record.notes || '')}</textarea>
 
                 <button class="primary-action" onclick="saveEditedRecord(${inlineArg(id)})"><i data-lucide="check"></i> Salvar alterações</button>
                 <div class="management-zone">
