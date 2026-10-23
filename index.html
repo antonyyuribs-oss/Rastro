@@ -138,6 +138,14 @@ button{-webkit-tap-highlight-color:transparent}
 .state-value{font-size:22px;line-height:1.1;font-weight:760;margin-top:5px;letter-spacing:-.03em}
 .state-value.empty{color:var(--muted)!important;font-weight:500}
 
+/* Avaliações repetidas de disposição: hora da última nota e quantidade de registros. */
+.state-extra{margin-top:5px;font-size:9px;line-height:1.2;color:var(--muted);font-variant-numeric:tabular-nums;white-space:normal}
+.day-state-card .state-extra{font-size:8px;min-height:10px}
+.state-time-help{margin:-6px 0 15px;color:var(--muted);font-size:11px;line-height:1.45}
+.timeline-state-score{display:inline-block;margin-left:4px;font-size:12px;font-weight:750;color:var(--accent-text)}
+.timeline-activity-icon.disp-mental{color:var(--amber);background:rgba(243,181,74,.12)}
+.timeline-activity-icon.disp-body{color:var(--red);background:rgba(242,107,107,.12)}
+
 /* HOME — atividades */
 .activities-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .activity-card{
@@ -1575,6 +1583,14 @@ const STATE_ACTIVITIES = [
 "disposição mental",
 "disposição física"
 ];
+// As notas ao acordar permanecem distintas das avaliações que podem ser feitas ao longo do dia.
+const REPEATED_STATE_ACTIVITIES = ["disposição mental", "disposição física"];
+function isRepeatedState(activity){
+    return REPEATED_STATE_ACTIVITIES.includes(String(activity||'').trim().toLocaleLowerCase('pt-BR'));
+}
+function localTimeHHMM(date=new Date()){
+    return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+}
 
 const DEFAULT_ACTIVITIES = [
 "Mente ao Acordar",
@@ -1982,8 +1998,17 @@ function todayISO(){
     return localDateISO();
 }
 
+function stateRecordsForDate(name,date){
+    const matches=records.filter(r=>r.activity===name && r.date===date);
+    if(isRepeatedState(name)){
+        // Os registros antigos não possuem hora: preservá-los, mas dar prioridade
+        // cronológica às novas medições com horário definido.
+        matches.sort((a,b)=>String(a.startTime||'').localeCompare(String(b.startTime||'')));
+    }
+    return matches;
+}
 function latestStateToday(name){
-    const matches=records.filter(r=>r.activity===name && r.date===todayISO());
+    const matches=stateRecordsForDate(name,todayISO());
     return matches.length ? matches[matches.length-1] : null;
 }
 
@@ -2107,11 +2132,15 @@ function renderActivities(){
         if(!exists) return '';
         const r=latestStateToday(cfg.name);
         const value=r ? formatStateValue(r.value) : '—';
+        const count=isRepeatedState(cfg.name) ? stateRecordsForDate(cfg.name,todayISO()).length : 0;
+        const detail=isRepeatedState(cfg.name) && r
+            ? `${r.startTime ? escapeHTML(r.startTime) : 'Sem hora'}${count>1 ? ` · ${count} notas` : ''}` : '';
         return `
             <div class="state-card ${cfg.cls}" onclick="openRegister('${cfg.name}')">
                 <div class="state-icon"><i data-lucide="${cfg.icon}"></i></div>
                 <div class="state-name">${cfg.short}</div>
                 <div class="state-value ${r?'':'empty'}">${value}</div>
+                ${detail ? `<div class="state-extra">${detail}</div>` : ''}
             </div>`;
     }).join('');
 
@@ -2416,17 +2445,32 @@ function insertNotesModel(activity, textareaId){
     textarea.focus();
 }
 
-function openRegister(activity){
+function openRegister(activity, selectedDay=null){
 
     const isState = STATE_ACTIVITIES.includes(activity.toLowerCase());
-    const today = localDateISO();
+    const repeatable = isRepeatedState(activity);
+    const today = selectedDay || localDateISO();
     let content="";
 
     if(isState){
         content=`
         <div class="sheet-form">
+            ${repeatable ? `
+            <div class="form-row">
+                <div>
+                    <label class="form-label" for="date">Data</label>
+                    <input id="date" type="date" value="${today}">
+                </div>
+                <div>
+                    <label class="form-label" for="stateTime">Hora e minuto</label>
+                    <input id="stateTime" type="time" value="${localTimeHHMM()}" required>
+                </div>
+            </div>
+            <p class="state-time-help">Você pode registrar várias notas no mesmo dia. Cada avaliação fica preservada no histórico.</p>
+            ` : `
             <label class="form-label" for="date">Data</label>
             <input id="date" type="date" value="${today}">
+            `}
 
             <label class="form-label" for="value">Como está agora? <span>-10 a +10</span></label>
             <div class="state-control">
@@ -2555,15 +2599,29 @@ function saveStateRecord(activity){
     const dateEl=document.getElementById('date');
     const valueEl=document.getElementById('value');
     const notesEl=document.getElementById('notes');
-    if(!dateEl || !valueEl) return;
+    const timeEl=document.getElementById('stateTime');
+    if(!dateEl || !valueEl || !dateEl.value) return;
 
-    records.push({
-        id:Date.now(),
+    const repeatable=isRepeatedState(activity);
+    const time=repeatable ? (timeEl?.value || '') : '';
+    if(repeatable && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){
+        showToast('Informe a hora e o minuto da avaliação.','error');
+        timeEl?.focus();
+        return;
+    }
+
+    const record={
+        id:`${Date.now()}-${Math.random().toString(36).slice(2,9)}`,
         activity,
         date:dateEl.value,
         value:Number(valueEl.value),
         notes:notesEl?.value || ''
-    });
+    };
+    if(repeatable){
+        record.startTime=time;
+        record.createdAt=new Date().toISOString();
+    }
+    records.push(record);
 
     save();
     closeModal();
@@ -3095,7 +3153,7 @@ function getEndTime(startTime, duration){
 }
 
 function latestStateForDate(name,date){
-    const matches=records.filter(r=>r.activity===name && r.date===date);
+    const matches=stateRecordsForDate(name,date);
     return matches.length ? matches[matches.length-1] : null;
 }
 
@@ -3114,22 +3172,33 @@ function openRecordMenu(id){
 function renderDay(date){
     const history=document.getElementById("historyScreen");
     const dayRecords=records.filter(r=>r.date===date);
-    const activitiesOfDay=dayRecords
-        .filter(r=>!STATE_ACTIVITIES.includes((r.activity||'').toLowerCase()))
-        .sort((a,b)=>(a.startTime||"").localeCompare(b.startTime||""));
+    const chronologicalRecords=dayRecords
+        .filter(r=>isRepeatedState(r.activity) || !STATE_ACTIVITIES.includes((r.activity||'').toLowerCase()))
+        // Sem horário (inclusive avaliações antigas) aparecem após os registros cronometrados.
+        .sort((a,b)=>(a.startTime||'99:99').localeCompare(b.startTime||'99:99'));
 
     const stateCards=STATE_UI.map(cfg=>{
-        const r=latestStateForDate(cfg.name,date);
+        const matches=stateRecordsForDate(cfg.name,date);
+        const r=matches.length ? matches[matches.length-1] : null;
         const value=r ? formatStateValue(r.value) : '—';
+        const repeatable=isRepeatedState(cfg.name);
+        const detail=repeatable && r
+            ? `${r.startTime ? escapeHTML(r.startTime) : 'Sem hora'}${matches.length>1 ? ` · ${matches.length} notas` : ''}` : '';
+        const click=repeatable
+            ? `onclick="openRegister(${inlineArg(cfg.name)},${inlineArg(date)})"`
+            : (r ? `onclick="openRecordMenu(${inlineArg(r.id)})"` : '');
         return `
-            <div class="day-state-card ${cfg.cls} ${r?'':'empty-state'}" ${r?`onclick="openRecordMenu(${inlineArg(r.id)})"`:''}>
+            <div class="day-state-card ${cfg.cls} ${r?'':'empty-state'}" ${click}>
                 <div class="state-icon"><i data-lucide="${cfg.icon}"></i></div>
                 <div class="state-name">${cfg.short}</div>
                 <div class="state-value ${r?'':'empty'}">${value}</div>
+                ${detail ? `<div class="state-extra">${detail}</div>` : ''}
             </div>`;
     }).join('');
 
-    const stateNotes=STATE_UI.map(cfg=>{
+    // Notas ao acordar continuam independentes. As avaliações de disposição
+    // são apresentadas integralmente na linha do tempo, sem duplicar observações.
+    const wakingNotes=STATE_UI.filter(cfg=>!isRepeatedState(cfg.name)).map(cfg=>{
         const r=latestStateForDate(cfg.name,date);
         if(!r || !r.notes) return '';
         return `<div class="timeline-card" onclick="openRecordMenu(${inlineArg(r.id)})">
@@ -3138,24 +3207,34 @@ function renderDay(date){
         </div>`;
     }).join('');
 
-    const timeline=activitiesOfDay.length
-        ? activitiesOfDay.map(r=>`
+    const timeline=chronologicalRecords.length
+        ? chronologicalRecords.map(r=>{
+            const isDisposition=isRepeatedState(r.activity);
+            const config=isDisposition ? STATE_UI.find(cfg=>cfg.name===r.activity) : null;
+            const icon=config?.icon || activityIcon(r.activity);
+            const visualStyle=isDisposition ? '' : `style="${activityVisualStyle(r.activity)}"`;
+            const time=escapeHTML(r.startTime||'--:--');
+            const detail=isDisposition
+                ? `${r.startTime ? time : 'Sem horário (registro antigo)'} · Nota ${formatStateValue(r.value)}`
+                : `${time}–${getEndTime(r.startTime,r.duration)} · ${formatDuration(Number(r.duration)||0)}`;
+            return `
             <div class="timeline-item">
-                <div class="timeline-time">${r.startTime||'--:--'}</div>
+                <div class="timeline-time">${time}</div>
                 <div class="timeline-rail"><span class="timeline-dot"></span></div>
                 <div class="timeline-card" onclick="openRecordMenu(${inlineArg(r.id)})">
                     <div class="timeline-title-row">
-                        <div class="timeline-activity-icon" style="${activityVisualStyle(r.activity)}"><i data-lucide="${activityIcon(r.activity)}"></i></div>
+                        <div class="timeline-activity-icon ${config?.cls||''}" ${visualStyle}><i data-lucide="${icon}"></i></div>
                         <div style="min-width:0">
-                            <div class="timeline-title">${escapeHTML(r.activity)}</div>
-                            <div class="timeline-meta">${r.startTime||'--:--'}–${getEndTime(r.startTime,r.duration)} · ${formatDuration(Number(r.duration)||0)}</div>
+                            <div class="timeline-title">${escapeHTML(r.activity)}${isDisposition ? ` <span class="timeline-state-score">${formatStateValue(r.value)}</span>` : ''}</div>
+                            <div class="timeline-meta">${detail}</div>
                         </div>
                     </div>
                     ${r.notes ? `<div class="timeline-notes">${escapeHTML(r.notes)}</div>` : ''}
                     <div class="timeline-edit-hint">Toque para editar ou excluir</div>
                 </div>
-            </div>`).join('')
-        : `<div class="timeline-empty">Nenhuma atividade registrada neste dia.</div>`;
+            </div>`;
+        }).join('')
+        : `<div class="timeline-empty">Nenhum registro com horário ou atividade neste dia.</div>`;
 
     history.innerHTML=`
     <div class="day-view">
@@ -3173,11 +3252,11 @@ function renderDay(date){
         <section class="day-state-section">
             <div class="section-heading"><h2>Estado do dia</h2><span class="eyebrow">-10 a +10</span></div>
             <div class="day-state-grid">${stateCards}</div>
-            ${stateNotes ? `<div class="section-label">Observações do estado</div>${stateNotes}` : ''}
+            ${wakingNotes ? `<div class="section-label">Observações ao acordar</div>${wakingNotes}` : ''}
         </section>
 
         <section>
-            <div class="section-heading"><h2>Linha do tempo</h2><span class="eyebrow">${activitiesOfDay.length} ${activitiesOfDay.length===1?'atividade':'atividades'}</span></div>
+            <div class="section-heading"><h2>Linha do tempo</h2><span class="eyebrow">${chronologicalRecords.length} ${chronologicalRecords.length===1?'registro':'registros'}</span></div>
             <div class="timeline-wrap">${timeline}</div>
         </section>
     </div>`;
@@ -3207,8 +3286,22 @@ function editRecord(id){
     if(isState){
         showModal(record.activity, `
             <div class="sheet-form">
+                ${isRepeatedState(record.activity) ? `
+                <div class="form-row">
+                    <div>
+                        <label class="form-label" for="editDate">Data</label>
+                        <input id="editDate" type="date" value="${escapeHTML(record.date || '')}">
+                    </div>
+                    <div>
+                        <label class="form-label" for="editStateTime">Hora e minuto</label>
+                        <input id="editStateTime" type="time" value="${escapeHTML(record.startTime || '')}">
+                    </div>
+                </div>
+                <p class="state-time-help">Registros antigos sem horário podem continuar sem horário.</p>
+                ` : `
                 <label class="form-label" for="editDate">Data</label>
-                <input id="editDate" type="date" value="${record.date || ''}">
+                <input id="editDate" type="date" value="${escapeHTML(record.date || '')}">
+                `}
 
                 <label class="form-label" for="editValue">Como estava? <span>-10 a +10</span></label>
                 <div class="state-control">
@@ -3219,7 +3312,7 @@ function editRecord(id){
                 </div>
 
                 <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
-                <textarea id="editNotes">${record.notes || ''}</textarea>
+                <textarea id="editNotes">${escapeHTML(record.notes || '')}</textarea>
 
                 <button class="primary-action" onclick="saveEditedRecord(${inlineArg(id)})"><i data-lucide="check"></i> Salvar alterações</button>
                 <div class="management-zone">
@@ -3276,23 +3369,26 @@ function saveEditedRecord(id){
 
     if(!record) return;
 
-    const isState =
-    STATE_ACTIVITIES.includes(
-        record.activity.toLowerCase()
-    );
-
-    record.date =
-    document.getElementById("editDate").value;
-
-    record.notes =
-    document.getElementById("editNotes").value;
+    const isState = STATE_ACTIVITIES.includes(record.activity.toLowerCase());
+    const newDate=document.getElementById('editDate')?.value;
+    if(!newDate){
+        showToast('Informe a data do registro.','error');
+        return;
+    }
+    if(isState && isRepeatedState(record.activity)){
+        const time=document.getElementById('editStateTime')?.value || '';
+        if(time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){
+            showToast('Horário inválido.','error');
+            return;
+        }
+        // Não criar horários fictícios para entradas anteriores à atualização.
+        record.startTime=time;
+    }
+    record.date=newDate;
+    record.notes=document.getElementById('editNotes').value;
 
     if(isState){
-
-        record.value = Number(
-            document.getElementById("editValue").value
-        );
-
+        record.value=Number(document.getElementById('editValue').value);
     }else{
 
         record.startTime =
@@ -4230,7 +4326,7 @@ r.date || "",
 r.activity || "",
 r.startTime || "",
 r.duration || "",
-r.value || "",
+r.value ?? "",
 `"${(r.notes || "").replace(/"/g,'""')}"`
 ].join(";");
 
@@ -4315,8 +4411,12 @@ function recordImportKey(record){
             'state',
             activity,
             date,
+            // Diferentes momentos do mesmo dia não são registros duplicados.
+            isRepeatedState(activity) ? String(record.startTime || '') : '',
             Number(record.value),
-            notes
+            notes,
+            // Permite também múltiplos registros idênticos no mesmo minuto.
+            isRepeatedState(activity) ? String(record.createdAt || '') : ''
         ]);
     }
 
