@@ -1997,6 +1997,15 @@ const ACTIVITY_ICONS = {
     'Netflix':'tv','Casa':'house','Meditação':'brain'
 };
 
+
+function activityButtonLabel(activity){
+    if(!activity || !activity.name) return '';
+    if(activity.name==='Rotina de Despertamento') return 'R.M.';
+    if(activity.name==='Rotina de Trabalho') return 'R.T.';
+    if(activity.name==='Recompensa') return 'Recompensa';
+    return activity.name;
+}
+
 function activityIcon(name){
     const saved=activities.find(a=>a.name===name)?.icon;
     return saved || ACTIVITY_ICONS[name] || 'circle-dot';
@@ -2240,8 +2249,7 @@ function renderActivities(){
         card.setAttribute('aria-label',activity.name);
         card.innerHTML=`
             <div class="activity-icon"><i data-lucide="${activityIcon(activity.name)}"></i></div>
-            ${activity.shortcode ? `<div class="activity-shortcode">${escapeHTML(activity.shortcode)}</div>` : ''}
-            <div class="activity-title-btn">${escapeHTML(activity.name)}</div>
+            <div class="activity-title-btn">${escapeHTML(activityButtonLabel(activity))}</div>
         `;
         document.getElementById("activitiesGrid").appendChild(card);
     });
