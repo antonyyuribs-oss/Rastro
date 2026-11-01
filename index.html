@@ -226,6 +226,13 @@ textarea{resize:vertical;min-height:100px}
     border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(var(--accent-rgb),.17)
 }
 .calendar-day.many-records::after{width:16px;border-radius:99px}
+/* Recompensas: destaque próprio, inclusive em datas futuras.
+   O marcador comum permanece para os demais registros do mesmo dia. */
+.calendar-day.has-reward{background:rgba(243,181,74,.11);border-color:rgba(243,181,74,.44);color:#fbe0a0;font-weight:750}
+.calendar-day.has-reward::before{content:'✦';position:absolute;top:2px;right:4px;color:#f3b54a;font-size:10px;line-height:1}
+.calendar-day.reward-only::after{background:#f3b54a!important;box-shadow:0 0 0 2px rgba(243,181,74,.19)!important}
+.legend-dot.reward{background:#f3b54a}
+.activity-shortcode{font-size:19px;font-weight:790;line-height:1;letter-spacing:.025em;color:var(--accent-text)}
 .calendar-legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:15px;color:var(--muted);font-size:10px}
 .legend-item{display:flex;align-items:center;gap:6px}
 .legend-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
@@ -1626,6 +1633,45 @@ DEFAULT_ACTIVITIES.map(a=>({
     archived:false
 }));
 
+// Migração única: acrescenta os três botões ao Rastro existente sem apagar atividades.
+// A marca de inicialização impede recriá-los se o usuário optar por excluí-los depois.
+const PHASE2_SHORTCUTS = [
+    {name:'Rotina de Despertamento',icon:'sunrise',shortcode:'RM',notesTemplate:[
+        'Escovei os dentes? Sim / Não',
+        'Bebi água? Sim / Não',
+        'Saí ao sol e orei? Sim / Não',
+        'Juntei o lixo / organizei o espaço? Sim / Não',
+        'Tomei banho e preparei o café? Sim / Não',
+        'Fiz a leitura da Bíblia? Sim / Não',
+        'Tomei café com a família? Sim / Não',
+        'Levei meu filho à escola (quando aplicável)? Sim / Não'
+    ].join('\n')},
+    {name:'Rotina de Trabalho',icon:'briefcase-business',shortcode:'RT',notesTemplate:[
+        'Organizei meu ambiente de trabalho? Sim / Não',
+        'Escrevi o briefing / planejamento à mão? Sim / Não',
+        'Defini o que pretendo fazer (inclusive pausas)? Sim / Não',
+        'Iniciei a execução do trabalho? Sim / Não'
+    ].join('\n')},
+    {name:'Recompensa',icon:'gift',shortcode:'R'}
+];
+const PHASE2_INIT_KEY='rastro_phase2_shortcuts_initialized_v1';
+if(!localStorage.getItem(PHASE2_INIT_KEY)){
+    // Coloca as rotinas ao lado das principais atividades para acesso rápido.
+    const mainWorkIndex=activities.findIndex(a=>a.name==='Trabalho');
+    let insertAt=mainWorkIndex>=0 ? mainWorkIndex : Math.min(4,activities.length);
+    for(const cfg of PHASE2_SHORTCUTS){
+        const existing=activities.find(a=>String(a.name||'').toLocaleLowerCase('pt-BR')===cfg.name.toLocaleLowerCase('pt-BR'));
+        if(!existing) activities.splice(insertAt++,0,{...cfg,archived:false});
+        else {
+            if(!existing.icon) existing.icon=cfg.icon;
+            if(!existing.shortcode) existing.shortcode=cfg.shortcode;
+            if(cfg.notesTemplate && !Object.prototype.hasOwnProperty.call(existing,'notesTemplate')) existing.notesTemplate=cfg.notesTemplate;
+        }
+    }
+    localStorage.setItem('rastro_activities',JSON.stringify(activities));
+    localStorage.setItem(PHASE2_INIT_KEY,'1');
+}
+
 let records =
 JSON.parse(localStorage.getItem("rastro_records"))
 ||
@@ -1929,6 +1975,8 @@ const ACTIVITY_ICON_OPTIONS = [
     ['map','Mapa'],
     ['utensils','Alimentação'],
     ['coffee','Café'],
+    ['sunrise','Nascer do sol'],
+    ['gift','Presente / Recompensa'],
     ['sun','Sol'],
     ['clock-3','Tempo'],
     ['calendar-days','Agenda'],
@@ -2189,8 +2237,10 @@ function renderActivities(){
             }
             openRegister(activity.name);
         };
+        card.setAttribute('aria-label',activity.name);
         card.innerHTML=`
             <div class="activity-icon"><i data-lucide="${activityIcon(activity.name)}"></i></div>
+            ${activity.shortcode ? `<div class="activity-shortcode">${escapeHTML(activity.shortcode)}</div>` : ''}
             <div class="activity-title-btn">${escapeHTML(activity.name)}</div>
         `;
         document.getElementById("activitiesGrid").appendChild(card);
@@ -2336,6 +2386,11 @@ function openRenameActivity(activityName){
                 </div>
             </div>
 
+            ${Object.prototype.hasOwnProperty.call(currentActivity||{},'notesTemplate') ? `
+                <label class="form-label" for="renameNotesTemplate">Modelo das notas <span>editável</span></label>
+                <textarea id="renameNotesTemplate" rows="9" placeholder="Uma etapa por linha">${escapeHTML(currentActivity.notesTemplate||'')}</textarea>
+                <p class="plan-form-help">Ao registrar, toque em Modelo para inserir estas etapas nas notas. As alterações não modificam registros anteriores.</p>
+            ` : ''}
             <button class="primary-action"
                     onclick="saveRenamedActivity(${inlineArg(activityName)})">
                 <i data-lucide="check"></i> Salvar alterações
@@ -2385,6 +2440,10 @@ function saveRenamedActivity(oldName){
 
     activity.name=newName;
     activity.icon=newIcon;
+    const templateInput=document.getElementById('renameNotesTemplate');
+    if(templateInput && Object.prototype.hasOwnProperty.call(activity,'notesTemplate')){
+        activity.notesTemplate=templateInput.value;
+    }
 
     if(!sameName){
         records.forEach(record=>{
@@ -2424,15 +2483,20 @@ const NOTES_TEMPLATES = {
 };
 NOTES_TEMPLATES['xadrez'] = NOTES_TEMPLATES['estudo musical'];
 
+function activityNotesTemplate(activity){
+    const cfg=activities.find(a=>a.name===activity);
+    if(cfg && typeof cfg.notesTemplate==='string') return cfg.notesTemplate;
+    return NOTES_TEMPLATES[String(activity||'').trim().toLocaleLowerCase('pt-BR')] || '';
+}
+
 function notesModelButtonHTML(activity, textareaId){
-    const name=String(activity||'').trim().toLocaleLowerCase('pt-BR');
-    if(!Object.prototype.hasOwnProperty.call(NOTES_TEMPLATES,name)) return '';
+    if(!activityNotesTemplate(activity)) return '';
     return `<button type="button" class="notes-model-btn" onclick="insertNotesModel(${inlineArg(activity)},${inlineArg(textareaId)})">Modelo</button>`;
 }
 
 function insertNotesModel(activity, textareaId){
     const textarea=document.getElementById(textareaId);
-    const template=NOTES_TEMPLATES[String(activity||'').trim().toLocaleLowerCase('pt-BR')];
+    const template=activityNotesTemplate(activity);
     if(!textarea || !template) return;
     const existing=textarea.value;
     if(existing.includes(template)){
@@ -2449,6 +2513,7 @@ function openRegister(activity, selectedDay=null){
 
     const isState = STATE_ACTIVITIES.includes(activity.toLowerCase());
     const repeatable = isRepeatedState(activity);
+    const isReward = activity === 'Recompensa';
     const today = selectedDay || localDateISO();
     let content="";
 
@@ -2503,12 +2568,12 @@ function openRegister(activity, selectedDay=null){
                     <label class="form-label" for="date">Data</label>
                     <input id="date" type="date" value="${today}">
                 </div>
-                <div>
+                ${isReward ? '' : `<div>
                     <label class="form-label" for="startTime">Hora inicial</label>
                     <input id="startTime" type="time">
-                </div>
+                </div>`}
             </div>
-
+            ${isReward ? '<p class="plan-form-help">Escolha a data da recompensa. Descreva o que deseja fazer nas notas; depois você pode editá-las para registrar o que aconteceu.</p>' : `
             <label class="form-label">Duração <span>toque para selecionar</span></label>
             <div class="duration-chips">
                 ${[30,60,90,120,180,240].map(v=>
@@ -2521,8 +2586,9 @@ function openRegister(activity, selectedDay=null){
                 <span>min</span>
             </div>
 
+            `}
             <div class="notes-heading">
-                <label class="form-label" for="notes">Notas <span>opcional</span></label>
+                <label class="form-label" for="notes">${isReward ? 'Recompensa / observações' : 'Notas'} <span>opcional</span></label>
                 ${notesModelButtonHTML(activity,'notes')}
             </div>
             <textarea id="notes" placeholder="O que vale a pena deixar registrado?"></textarea>
@@ -2634,14 +2700,17 @@ function saveActivityRecord(activity){
     const startEl=document.getElementById('startTime');
     const durationEl=document.getElementById('duration');
     const notesEl=document.getElementById('notes');
-    if(!dateEl || !durationEl) return;
+    if(!dateEl?.value || (activity!=='Recompensa' && !durationEl)){
+        showToast('Informe a data do registro.','error');
+        return;
+    }
 
     records.push({
         id:Date.now(),
         activity,
         date:dateEl.value,
-        startTime:startEl?.value || '',
-        duration:Math.max(1,Number(durationEl.value)||30),
+        startTime:activity==='Recompensa' ? '' : (startEl?.value || ''),
+        duration:activity==='Recompensa' ? 0 : Math.max(1,Number(durationEl.value)||30),
         notes:notesEl?.value || ''
     });
 
@@ -3032,10 +3101,12 @@ function renderCalendar(){
     const startWeekDay=firstDay.getDay();
     const key=monthKey(currentYear,currentMonth);
     const monthRecords=records.filter(r=>(r.date||'').startsWith(key));
+    const rewardsByDate=new Set(monthRecords.filter(r=>r.activity==='Recompensa').map(r=>r.date));
+    const actualMonthRecords=monthRecords.filter(r=>r.activity!=='Recompensa');
     const counts={};
-    monthRecords.forEach(r=>{counts[r.date]=(counts[r.date]||0)+1;});
+    actualMonthRecords.forEach(r=>{counts[r.date]=(counts[r.date]||0)+1;});
     const recordedDays=Object.keys(counts).length;
-    const durationMin=monthRecords
+    const durationMin=actualMonthRecords
         .filter(r=>!STATE_ACTIVITIES.includes((r.activity||'').toLowerCase()))
         .reduce((sum,r)=>sum+(Number(r.duration)||0),0);
     const durationHours=Math.round((durationMin/60)*10)/10;
@@ -3065,14 +3136,17 @@ function renderCalendar(){
     for(let day=1;day<=totalDays;day++){
         const date=`${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const count=counts[date]||0;
+        const hasReward=rewardsByDate.has(date);
         const classes=[
             'calendar-day',
             count ? 'has-record' : '',
             count>=5 ? 'many-records' : '',
+            hasReward ? 'has-reward' : '',
+            hasReward && !count ? 'reward-only' : '',
             date===today ? 'today' : ''
         ].filter(Boolean).join(' ');
         html+=`
-        <button class="${classes}" onclick="openDay('${date}')" aria-label="${day} de ${months[currentMonth]}, ${count} registros">
+        <button class="${classes}" onclick="openDay('${date}')" aria-label="${day} de ${months[currentMonth]}, ${count} registros${hasReward?', com recompensa':''}">
             ${day}
         </button>`;
     }
@@ -3081,6 +3155,7 @@ function renderCalendar(){
             </div>
             <div class="calendar-legend">
                 <span class="legend-item"><span class="legend-dot"></span>com registros</span>
+                <span class="legend-item"><span class="legend-dot reward"></span>recompensa</span>
                 <span class="legend-item"><span class="legend-today"></span>hoje</span>
             </div>
         </div>
@@ -3089,7 +3164,7 @@ function renderCalendar(){
             <div class="section-heading"><h2>Resumo do mês</h2><span class="eyebrow">visão rápida</span></div>
             <div class="history-stats">
                 <div class="history-stat"><b>${recordedDays}</b><span>dias registrados</span></div>
-                <div class="history-stat"><b>${monthRecords.length}</b><span>registros totais</span></div>
+                <div class="history-stat"><b>${actualMonthRecords.length}</b><span>registros totais</span></div>
                 <div class="history-stat"><b>${String(durationHours).replace('.',',')}h</b><span>atividades</span></div>
             </div>
         </div>
@@ -3213,10 +3288,13 @@ function renderDay(date){
             const config=isDisposition ? STATE_UI.find(cfg=>cfg.name===r.activity) : null;
             const icon=config?.icon || activityIcon(r.activity);
             const visualStyle=isDisposition ? '' : `style="${activityVisualStyle(r.activity)}"`;
-            const time=escapeHTML(r.startTime||'--:--');
-            const detail=isDisposition
-                ? `${r.startTime ? time : 'Sem horário (registro antigo)'} · Nota ${formatStateValue(r.value)}`
-                : `${time}–${getEndTime(r.startTime,r.duration)} · ${formatDuration(Number(r.duration)||0)}`;
+            const reward=r.activity==='Recompensa';
+            const time=reward ? '✦' : escapeHTML(r.startTime||'--:--');
+            const detail=reward
+                ? (r.date>todayISO() ? 'Recompensa prevista' : 'Recompensa · consulte as notas')
+                : (isDisposition
+                    ? `${r.startTime ? time : 'Sem horário (registro antigo)'} · Nota ${formatStateValue(r.value)}`
+                    : `${time}–${getEndTime(r.startTime,r.duration)} · ${formatDuration(Number(r.duration)||0)}`);
             return `
             <div class="timeline-item">
                 <div class="timeline-time">${time}</div>
@@ -3322,6 +3400,7 @@ function editRecord(id){
         `,'Editar registro');
         updateStateRange('editValue','editStateReadout');
     }else{
+        const isReward=record.activity==='Recompensa';
         const d=Number(record.duration)||30;
         showModal(record.activity, `
             <div class="sheet-form">
@@ -3330,12 +3409,12 @@ function editRecord(id){
                         <label class="form-label" for="editDate">Data</label>
                         <input id="editDate" type="date" value="${record.date || ''}">
                     </div>
-                    <div>
+                    ${isReward ? '' : `<div>
                         <label class="form-label" for="editStartTime">Hora inicial</label>
                         <input id="editStartTime" type="time" value="${record.startTime || ''}">
-                    </div>
+                    </div>`}
                 </div>
-
+                ${isReward ? '<p class="plan-form-help">Atualize as notas para registrar se a recompensa aconteceu e, se desejar, por quê.</p>' : `
                 <label class="form-label">Duração</label>
                 <div class="duration-chips">
                     ${[30,60,90,120,180,240].map(v=>
@@ -3348,8 +3427,9 @@ function editRecord(id){
                     <span>min</span>
                 </div>
 
+                `}
                 <div class="notes-heading">
-                    <label class="form-label" for="editNotes">Notas <span>opcional</span></label>
+                    <label class="form-label" for="editNotes">${isReward ? 'Recompensa / observações' : 'Notas'} <span>opcional</span></label>
                     ${notesModelButtonHTML(record.activity,'editNotes')}
                 </div>
                 <textarea id="editNotes">${escapeHTML(record.notes || '')}</textarea>
@@ -3389,6 +3469,9 @@ function saveEditedRecord(id){
 
     if(isState){
         record.value=Number(document.getElementById('editValue').value);
+    }else if(record.activity==='Recompensa'){
+        record.startTime='';
+        record.duration=0;
     }else{
 
         record.startTime =
@@ -4472,6 +4555,13 @@ function handleImport(event){
                     if(!existe){
                         activities.push(novaAtividade);
                         importedActivities++;
+                    }else{
+                        // Preserva nomes, ícones e edições locais; complementa apenas
+                        // o modelo que estiver ausente na atividade já cadastrada.
+                        const local=activities.find(a=>String(a.name||'').trim().toLocaleLowerCase('pt-BR')===String(novaAtividade.name||'').trim().toLocaleLowerCase('pt-BR'));
+                        if(local && !Object.prototype.hasOwnProperty.call(local,'notesTemplate') && typeof novaAtividade.notesTemplate==='string'){
+                            local.notesTemplate=novaAtividade.notesTemplate;
+                        }
                     }
                 });
             }
