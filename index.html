@@ -1515,6 +1515,61 @@ html[data-effect="mud"] .activity-card:active .activity-icon{
 .effect-choice .theme-check{display:none}
 .effect-choice.active .theme-check{display:grid}
 
+
+/* Cores opcionais por atividade: o estilo atual é preservado para a opção Padrão. */
+.activity-card.has-custom-color:not(.reorder-source){
+    background:linear-gradient(148deg,
+        rgba(var(--activity-button-rgb),.30),
+        rgba(var(--activity-button-rgb),.13) 57%,
+        rgba(var(--activity-button-rgb),.07)),var(--surface);
+    border-color:rgba(var(--activity-button-rgb),.68);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 0 0 1px rgba(var(--activity-button-rgb),.10);
+}
+.activity-card.has-custom-color .activity-title-btn{color:var(--heading)}
+.activity-card.has-custom-color .activity-icon{
+    background:rgba(var(--activity-button-rgb),.17);
+    border-color:rgba(var(--activity-button-rgb),.35);
+}
+.activity-card.has-custom-color:active:not(.reorder-source){
+    background:linear-gradient(148deg,rgba(var(--activity-button-rgb),.43),rgba(var(--activity-button-rgb),.18));
+}
+.activity-color-choices{
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px 6px;
+    margin:4px 0 12px;
+}
+.activity-color-choice{
+    appearance:none;min-width:0;display:flex;align-items:center;flex-direction:column;gap:5px;
+    padding:8px 1px 7px;border:1px solid var(--border-soft);border-radius:12px;
+    background:var(--surface);color:var(--text-2);font-size:10px;font-weight:600;
+    cursor:pointer;transition:border-color .14s ease,background .14s ease;
+}
+.activity-color-choice .color-swatch{
+    display:grid;place-items:center;width:29px;height:29px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.15);background:var(--swatch-color,var(--surface-3));
+    color:white;font-size:17px;font-weight:800;
+}
+.activity-color-choice.is-default .color-swatch{
+    background:var(--surface-3);border:2px dashed var(--muted);color:var(--text-2);
+}
+.activity-color-choice.is-selected{
+    border-color:var(--accent);background:var(--accent-soft);color:var(--text);
+}
+.activity-color-choice.is-selected .color-swatch{box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--accent)}
+.activity-color-choice:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.activity-color-help{font-size:11px;color:var(--muted);line-height:1.4;margin-bottom:10px}
+.activity-color-preview-label{color:var(--muted);font-size:10px;margin:0 0 7px}
+.activity-color-preview-area{margin-bottom:17px;display:flex;justify-content:flex-start}
+.activity-color-preview-area .activity-card{
+    width:116px;min-height:84px;flex:none;cursor:default;pointer-events:none;
+    background:var(--surface);border:1px solid var(--border);
+}
+.activity-color-preview-area .activity-card.has-custom-color{
+    background:linear-gradient(148deg,
+        rgba(var(--activity-button-rgb),.30),rgba(var(--activity-button-rgb),.13) 57%,
+        rgba(var(--activity-button-rgb),.07)),var(--surface);
+    border-color:rgba(var(--activity-button-rgb),.68);
+}
+
 </style>
 <script>
 (function(){
@@ -2022,7 +2077,22 @@ const ACTIVITY_COLOR_PALETTE=[
     {color:'#91c95f',rgb:'145,201,95'}
 ];
 
-function activityColorData(name){
+// Paleta universal: funciona tanto nas atividades atuais quanto nas criadas depois.
+// A opção Padrão mantém as cores atuais, sem colorir o fundo do botão.
+const BUTTON_COLOR_OPTIONS=[
+    {label:'Padrão',color:'',rgb:''},
+    {label:'Vermelho',color:'#e96b6b',rgb:'233,107,107'},
+    {label:'Laranja',color:'#e48858',rgb:'228,136,88'},
+    {label:'Amarelo',color:'#e7b34e',rgb:'231,179,78'},
+    {label:'Verde',color:'#91c95f',rgb:'145,201,95'},
+    {label:'Menta',color:'#55c995',rgb:'85,201,149'},
+    {label:'Turquesa',color:'#55c5cf',rgb:'85,197,207'},
+    {label:'Azul',color:'#65aef0',rgb:'101,174,240'},
+    {label:'Roxo',color:'#a88be3',rgb:'168,139,227'},
+    {label:'Rosa',color:'#d9798e',rgb:'217,121,142'}
+];
+
+function defaultActivityColorData(name){
     const text=String(name||'');
     let hash=0;
     for(let i=0;i<text.length;i++){
@@ -2031,10 +2101,73 @@ function activityColorData(name){
     }
     return ACTIVITY_COLOR_PALETTE[Math.abs(hash)%ACTIVITY_COLOR_PALETTE.length];
 }
-
+function allowedButtonColor(color){
+    return BUTTON_COLOR_OPTIONS.find(item=>item.color && item.color===color) || null;
+}
+function selectedActivityButtonColor(name){
+    const activity=activities.find(a=>a.name===name);
+    return allowedButtonColor(activity?.buttonColor);
+}
+function activityColorData(name){
+    return selectedActivityButtonColor(name) || defaultActivityColorData(name);
+}
+function activityButtonVisualStyle(name, color=''){
+    const chosen=allowedButtonColor(color);
+    const c=chosen || defaultActivityColorData(name);
+    return `--activity-color:${c.color};--activity-soft:rgba(${c.rgb},.14);--activity-border:rgba(${c.rgb},.20);--activity-glow:rgba(${c.rgb},.08)`+
+        (chosen ? `;--activity-button-rgb:${chosen.rgb}` : '');
+}
 function activityVisualStyle(name){
-    const c=activityColorData(name);
-    return `--activity-color:${c.color};--activity-soft:rgba(${c.rgb},.14);--activity-border:rgba(${c.rgb},.20);--activity-glow:rgba(${c.rgb},.08)`;
+    return activityButtonVisualStyle(name, selectedActivityButtonColor(name)?.color || '');
+}
+function buttonColorPickerHTML(prefix, name, icon, color=''){
+    const selected=allowedButtonColor(color)?.color || '';
+    const options=BUTTON_COLOR_OPTIONS.map(item=>{
+        const active=selected===item.color;
+        const mark=active?'✓':'';
+        return `<button type="button" class="activity-color-choice ${active?'is-selected':''} ${item.color?'':'is-default'}" `+
+            `style="${item.color ? '--swatch-color:'+item.color : ''}" `+
+            `title="${item.label}" aria-label="Cor ${item.label}" aria-pressed="${active}" `+
+            `data-button-color="${item.color}" onclick="chooseActivityButtonColor('${prefix}','${item.color}')">`+
+            `<span class="color-swatch" aria-hidden="true">${mark || (!item.color?'↺':'')}</span>`+
+            `<span>${item.label}</span></button>`;
+    }).join('');
+    return `<label class="form-label" id="${prefix}ButtonColorLabel">Cor do botão</label>`+
+        `<input type="hidden" id="${prefix}ActivityButtonColor" value="${selected}">`+
+        `<div class="activity-color-choices" role="group" aria-labelledby="${prefix}ButtonColorLabel" `+
+            `id="${prefix}ButtonColorChoices">${options}</div>`+
+        `<p class="activity-color-help">A cor escolhida destaca o botão na tela inicial. Padrão mantém o visual de hoje.</p>`+
+        `<p class="activity-color-preview-label">Prévia do botão</p>`+
+        `<div class="activity-color-preview-area">`+
+          `<div id="${prefix}ButtonColorPreview" class="card activity-card ${selected?'has-custom-color':''}" `+
+          `style="${activityButtonVisualStyle(name,selected)}">`+
+          `<div class="activity-icon"><i data-lucide="${icon}"></i></div>`+
+          `<div class="activity-title-btn">${escapeHTML(activityButtonLabel({name}))}</div>`+
+          `</div></div>`;
+}
+function chooseActivityButtonColor(prefix, color){
+    const chosen=allowedButtonColor(color);
+    const selected=chosen?.color || '';
+    const field=document.getElementById(prefix+'ActivityButtonColor');
+    if(!field) return;
+    field.value=selected;
+    const choices=document.getElementById(prefix+'ButtonColorChoices');
+    choices?.querySelectorAll('.activity-color-choice').forEach(button=>{
+        const active=button.dataset.buttonColor===selected;
+        button.classList.toggle('is-selected',active);
+        button.setAttribute('aria-pressed',String(active));
+        const swatch=button.querySelector('.color-swatch');
+        if(swatch) swatch.textContent=active?'✓':(button.dataset.buttonColor?'':'↺');
+    });
+    const preview=document.getElementById(prefix+'ButtonColorPreview');
+    if(!preview) return;
+    const name=document.getElementById(prefix==='rename'?'renameActivityName':'newActivityName')?.value.trim() || 'Nova atividade';
+    const icon=document.getElementById(prefix==='rename'?'renameActivityIcon':'newActivityIcon')?.value || 'circle-dot';
+    preview.classList.toggle('has-custom-color',!!selected);
+    preview.style.cssText=activityButtonVisualStyle(name,selected);
+    preview.querySelector('.activity-title-btn').textContent=activityButtonLabel({name});
+    preview.querySelector('.activity-icon').innerHTML=`<i data-lucide="${icon}"></i>`;
+    lucide.createIcons();
 }
 
 function iconOptionsHTML(selected='circle-dot'){
@@ -2048,6 +2181,10 @@ function updateIconPreview(selectId,previewId){
     const preview=document.getElementById(previewId);
     if(!select || !preview) return;
     preview.innerHTML=`<i data-lucide="${select.value}"></i>`;
+    if(selectId==='newActivityIcon' || selectId==='renameActivityIcon'){
+        chooseActivityButtonColor(selectId==='newActivityIcon'?'new':'rename',
+            document.getElementById(selectId==='newActivityIcon'?'newActivityButtonColor':'renameActivityButtonColor')?.value || '');
+    }
     lucide.createIcons();
 }
 
@@ -2221,7 +2358,7 @@ function renderActivities(){
 
     normalActivities.forEach(activity=>{
         const card=document.createElement("div");
-        card.className="card activity-card";
+        card.className="card activity-card"+(selectedActivityButtonColor(activity.name)?" has-custom-color":"");
         card.style.cssText=activityVisualStyle(activity.name);
         card.draggable=!window.matchMedia('(pointer:coarse)').matches;
         card.dataset.activityName=activity.name;
@@ -2321,7 +2458,7 @@ function addActivity(){
             <p class="add-activity-note">Crie uma atividade para aparecer na grade de registro.</p>
 
             <label class="form-label" for="newActivityName">Nome da atividade</label>
-            <input id="newActivityName" type="text" maxlength="40" autocomplete="off" placeholder="Ex.: Estudo, Caminhada, Projeto">
+            <input id="newActivityName" type="text" maxlength="40" autocomplete="off" placeholder="Ex.: Estudo, Caminhada, Projeto" oninput="chooseActivityButtonColor('new',document.getElementById('newActivityButtonColor')?.value || '')">
 
             <label class="form-label" for="newActivityIcon">Ícone</label>
             <div class="icon-picker-row">
@@ -2332,6 +2469,8 @@ function addActivity(){
                     </select>
                 </div>
             </div>
+
+            ${buttonColorPickerHTML('new','Nova atividade','circle-dot')}
 
             <button class="primary-action" onclick="createActivity()"><i data-lucide="plus"></i> Adicionar atividade</button>
         </div>
@@ -2353,7 +2492,8 @@ function createActivity(){
         return;
     }
     const icon=document.getElementById('newActivityIcon')?.value || 'circle-dot';
-    activities.push({name,icon,archived:false});
+    const buttonColor=allowedButtonColor(document.getElementById('newActivityButtonColor')?.value)?.color;
+    activities.push({...{name,icon,archived:false},...(buttonColor?{buttonColor}:{})});
     save();
     closeModal();
     renderActivities();
@@ -2370,11 +2510,12 @@ function openRenameActivity(activityName){
 
     const currentActivity=activities.find(a=>a.name===activityName);
     const currentIcon=currentActivity?.icon || ACTIVITY_ICONS[activityName] || 'circle-dot';
+    const currentButtonColor=allowedButtonColor(currentActivity?.buttonColor)?.color || '';
 
     showModal('Editar atividade', `
         <div class="sheet-form">
             <p class="add-activity-note">
-                Você pode alterar o nome e o ícone. O novo nome também será aplicado aos registros anteriores dessa atividade.
+                Você pode alterar o nome, o ícone e a cor do botão. O novo nome também será aplicado aos registros anteriores dessa atividade.
             </p>
 
             <label class="form-label" for="renameActivityName">Nome</label>
@@ -2382,7 +2523,8 @@ function openRenameActivity(activityName){
                    type="text"
                    maxlength="40"
                    autocomplete="off"
-                   value="${escapeHTML(activityName)}">
+                   value="${escapeHTML(activityName)}"
+                   oninput="chooseActivityButtonColor('rename',document.getElementById('renameActivityButtonColor')?.value || '')">
 
             <label class="form-label" for="renameActivityIcon">Ícone</label>
             <div class="icon-picker-row">
@@ -2393,6 +2535,8 @@ function openRenameActivity(activityName){
                     </select>
                 </div>
             </div>
+
+            ${buttonColorPickerHTML('rename',activityName,currentIcon,currentButtonColor)}
 
             ${Object.prototype.hasOwnProperty.call(currentActivity||{},'notesTemplate') ? `
                 <label class="form-label" for="renameNotesTemplate">Modelo das notas <span>editável</span></label>
@@ -2448,6 +2592,9 @@ function saveRenamedActivity(oldName){
 
     activity.name=newName;
     activity.icon=newIcon;
+    const buttonColor=allowedButtonColor(document.getElementById('renameActivityButtonColor')?.value)?.color;
+    if(buttonColor) activity.buttonColor=buttonColor;
+    else delete activity.buttonColor; // Padrão restaura as cores originais.
     const templateInput=document.getElementById('renameNotesTemplate');
     if(templateInput && Object.prototype.hasOwnProperty.call(activity,'notesTemplate')){
         activity.notesTemplate=templateInput.value;
@@ -4569,6 +4716,11 @@ function handleImport(event){
                         const local=activities.find(a=>String(a.name||'').trim().toLocaleLowerCase('pt-BR')===String(novaAtividade.name||'').trim().toLocaleLowerCase('pt-BR'));
                         if(local && !Object.prototype.hasOwnProperty.call(local,'notesTemplate') && typeof novaAtividade.notesTemplate==='string'){
                             local.notesTemplate=novaAtividade.notesTemplate;
+                        }
+                        // Uma cor de backup é recuperada somente se ainda não houver
+                        // uma escolha de cor local, preservando personalizações existentes.
+                        if(local && !Object.prototype.hasOwnProperty.call(local,'buttonColor') && allowedButtonColor(novaAtividade.buttonColor)){
+                            local.buttonColor=novaAtividade.buttonColor;
                         }
                     }
                 });
