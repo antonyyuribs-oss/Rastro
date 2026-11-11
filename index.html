@@ -1570,6 +1570,33 @@ html[data-effect="mud"] .activity-card:active .activity-icon{
     border-color:rgba(var(--activity-button-rgb),.68);
 }
 
+
+/* Rastro — visualização de moods, marcos e briefing (2026-11) */
+.mood-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 6px}
+.mood-card{display:flex;align-items:center;justify-content:center;gap:6px;flex-direction:column;min-height:72px;padding:8px 4px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text-2);font-size:11px;font-weight:650}
+.mood-card svg{width:18px;height:18px;color:var(--accent-icon)}
+.mood-card.active{background:var(--accent-soft);border-color:var(--accent);color:var(--heading)}
+.mood-help{font-size:10px;color:var(--muted);margin:7px 0 18px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.mood-edit-recent{min-height:34px;padding:5px 9px;font-size:10px;color:var(--accent-text);background:transparent}
+.rm-help{margin:-5px 0 10px;color:var(--muted);font-size:11px}
+.rm-lines{display:grid;gap:7px;margin:4px 0 10px}
+.rm-line{display:grid;grid-template-columns:minmax(0,1fr) 38px;gap:6px;align-items:center;border-radius:12px;border:1px solid var(--border);background:var(--surface-3);padding:3px 3px 3px 9px}
+.rm-line input{margin:0!important;border:0!important;box-shadow:none!important;min-height:40px!important;padding:7px 3px!important;background:transparent!important;color:var(--text-2)!important;font-size:13px}
+.rm-line.milestone{border-color:rgba(var(--sand-rgb),.42);background:rgba(var(--sand-rgb),.065)}
+.rm-line.milestone input{color:var(--sand)!important;font-weight:760}
+.rm-line .rm-remove{min-height:34px;width:34px;padding:0;display:grid;place-items:center;border:0;background:transparent;color:var(--muted)}
+.rm-line .rm-remove svg{height:16px;width:16px}
+.rm-add{font-size:11px;margin:0 0 13px;padding:7px 9px;min-height:36px;background:transparent;color:var(--accent-text)}
+.briefing-modal .modal-content{height:min(96dvh,1040px);max-height:96dvh;display:flex;flex-direction:column}
+.briefing-modal .sheet-form{flex:1;min-height:0;display:flex;flex-direction:column}
+.briefing-modal .briefing-editor{min-height:300px!important;max-height:none!important;resize:vertical;flex:1;line-height:1.5;font-size:14px}
+.briefing-modal .briefing-actions{flex-shrink:0}
+.briefing-mood-info{font-size:11px;color:var(--muted);margin:0 0 10px}
+.briefing-templates-list{display:grid;gap:8px}
+.briefing-templates-list button{display:flex;align-items:center;justify-content:space-between;text-align:left}
+.briefing-template-editor{min-height:46dvh!important;max-height:65dvh!important;line-height:1.5}
+@media(min-width:700px){.briefing-modal .modal-content{height:min(90dvh,980px)}}
+
 </style>
 <script>
 (function(){
@@ -1638,6 +1665,34 @@ html[data-effect="mud"] .activity-card:active .activity-icon{
 </nav>
 
 <script>
+
+
+// Atualização de novembro: registros observacionais independentes e modelos configuráveis.
+const RM_NEW_TEMPLATE="Sair do quarto imediatamente\nEscovar os dentes\nBeber água\nSair ao sol\nOrar\nJuntar o lixo\nOrganizar área\nTomar banho\nPreparar o café\nLer a Bíblia\nTomar café com a família\nLevar o filho à escola\nEntrar no escritório somente após concluir a Rotina Matinal";
+const RM_MILESTONES=new Set(['Sair do quarto imediatamente','Sair ao sol','Entrar no escritório somente após concluir a Rotina Matinal']);
+const MOOD_UI=[
+    {name:'Lento',icon:'snail'},{name:'Desmotivado',icon:'cloud'},
+    {name:'Sonolento',icon:'moon'},{name:'Agitado',icon:'zap'},
+    {name:'Disposto',icon:'sun'},{name:'Empolgado',icon:'flame'}
+];
+const DEFAULT_BRIEFING_PLAN="PLANO DE EXECUÇÃO\n\nMANHÃ\n\nTARDE\n\nNOITE\n\nTarefas que decidi executar:\n\n1\n2\n3\n\nA decisão está tomada. Agora é execução.";
+const DEFAULT_BRIEFING_MOODS={
+  "Lento": "LENTO — ACORDE PARA A EXECUÇÃO\n\nVocê está lento. E daí?\nVai esperar seu cérebro funcionar na velocidade ideal para cumprir suas responsabilidades?\nPare de negociar com a lentidão. Você não precisa trabalhar rápido agora. Precisa começar.\n\nCALEJE SUA MENTE\nCada tarefa executada apesar da lentidão é um exercício de disciplina.\n\nVISUALIZE A EXECUÇÃO\nIdentifique a primeira tarefa e imagine a ação concreta para começá-la.\n\nPOTE DE BISCOITOS\nLembre-se de um dia em que começou lentamente e, mesmo assim, concluiu suas obrigações.\n\nREGRA DOS 40%\nQuestione a sensação de que já chegou ao seu limite de execução.\n\nORGANIZAÇÃO DO TEMPO\nDefina seu bloco e suas entregas; não transforme um compromisso delimitado em um dia inteiro.\n\nDIÁLOGO INTERNO\nPare de repetir que está lento. Você já sabe. Agora execute.\n\nACEITE O DESCONFORTO\nNão confunda ritmo lento com incapacidade.\n\nORDEM FINAL: Comece pela primeira tarefa. Trabalhe no ritmo possível, sem abandonar o compromisso.",
+  "Desmotivado": "DESMOTIVADO — A DECISÃO JÁ FOI TOMADA\n\nVocê não quer trabalhar? E daí?\nDesde quando suas responsabilidades dependem da sua vontade?\n\nCALEJE SUA MENTE\nEnfrente a obrigação que está evitando. Treine a capacidade de fazer o necessário.\n\nVISUALIZAÇÃO\nAntecipe a vontade de desistir ou procurar outra atividade. Decida agora como responder.\n\nPOTE DE BISCOITOS\nRecorde uma ocasião em que você executou apesar da falta de motivação.\n\nREGRA DOS 40%\nO impulso de desistir pode aparecer antes de você ter esgotado sua capacidade.\n\nORGANIZAÇÃO DO TEMPO\nDefina exatamente o que fará, o início e o encerramento.\n\nE SE VOCÊ CONSEGUIR?\nE se você concluir o compromisso de hoje apesar da resistência?\n\nDIÁLOGO INTERNO\nNão negocie novamente o que já decidiu. Comece a primeira tarefa.\n\nMOTIVAÇÃO VERSUS DETERMINAÇÃO\nA motivação é variável. Seu compromisso foi escolhido.\n\nACEITE O DESCONFORTO\nA tarefa pode continuar desagradável, e ainda assim ser executada.\n\nADVERSIDADE COMO COMBUSTÍVEL\nLembre-se das consequências de deixar obrigações acumularem. Use isso para agir agora.\n\nORDEM FINAL: Pare de negociar. Execute o que decidiu.",
+  "Sonolento": "SONOLENTO — ASSUMA O CONTROLE\n\nVocê está com sono. Já percebeu. Quantas vezes vai precisar confirmar isso antes de começar?\nVocê abriu o Briefing para transformar uma decisão em execução.\n\nCALEJE SUA MENTE\nTreine o início de obrigações quando a disposição não acompanha a decisão.\n\nVISUALIZAÇÃO\nImagine-se abrindo o trabalho e executando a primeira tarefa. Antecipe a resistência.\n\nPOTE DE BISCOITOS\nRecupere uma ocasião em que, mesmo com baixa disposição, iniciou e concluiu algo importante.\n\nORGANIZAÇÃO DO TEMPO\nDefina início, encerramento e tarefas. Evite transformar o compromisso em obrigação sem fim.\n\nE SE VOCÊ CONSEGUIR?\nE se conseguir cumprir o briefing mesmo sem a disposição ideal?\n\nDIÁLOGO INTERNO\nNão transforme a sensação de sono no assunto principal. A tarefa está diante de você.\n\nMOTIVAÇÃO VERSUS DETERMINAÇÃO\nO compromisso não depende de entusiasmo.\n\nACEITE O DESCONFORTO\nNão precisa gostar de como está se sentindo para começar.\n\nORDEM FINAL: Abra a primeira tarefa. Comece. Não reabra a negociação a cada dificuldade.",
+  "Agitado": "AGITADO — DOMINE SUA ATENÇÃO\n\nSua mente quer estímulos, novidades e prazer imediato. Quem está no comando?\n\nCALEJE SUA MENTE\nTreine permanecer numa tarefa pouco estimulante. O impulso de sair não é uma ordem.\n\nVISUALIZAÇÃO\nAntecipe a vontade de abrir o YouTube, pegar o celular ou iniciar outra atividade. Prepare a resposta.\n\nREGRA DOS 40%\nA primeira vontade de escapar não significa o fim da sua concentração.\n\nORGANIZAÇÃO DO TEMPO\nDelimite o bloco e as tarefas. Durante esse período, sua atenção tem um destino.\n\nE SE VOCÊ CONSEGUIR?\nE se permanecer no compromisso até executar o que decidiu?\n\nDIÁLOGO INTERNO\nReconheça justificativas para se dispersar e retorne à tarefa.\n\nMOTIVAÇÃO VERSUS DETERMINAÇÃO\nO compromisso tem prioridade sobre a vontade momentânea de estímulo.\n\nACEITE O DESCONFORTO\nTolere o tédio e a inquietação sem fugir automaticamente.\n\nORDEM FINAL: Uma tarefa. Uma direção. Termine o que decidiu fazer.",
+  "Disposto": "DISPOSTO — EXECUTE COM PRECISÃO\n\nVocê está disposto. Ótimo. Disposição sem direção pode virar desperdício.\n\nCALEJE SUA MENTE\nAproveite a disposição para enfrentar tarefas difíceis que você costuma evitar.\n\nVISUALIZAÇÃO\nVeja o bloco concluído e o restante do dia preservado. Prepare as ações necessárias.\n\nREGRA DOS 40%\nNão recue diante da primeira dificuldade; exija concentração e qualidade dentro do bloco.\n\nORGANIZAÇÃO DO TEMPO\nEstabeleça prioridades e respeite o encerramento. Energia não autoriza aumentar a carga sem limite.\n\nDIÁLOGO INTERNO\nSentir-se bem não substitui executar algo importante.\n\nMOTIVAÇÃO VERSUS DETERMINAÇÃO\nA disciplina sustenta o compromisso e também determina a hora de terminar.\n\nADVERSIDADE COMO COMBUSTÍVEL\nLembre-se dos dias em que começar foi difícil. Use as condições de hoje com propósito.\n\nORDEM FINAL: Execute as prioridades com concentração. Cumpra o bloco. Encerre no horário decidido.",
+  "Empolgado": "EMPOLGADO — DOMINE SEU ENTUSIASMO\n\nVocê tem ideias e vontade de fazer mais. Mas quantas vezes já ultrapassou seus limites por gostar do que fazia?\n\nCALEJE SUA MENTE\nTreine encerrar uma atividade prazerosa quando chegar a hora decidida.\n\nVISUALIZAÇÃO\nImagine chegar ao fim do bloco ainda com vontade de continuar. Veja-se encerrando conforme o plano.\n\nPOTE DE BISCOITOS\nLembre-se das vezes em que respeitou limites e preservou tempo para o que importa.\n\nORGANIZAÇÃO DO TEMPO\nDefina suas entregas. Não acrescente outras tarefas durante o bloco apenas por entusiasmo.\n\nE SE VOCÊ CONSEGUIR?\nE se terminar satisfeito sem precisar esgotar seu tempo e sua energia?\n\nDIÁLOGO INTERNO\n“Só mais uma coisa” é uma negociação. Não deixe que ela substitua a decisão tomada.\n\nMOTIVAÇÃO VERSUS DETERMINAÇÃO\nEntusiasmo não revoga limites planejados.\n\nACEITE O DESCONFORTO\nAceite a frustração de interromper algo agradável.\n\nORDEM FINAL: Faça o que planejou. Termine no horário. Preserve sua energia para o restante da vida."
+};
+const BRIEFING_TEMPLATE_KEY='rastro_briefing_mood_templates_v1';
+const BRIEFING_PLAN_KEY='rastro_briefing_plan_v1';
+let briefingPlanText=localStorage.getItem(BRIEFING_PLAN_KEY) || DEFAULT_BRIEFING_PLAN;
+let briefingMoodTemplates=Object.assign({},DEFAULT_BRIEFING_MOODS,JSON.parse(localStorage.getItem(BRIEFING_TEMPLATE_KEY)||'{}'));
+function isMoodRecord(r){return !!r && (r.recordType==='mood' || (r.activity==='Estado de hoje' && !!r.mood));}
+function moodRecordsForDate(date){return records.filter(r=>isMoodRecord(r)&&r.date===date).sort((a,b)=>String(a.startTime||'').localeCompare(String(b.startTime||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));}
+function lastMoodOfDay(date=localDateISO()){const list=moodRecordsForDate(date);return list.length?list[list.length-1]:null;}
+function isBriefingActivity(name){return String(name||'').trim().toLocaleLowerCase('pt-BR')==='briefing' || (typeof activities!=='undefined' && activities.some(a=>a.name===name&&a.kind==='briefing'));}
+function isMorningRoutine(name){return String(name||'')==='Rotina de Despertamento';}
 
 const STATE_ACTIVITIES = [
 "mente ao acordar",
@@ -1725,6 +1780,27 @@ if(!localStorage.getItem(PHASE2_INIT_KEY)){
     }
     localStorage.setItem('rastro_activities',JSON.stringify(activities));
     localStorage.setItem(PHASE2_INIT_KEY,'1');
+}
+
+
+// Atualiza apenas o modelo da R.M., preservando todos os registros históricos.
+const RM_MIGRATION_KEY='rastro_rm_modelo_individual_v2';
+if(!localStorage.getItem(RM_MIGRATION_KEY)){
+    const rm=activities.find(a=>isMorningRoutine(a.name));
+    if(rm){rm.notesTemplate=RM_NEW_TEMPLATE;localStorage.setItem('rastro_activities',JSON.stringify(activities));}
+    localStorage.setItem(RM_MIGRATION_KEY,'1');
+}
+// O briefing é uma atividade normal: não o recriar após exclusão deliberada.
+const BRIEFING_INIT_KEY='rastro_briefing_activity_initialized_v1';
+if(!localStorage.getItem(BRIEFING_INIT_KEY)){
+    if(!activities.some(a=>isBriefingActivity(a.name))){
+        const after=activities.findIndex(a=>a.name==='Rotina de Trabalho');
+        activities.splice(after<0?activities.length:after+1,0,{name:'Briefing',icon:'clipboard-list',shortcode:'B',kind:'briefing',archived:false});
+    }
+    const cfg=activities.find(a=>a.name.toLocaleLowerCase('pt-BR')==='briefing');
+    if(cfg)cfg.kind='briefing';
+    localStorage.setItem('rastro_activities',JSON.stringify(activities));
+    localStorage.setItem(BRIEFING_INIT_KEY,'1');
 }
 
 let records =
@@ -1922,6 +1998,8 @@ localStorage.setItem(
 "rastro_weekly_plans",
 JSON.stringify(weeklyPlans)
 );
+localStorage.setItem(BRIEFING_TEMPLATE_KEY,JSON.stringify(briefingMoodTemplates));
+localStorage.setItem(BRIEFING_PLAN_KEY,briefingPlanText);
 }
 
 function formatHeaderDate(){
@@ -2049,7 +2127,7 @@ const ACTIVITY_ICONS = {
     'Leitura':'book-open','Xadrez':'chess-knight','Bíblia':'book-marked','Oração':'cross',
     'Culto':'church','Estudo Musical':'music','Ensaio':'guitar','Esposa':'heart',
     'Filhos':'baby','Família':'users','Redes Sociais':'smartphone','YouTube':'play',
-    'Netflix':'tv','Casa':'house','Meditação':'brain'
+    'Netflix':'tv','Casa':'house','Meditação':'brain','Briefing':'clipboard-list','Estado de hoje':'smile'
 };
 
 
@@ -2341,10 +2419,16 @@ function renderActivities(){
     home.innerHTML=`
         <section aria-labelledby="todayStateTitle">
             <div class="section-heading">
-                <h2 id="todayStateTitle">Estado de hoje</h2>
+                <h2 id="todayStateTitle">Notas e disposição</h2>
                 <span class="eyebrow">toque para registrar</span>
             </div>
             <div class="state-grid">${stateCards}</div>
+        </section>
+
+        <section aria-labelledby="moodTitle">
+            <div class="section-heading"><h2 id="moodTitle">Estado de hoje</h2><span class="eyebrow">toque para registrar</span></div>
+            <div class="mood-grid" id="moodGrid"></div>
+            <div class="mood-help" id="moodHelp"></div>
         </section>
 
         <section aria-labelledby="activityTitle">
@@ -2356,6 +2440,7 @@ function renderActivities(){
         </section>
     `;
 
+    renderMoodButtons();
     normalActivities.forEach(activity=>{
         const card=document.createElement("div");
         card.className="card activity-card"+(selectedActivityButtonColor(activity.name)?" has-custom-color":"");
@@ -2391,21 +2476,37 @@ function renderActivities(){
         document.getElementById("activitiesGrid").appendChild(card);
     });
 
-    if(archived.length){
-        const div=document.createElement('div');
-        div.className='archived-wrap';
-        div.innerHTML=`<div class="section-label">Arquivadas</div><div class="archived-grid">`+
-            archived.map(a=>{
-                const idx=activities.indexOf(a);
-                return `<div class="archived-item">
-                    <div class="activity-name">${escapeHTML(a.name)}</div>
-                    <button class="restore-btn" onclick="event.stopPropagation();unarchiveActivity(${idx})">Restaurar</button>
-                </div>`;
-            }).join('')+`</div>`;
-        home.appendChild(div);
-    }
-
     lucide.createIcons();
+}
+
+
+function renderMoodButtons(){
+    const host=document.getElementById('moodGrid');
+    const help=document.getElementById('moodHelp');
+    if(!host || !help) return;
+    const latest=lastMoodOfDay();
+    host.innerHTML=MOOD_UI.map(m=>`
+        <button type="button" class="mood-card ${latest?.mood===m.name?'active':''}"
+            onclick="registerMood(${inlineArg(m.name)})" aria-label="Registrar ${escapeHTML(m.name)}">
+            <i data-lucide="${m.icon}"></i><span>${escapeHTML(m.name)}</span>
+        </button>`).join('');
+    const all=moodRecordsForDate(todayISO());
+    help.innerHTML=latest
+        ? `<span>${all.length} ${all.length===1?'registro':'registros'} hoje · último ${escapeHTML(latest.startTime||'')}</span>
+            <button type="button" class="mood-edit-recent" onclick="editRecord(${inlineArg(latest.id)})">Editar / observação</button>`
+        : '<span>Um toque salva o estado e o horário. Observações são opcionais.</span>';
+    lucide.createIcons();
+}
+function registerMood(name){
+    if(!MOOD_UI.some(m=>m.name===name)) return;
+    const now=new Date();
+    const record={id:`mood-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+        recordType:'mood',activity:'Estado de hoje',mood:name,date:localDateISO(now),
+        startTime:localTimeHHMM(now),createdAt:now.toISOString(),notes:''};
+    records.push(record);
+    save();
+    renderMoodButtons();
+    showToast(`${name} registrado. Use "Editar / observação" para complementar.`);
 }
 
 function archiveActivity(index){
@@ -2664,6 +2765,80 @@ function insertNotesModel(activity, textareaId){
     textarea.focus();
 }
 
+
+function morningRoutineEditorHTML(){
+    const lines=activityNotesTemplate('Rotina de Despertamento').split('\n').map(s=>s.trim()).filter(Boolean);
+    return `<p class="rm-help">Mantenha o que fez; remova o que não fez. Os marcos essenciais aparecem em destaque.</p>
+        <div id="rmLines" class="rm-lines">${lines.map(rmLineHTML).join('')}</div>
+        <button type="button" class="rm-add" onclick="addRmLine()">+ Adicionar linha</button>
+        <label class="form-label" for="rmExtraNotes">Outras observações <span>opcional</span></label>
+        <textarea id="rmExtraNotes" placeholder="Observações adicionais"></textarea>`;
+}
+function rmLineHTML(value){
+    const essential=RM_MILESTONES.has(value);
+    return `<div class="rm-line ${essential?'milestone':''}">
+        <input type="text" aria-label="Item da Rotina Matinal" value="${escapeHTML(value)}" oninput="refreshRmLineStyle(this)">
+        <button type="button" class="rm-remove" aria-label="Remover item" onclick="this.closest('.rm-line').remove()"><i data-lucide="x"></i></button>
+    </div>`;
+}
+function refreshRmLineStyle(input){input.closest('.rm-line')?.classList.toggle('milestone',RM_MILESTONES.has(input.value.trim()));}
+function addRmLine(){
+    const host=document.getElementById('rmLines');if(!host)return;
+    host.insertAdjacentHTML('beforeend',rmLineHTML(''));
+    lucide.createIcons();host.lastElementChild?.querySelector('input')?.focus();
+}
+function readMorningRoutineNotes(){
+    const items=[...document.querySelectorAll('#rmLines .rm-line input')].map(e=>e.value.trim()).filter(Boolean);
+    const extra=document.getElementById('rmExtraNotes')?.value.trim()||'';
+    return items.join('\n')+(extra?'\n\n'+extra:'');
+}
+function briefingModelForCurrentMood(){
+    const date=document.getElementById('date')?.value || document.getElementById('editDate')?.value || todayISO();
+    const latest=lastMoodOfDay(date);
+    return latest?{mood:latest.mood,template:briefingMoodTemplates[latest.mood]||''}:null;
+}
+function briefingModelButtonHTML(textareaId){
+    return `<button type="button" class="notes-model-btn" onclick="insertBriefingModel(${inlineArg(textareaId)})">Modelo</button>`;
+}
+function insertBriefingModel(textareaId){
+    const textarea=document.getElementById(textareaId);
+    if(!textarea)return;
+    const mood=briefingModelForCurrentMood();
+    let text=textarea.value;
+    const firstLine=(briefingPlanText.split('\n').find(x=>x.trim())||'PLANO DE EXECUÇÃO').trim();
+    if(!text.includes(firstLine)) text=briefingPlanText+(text.trim()?'\n\n'+text:'');
+    if(mood?.template && !text.includes(mood.template)) text=text.trimEnd()+'\n\n'+mood.template;
+    textarea.value=text;
+    textarea.dispatchEvent(new Event('input',{bubbles:true}));
+    textarea.focus();
+    showToast(mood?`Modelo de ${mood.mood} acrescentado.`:'Plano acrescentado. Registre um mood para incluir orientações específicas.');
+}
+function openBriefingTemplateMenu(){
+    showModal('Modelos do Briefing',`
+        <p class="menu-note">Edite o texto de cada estado. O Plano de Execução é inserido antes do modelo; os registros anteriores não são modificados.</p>
+        <div class="briefing-templates-list">
+            <button onclick="openBriefingTemplateEditor('Plano de Execução')">Plano de Execução<i data-lucide="chevron-right"></i></button>
+            ${MOOD_UI.map(m=>`
+            <button onclick="openBriefingTemplateEditor(${inlineArg(m.name)})">${escapeHTML(m.name)}<i data-lucide="chevron-right"></i></button>`).join('')}</div>
+    `,'Configuração');
+}
+function openBriefingTemplateEditor(mood){
+    const isPlan=mood==='Plano de Execução';
+    if(!isPlan && !MOOD_UI.some(m=>m.name===mood))return;
+    showModal('Modelo: '+mood,`
+        <label class="form-label" for="briefingTemplateEdit">Texto usado no Briefing</label>
+        <textarea id="briefingTemplateEdit" class="briefing-template-editor">${escapeHTML(isPlan?briefingPlanText:(briefingMoodTemplates[mood]||''))}</textarea>
+        <button class="primary-action" onclick="saveBriefingTemplate(${inlineArg(mood)})">Salvar modelo</button>
+        <button class="secondary-action" onclick="openBriefingTemplateMenu()">Voltar à lista</button>
+    `,'Configuração');
+}
+function saveBriefingTemplate(mood){
+    const value=document.getElementById('briefingTemplateEdit')?.value||'';
+    if(mood==='Plano de Execução') briefingPlanText=value;
+    else briefingMoodTemplates[mood]=value;
+    save();openBriefingTemplateMenu();showToast('Modelo salvo.');
+}
+
 function openRegister(activity, selectedDay=null){
 
     const isState = STATE_ACTIVITIES.includes(activity.toLowerCase());
@@ -2688,8 +2863,10 @@ function openRegister(activity, selectedDay=null){
             </div>
             <p class="state-time-help">Você pode registrar várias notas no mesmo dia. Cada avaliação fica preservada no histórico.</p>
             ` : `
-            <label class="form-label" for="date">Data</label>
-            <input id="date" type="date" value="${today}">
+            <div class="form-row">
+                <div><label class="form-label" for="date">Data</label><input id="date" type="date" value="${today}"></div>
+                <div><label class="form-label" for="stateTime">Hora e minuto</label><input id="stateTime" type="time" value="${localTimeHHMM()}"></div>
+            </div>
             `}
 
             <label class="form-label" for="value">Como está agora? <span>-10 a +10</span></label>
@@ -2723,10 +2900,10 @@ function openRegister(activity, selectedDay=null){
                     <label class="form-label" for="date">Data</label>
                     <input id="date" type="date" value="${today}">
                 </div>
-                ${isReward ? '' : `<div>
-                    <label class="form-label" for="startTime">Hora inicial</label>
+                <div>
+                    <label class="form-label" for="startTime">Hora inicial <span>${isReward?'opcional':''}</span></label>
                     <input id="startTime" type="time">
-                </div>`}
+                </div>
             </div>
             ${isReward ? '<p class="plan-form-help">Escolha a data da recompensa. Descreva o que deseja fazer nas notas; depois você pode editá-las para registrar o que aconteceu.</p>' : `
             <label class="form-label">Duração <span>toque para selecionar</span></label>
@@ -2744,9 +2921,10 @@ function openRegister(activity, selectedDay=null){
             `}
             <div class="notes-heading">
                 <label class="form-label" for="notes">${isReward ? 'Recompensa / observações' : 'Notas'} <span>opcional</span></label>
-                ${notesModelButtonHTML(activity,'notes')}
+                ${isBriefingActivity(activity)?briefingModelButtonHTML('notes'):(isMorningRoutine(activity)?'':notesModelButtonHTML(activity,'notes'))}
             </div>
-            <textarea id="notes" placeholder="O que vale a pena deixar registrado?"></textarea>
+            ${isMorningRoutine(activity)?morningRoutineEditorHTML():`<textarea id="notes" class="${isBriefingActivity(activity)?'briefing-editor':''}" placeholder="O que vale a pena deixar registrado?"></textarea>`}
+            ${isBriefingActivity(activity)?`<p class="briefing-mood-info">Modelo: plano de execução + orientações do último mood registrado hoje (${escapeHTML(lastMoodOfDay()?.mood||'sem registro')}).</p>`:''}
 
             <button class="primary-action" onclick="saveActivityRecord(${inlineArg(activity)})">
                 <i data-lucide="check"></i> Registrar
@@ -2764,6 +2942,7 @@ function openRegister(activity, selectedDay=null){
     }
 
     showModal(activity,content,'Novo registro');
+    if(isBriefingActivity(activity))document.querySelector('.modal')?.classList.add('briefing-modal');
     if(isState) updateStateRange('value','stateReadout');
 }
 
@@ -2824,7 +3003,7 @@ function saveStateRecord(activity){
     if(!dateEl || !valueEl || !dateEl.value) return;
 
     const repeatable=isRepeatedState(activity);
-    const time=repeatable ? (timeEl?.value || '') : '';
+    const time=timeEl?.value || '';
     if(repeatable && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){
         showToast('Informe a hora e o minuto da avaliação.','error');
         timeEl?.focus();
@@ -2838,10 +3017,8 @@ function saveStateRecord(activity){
         value:Number(valueEl.value),
         notes:notesEl?.value || ''
     };
-    if(repeatable){
-        record.startTime=time;
-        record.createdAt=new Date().toISOString();
-    }
+    if(time)record.startTime=time;
+    record.createdAt=new Date().toISOString();
     records.push(record);
 
     save();
@@ -2864,9 +3041,9 @@ function saveActivityRecord(activity){
         id:Date.now(),
         activity,
         date:dateEl.value,
-        startTime:activity==='Recompensa' ? '' : (startEl?.value || ''),
+        startTime:startEl?.value || '',
         duration:activity==='Recompensa' ? 0 : Math.max(1,Number(durationEl.value)||30),
-        notes:notesEl?.value || ''
+        notes:isMorningRoutine(activity)?readMorningRoutineNotes():(notesEl?.value || '')
     });
 
     save();
@@ -3440,12 +3617,13 @@ function renderDay(date){
     const timeline=chronologicalRecords.length
         ? chronologicalRecords.map(r=>{
             const isDisposition=isRepeatedState(r.activity);
+            const isMood=isMoodRecord(r);
             const config=isDisposition ? STATE_UI.find(cfg=>cfg.name===r.activity) : null;
-            const icon=config?.icon || activityIcon(r.activity);
+            const icon=isMood?(MOOD_UI.find(m=>m.name===r.mood)?.icon||'smile'):(config?.icon || activityIcon(r.activity));
             const visualStyle=isDisposition ? '' : `style="${activityVisualStyle(r.activity)}"`;
             const reward=r.activity==='Recompensa';
             const time=reward ? '✦' : escapeHTML(r.startTime||'--:--');
-            const detail=reward
+            const detail=isMood ? `${time} · ${escapeHTML(r.mood||'Estado')}` : reward
                 ? (r.date>todayISO() ? 'Recompensa prevista' : 'Recompensa · consulte as notas')
                 : (isDisposition
                     ? `${r.startTime ? time : 'Sem horário (registro antigo)'} · Nota ${formatStateValue(r.value)}`
@@ -3458,7 +3636,7 @@ function renderDay(date){
                     <div class="timeline-title-row">
                         <div class="timeline-activity-icon ${config?.cls||''}" ${visualStyle}><i data-lucide="${icon}"></i></div>
                         <div style="min-width:0">
-                            <div class="timeline-title">${escapeHTML(r.activity)}${isDisposition ? ` <span class="timeline-state-score">${formatStateValue(r.value)}</span>` : ''}</div>
+                            <div class="timeline-title">${escapeHTML(isMood?'Estado de hoje · '+(r.mood||''):r.activity)}${isDisposition ? ` <span class="timeline-state-score">${formatStateValue(r.value)}</span>` : ''}</div>
                             <div class="timeline-meta">${detail}</div>
                         </div>
                     </div>
@@ -3516,6 +3694,23 @@ function editRecord(id){
 
     const isState = STATE_ACTIVITIES.includes(record.activity.toLowerCase());
 
+    if(isMoodRecord(record)){
+        showModal('Editar mood',`
+            <div class="sheet-form">
+                <div class="form-row">
+                    <div><label class="form-label" for="editDate">Data</label><input type="date" id="editDate" value="${escapeHTML(record.date||'')}"></div>
+                    <div><label class="form-label" for="editMoodTime">Hora</label><input type="time" id="editMoodTime" value="${escapeHTML(record.startTime||'')}"></div>
+                </div>
+                <label class="form-label" for="editMood">Estado</label>
+                <select id="editMood">${MOOD_UI.map(m=>`<option value="${escapeHTML(m.name)}" ${m.name===record.mood?'selected':''}>${escapeHTML(m.name)}</option>`).join('')}</select>
+                <label class="form-label" for="editNotes">Observação <span>opcional</span></label>
+                <textarea id="editNotes">${escapeHTML(record.notes||'')}</textarea>
+                <button class="primary-action" onclick="saveEditedRecord(${inlineArg(id)})">Salvar alterações</button>
+                <button class="danger-action" onclick="deleteRecord(${inlineArg(id)})">Excluir registro</button>
+            </div>`,'Editar registro');
+        return;
+    }
+
     if(isState){
         showModal(record.activity, `
             <div class="sheet-form">
@@ -3532,8 +3727,10 @@ function editRecord(id){
                 </div>
                 <p class="state-time-help">Registros antigos sem horário podem continuar sem horário.</p>
                 ` : `
-                <label class="form-label" for="editDate">Data</label>
-                <input id="editDate" type="date" value="${escapeHTML(record.date || '')}">
+                <div class="form-row">
+                    <div><label class="form-label" for="editDate">Data</label><input id="editDate" type="date" value="${escapeHTML(record.date || '')}"></div>
+                    <div><label class="form-label" for="editStateTime">Hora</label><input id="editStateTime" type="time" value="${escapeHTML(record.startTime || '')}"></div>
+                </div>
                 `}
 
                 <label class="form-label" for="editValue">Como estava? <span>-10 a +10</span></label>
@@ -3564,10 +3761,10 @@ function editRecord(id){
                         <label class="form-label" for="editDate">Data</label>
                         <input id="editDate" type="date" value="${record.date || ''}">
                     </div>
-                    ${isReward ? '' : `<div>
-                        <label class="form-label" for="editStartTime">Hora inicial</label>
+                    <div>
+                        <label class="form-label" for="editStartTime">Hora inicial <span>${isReward?'opcional':''}</span></label>
                         <input id="editStartTime" type="time" value="${record.startTime || ''}">
-                    </div>`}
+                    </div>
                 </div>
                 ${isReward ? '<p class="plan-form-help">Atualize as notas para registrar se a recompensa aconteceu e, se desejar, por quê.</p>' : `
                 <label class="form-label">Duração</label>
@@ -3585,9 +3782,9 @@ function editRecord(id){
                 `}
                 <div class="notes-heading">
                     <label class="form-label" for="editNotes">${isReward ? 'Recompensa / observações' : 'Notas'} <span>opcional</span></label>
-                    ${notesModelButtonHTML(record.activity,'editNotes')}
+                    ${isBriefingActivity(record.activity)?briefingModelButtonHTML('editNotes'):notesModelButtonHTML(record.activity,'editNotes')}
                 </div>
-                <textarea id="editNotes">${escapeHTML(record.notes || '')}</textarea>
+                <textarea id="editNotes" class="${isBriefingActivity(record.activity)?'briefing-editor':''}">${escapeHTML(record.notes || '')}</textarea>
 
                 <button class="primary-action" onclick="saveEditedRecord(${inlineArg(id)})"><i data-lucide="check"></i> Salvar alterações</button>
                 <div class="management-zone">
@@ -3595,6 +3792,7 @@ function editRecord(id){
                 </div>
             </div>
         `,'Editar registro');
+        if(isBriefingActivity(record.activity))document.querySelector('.modal')?.classList.add('briefing-modal');
     }
 }
 
@@ -3610,7 +3808,18 @@ function saveEditedRecord(id){
         showToast('Informe a data do registro.','error');
         return;
     }
-    if(isState && isRepeatedState(record.activity)){
+    if(isMoodRecord(record)){
+        const time=document.getElementById('editMoodTime')?.value || '';
+        if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){
+            showToast('Informe um horário válido.','error');return;
+        }
+        record.date=newDate;
+        record.startTime=time;
+        record.mood=document.getElementById('editMood')?.value||record.mood;
+        record.notes=document.getElementById('editNotes')?.value||'';
+        save();closeModal();refreshAfterRecordSave();showToast('Mood atualizado.');return;
+    }
+    if(isState){
         const time=document.getElementById('editStateTime')?.value || '';
         if(time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)){
             showToast('Horário inválido.','error');
@@ -3625,7 +3834,7 @@ function saveEditedRecord(id){
     if(isState){
         record.value=Number(document.getElementById('editValue').value);
     }else if(record.activity==='Recompensa'){
-        record.startTime='';
+        record.startTime=document.getElementById('editStartTime')?.value||'';
         record.duration=0;
     }else{
 
@@ -4529,12 +4738,35 @@ function moveActivity(name,direction){
     openReorderActivities();
 }
 
+
+function openArchivedActivities(){
+    const archived=activities.filter(a=>a.archived);
+    showModal('Atividades arquivadas',`
+        <p class="menu-note">Arquivar retira o botão da página inicial. Nenhum registro histórico é apagado.</p>
+        <div class="archived-grid">${archived.length?archived.map(a=>`
+            <div class="archived-item">
+                <div class="activity-name">${escapeHTML(a.name)}</div>
+                <div class="actions">
+                    <button onclick="openRenameActivity(${inlineArg(a.name)})" aria-label="Editar ${escapeHTML(a.name)}"><i data-lucide="pencil"></i></button>
+                    <button class="restore-btn" onclick="restoreArchivedActivity(${inlineArg(a.name)})">Restaurar</button>
+                </div>
+            </div>`).join(''):'<p class="small">Nenhuma atividade arquivada.</p>'}</div>
+    `,'Organização');
+}
+function restoreArchivedActivity(name){
+    const a=activities.find(x=>x.name===name);
+    if(!a)return;
+    a.archived=false;save();refreshAfterRecordSave();openArchivedActivities();
+    showToast('Atividade restaurada.');
+}
+
 function openDataMenu(){
     showModal('Dados', `
         <p class="menu-note">Exportação dos registros do Rastro.</p>
         <div class="menu-stack">
             <button onclick="exportCSV();closeModal()">Exportar planilha (CSV)</button>
-            <button onclick="exportJSON();closeModal()">Exportar backup (JSON)</button>
+            <button onclick="exportJSON();closeModal()">Exportar backup completo (JSON)</button>
+            <button onclick="openExportPeriodMenu()">Exportar JSON por período</button>
         </div>
     `,'Exportação');
 }
@@ -4545,6 +4777,8 @@ function openMoreMenu(){
         <div class="menu-stack">
             <button onclick="closeModal();addActivity()"><i data-lucide="plus"></i> Adicionar atividade</button>
             <button onclick="closeModal();openReorderActivities()"><i data-lucide="list-restart"></i> Organizar atividades</button>
+            <button onclick="openArchivedActivities()"><i data-lucide="archive"></i> Atividades arquivadas</button>
+            <button onclick="openBriefingTemplateMenu()"><i data-lucide="file-text"></i> Modelos do Briefing</button>
             <button onclick="closeModal();openAppearanceMenu()"><i data-lucide="palette"></i> Aparência</button>
             <button onclick="closeModal();openDataMenu()"><i data-lucide="chart-no-axes-column-increasing"></i> Dados</button>
             <button onclick="importJSON();closeModal()"><i data-lucide="upload"></i> Importar backup (JSON)</button>
@@ -4552,16 +4786,60 @@ function openMoreMenu(){
     `,'Rastro');
 }
 
+
+function openExportPeriodMenu(){
+    showModal('Exportar por período',`
+        <p class="menu-note">Exportar registros e planejamento dentro de um período. O backup completo continua disponível separadamente.</p>
+        <label class="form-label" for="exportPeriod">Período</label>
+        <select id="exportPeriod" onchange="toggleExportPeriodDates()">
+            <option value="all">Todo o histórico</option>
+            <option value="phase1">Fase 1 — 21/09 a 28/10/2026</option>
+            <option value="phase2">Fase 2 — desde 29/10/2026</option>
+            <option value="custom">Intervalo personalizado</option>
+        </select>
+        <div id="exportCustomDates" class="form-row hidden">
+            <div><label class="form-label" for="exportStart">Início</label><input type="date" id="exportStart" value="${todayISO()}"></div>
+            <div><label class="form-label" for="exportEnd">Fim</label><input type="date" id="exportEnd" value="${todayISO()}"></div>
+        </div>
+        <button class="primary-action" onclick="exportPeriodJSON()"><i data-lucide="download"></i> Exportar JSON</button>
+    `,'Exportação');
+}
+function toggleExportPeriodDates(){
+    document.getElementById('exportCustomDates')?.classList.toggle('hidden',document.getElementById('exportPeriod')?.value!=='custom');
+}
+function downloadJSON(data,filename){
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');link.href=url;link.download=filename;link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportPeriodJSON(){
+    const period=document.getElementById('exportPeriod')?.value||'all';
+    if(period==='all'){exportJSON();closeModal();return;}
+    let start=period==='phase1'?'2026-09-21':period==='phase2'?'2026-10-29':document.getElementById('exportStart')?.value;
+    let end=period==='phase1'?'2026-10-28':period==='phase2'?'9999-12-31':document.getElementById('exportEnd')?.value;
+    if(!start||!end||start>end){showToast('Confira as datas do intervalo.','error');return;}
+    const inRange=d=>!!d && d>=start && d<=end;
+    const data={exportadoEm:new Date().toISOString(),filtro:{tipo:period,inicio:start,fim:end==='9999-12-31'?null:end},
+        atividades:activities,registros:records.filter(r=>inRange(r.date)),
+        contadores:[],planejamentoSemanal:weeklyPlans.filter(p=>inRange(p.date)),
+        modelosBriefing:briefingMoodTemplates,planoBriefing:briefingPlanText,aparencia:{theme:currentTheme,effect:currentEffect}};
+    const suffix=period==='phase1'?'fase1':period==='phase2'?'fase2':`${start}_a_${end}`;
+    downloadJSON(data,`rastro_${suffix}.json`);
+    closeModal();showToast('Exportação do período concluída.');
+}
+
 function exportCSV(){
 
 let csv =
-"Data;Atividade;HoraInicial;Duracao;Valor;Notas\n";
+"Data;Atividade;Mood;HoraInicial;Duracao;Valor;Notas\n";
 
 records.forEach(r=>{
 
 csv += [
 r.date || "",
 r.activity || "",
+r.mood || "",
 r.startTime || "",
 r.duration || "",
 r.value ?? "",
@@ -4603,7 +4881,9 @@ contadores:counters,
 
 planejamentoSemanal:weeklyPlans,
 
-aparencia:{theme:currentTheme,effect:currentEffect}
+aparencia:{theme:currentTheme,effect:currentEffect},
+modelosBriefing:briefingMoodTemplates,
+planoBriefing:briefingPlanText
 
 };
 
@@ -4642,6 +4922,9 @@ function recordImportKey(record){
     const date = String(record.date || '');
     const notes = String(record.notes || '');
 
+    if(isMoodRecord(record)){
+        return JSON.stringify(['mood',date,record.mood||'',record.startTime||'',notes,record.createdAt||'']);
+    }
     const isState = STATE_ACTIVITIES.includes(activity);
 
     if(isState){
@@ -4696,6 +4979,19 @@ function handleImport(event){
             }
             if(data.aparencia && EFFECT_META[data.aparencia.effect]){
                 applyEffect(data.aparencia.effect,true);
+            }
+
+            if(typeof data.planoBriefing==='string' && briefingPlanText===DEFAULT_BRIEFING_PLAN){
+                briefingPlanText=data.planoBriefing;
+            }
+            if(data.modelosBriefing && typeof data.modelosBriefing==='object'){
+                for(const mood of MOOD_UI){
+                    const incoming=data.modelosBriefing[mood.name];
+                    if(typeof incoming==='string' &&
+                        (!briefingMoodTemplates[mood.name] || briefingMoodTemplates[mood.name]===DEFAULT_BRIEFING_MOODS[mood.name])){
+                        briefingMoodTemplates[mood.name]=incoming;
+                    }
+                }
             }
 
             if(data.atividades){
