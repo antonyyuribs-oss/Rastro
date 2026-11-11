@@ -1573,11 +1573,20 @@ html[data-effect="mud"] .activity-card:active .activity-icon{
 
 /* Rastro — visualização de moods, marcos e briefing (2026-11) */
 .mood-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 6px}
-.mood-card{display:flex;align-items:center;justify-content:center;gap:6px;flex-direction:column;min-height:72px;padding:8px 4px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text-2);font-size:11px;font-weight:650}
-.mood-card svg{width:18px;height:18px;color:var(--accent-icon)}
-.mood-card.active{background:var(--accent-soft);border-color:var(--accent);color:var(--heading)}
-.mood-help{font-size:10px;color:var(--muted);margin:7px 0 18px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.mood-card{display:flex;align-items:center;justify-content:center;gap:6px;flex-direction:column;min-height:72px;padding:8px 4px;border:1px solid rgba(var(--mood-rgb),.35);border-radius:13px;background:rgba(var(--mood-rgb),.075);color:var(--mood-ink);font-size:11px;font-weight:650;transition:background .15s,border-color .15s,transform .15s}
+.mood-card svg{width:18px;height:18px;color:var(--mood-ink)}
+.mood-card.active{background:rgba(var(--mood-rgb),.23);border-color:var(--mood-ink);color:var(--mood-ink);box-shadow:inset 0 0 0 1px rgba(var(--mood-rgb),.34)}
+.mood-card.active::after{content:'✓';position:absolute;top:5px;right:8px;font-size:12px;font-weight:800;color:var(--mood-ink)}
+.mood-card{position:relative}
+.mood-card:hover{border-color:var(--mood-ink)}
+.mood-help{font-size:10px;color:var(--muted);margin:7px 0 18px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .mood-edit-recent{min-height:34px;padding:5px 9px;font-size:10px;color:var(--accent-text);background:transparent}
+.mood-new-btn{min-height:34px;padding:5px 9px;font-size:10px;background:var(--surface-2)}
+.mood-help-actions{display:flex;gap:5px;align-items:center;margin-left:auto}
+.mood-edit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 16px}
+.mood-edit-option{display:flex;gap:8px;align-items:center;border:1px solid rgba(var(--mood-rgb),.32);border-radius:11px;background:rgba(var(--mood-rgb),.075);color:var(--mood-ink);padding:10px 9px;font-size:12px;font-weight:650}
+.mood-edit-option input[type="checkbox"]{width:16px;height:16px;flex:none;margin:0!important;accent-color:var(--mood-ink)}
+.timeline-activity-icon.mood-icon{color:var(--mood-ink);background:rgba(var(--mood-rgb),.16)}
 .rm-help{margin:-5px 0 10px;color:var(--muted);font-size:11px}
 .rm-lines{display:grid;gap:7px;margin:4px 0 10px}
 .rm-line{display:grid;grid-template-columns:minmax(0,1fr) 38px;gap:6px;align-items:center;border-radius:12px;border:1px solid var(--border);background:var(--surface-3);padding:3px 3px 3px 9px}
@@ -1671,9 +1680,12 @@ html[data-effect="mud"] .activity-card:active .activity-icon{
 const RM_NEW_TEMPLATE="Sair do quarto imediatamente\nEscovar os dentes\nBeber água\nSair ao sol\nOrar\nJuntar o lixo\nOrganizar área\nTomar banho\nPreparar o café\nLer a Bíblia\nTomar café com a família\nLevar o filho à escola\nEntrar no escritório somente após concluir a Rotina Matinal";
 const RM_MILESTONES=new Set(['Sair do quarto imediatamente','Sair ao sol','Entrar no escritório somente após concluir a Rotina Matinal']);
 const MOOD_UI=[
-    {name:'Lento',icon:'snail'},{name:'Desmotivado',icon:'cloud'},
-    {name:'Sonolento',icon:'moon'},{name:'Agitado',icon:'zap'},
-    {name:'Disposto',icon:'sun'},{name:'Empolgado',icon:'flame'}
+    {name:'Lento',icon:'snail',color:'#b5b7ff',rgb:'181,183,255'},
+    {name:'Desmotivado',icon:'cloud',color:'#d6a2dc',rgb:'214,162,220'},
+    {name:'Sonolento',icon:'moon',color:'#81c4fb',rgb:'129,196,251'},
+    {name:'Agitado',icon:'zap',color:'#ffae83',rgb:'255,174,131'},
+    {name:'Disposto',icon:'sun',color:'#80dfb1',rgb:'128,223,177'},
+    {name:'Empolgado',icon:'flame',color:'#f6d36f',rgb:'246,211,111'}
 ];
 const DEFAULT_BRIEFING_PLAN="PLANO DE EXECUÇÃO\n\nMANHÃ\n\nTARDE\n\nNOITE\n\nTarefas que decidi executar:\n\n1\n2\n3\n\nA decisão está tomada. Agora é execução.";
 const DEFAULT_BRIEFING_MOODS={
@@ -1688,9 +1700,25 @@ const BRIEFING_TEMPLATE_KEY='rastro_briefing_mood_templates_v1';
 const BRIEFING_PLAN_KEY='rastro_briefing_plan_v1';
 let briefingPlanText=localStorage.getItem(BRIEFING_PLAN_KEY) || DEFAULT_BRIEFING_PLAN;
 let briefingMoodTemplates=Object.assign({},DEFAULT_BRIEFING_MOODS,JSON.parse(localStorage.getItem(BRIEFING_TEMPLATE_KEY)||'{}'));
-function isMoodRecord(r){return !!r && (r.recordType==='mood' || (r.activity==='Estado de hoje' && !!r.mood));}
+function isMoodRecord(r){return !!r && (r.recordType==='mood' || (r.activity==='Estado de hoje' && (!!r.mood || Array.isArray(r.moods))));}
+// Leitura compatível com o histórico anterior: um mood (mood) ou vários (moods).
+function moodNames(r){
+    if(!r || !isMoodRecord(r)) return [];
+    const names=Array.isArray(r.moods)?r.moods:[r.mood];
+    return MOOD_UI.map(m=>m.name).filter(name=>names.includes(name));
+}
 function moodRecordsForDate(date){return records.filter(r=>isMoodRecord(r)&&r.date===date).sort((a,b)=>String(a.startTime||'').localeCompare(String(b.startTime||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));}
 function lastMoodOfDay(date=localDateISO()){const list=moodRecordsForDate(date);return list.length?list[list.length-1]:null;}
+// Toques próximos são uma observação simultânea. Após dez minutos, o próximo toque inicia outra.
+const MOOD_COMBINE_MS=10*60*1000;
+let forceNewMoodRecord=false;
+function currentMoodRecord(now=new Date()){
+    if(forceNewMoodRecord) return null;
+    const latest=lastMoodOfDay(localDateISO(now));
+    if(!latest || !latest.createdAt) return null;
+    const age=now.getTime()-new Date(latest.createdAt).getTime();
+    return Number.isFinite(age) && age>=0 && age<=MOOD_COMBINE_MS ? latest : null;
+}
 function isBriefingActivity(name){return String(name||'').trim().toLocaleLowerCase('pt-BR')==='briefing' || (typeof activities!=='undefined' && activities.some(a=>a.name===name&&a.kind==='briefing'));}
 function isMorningRoutine(name){return String(name||'')==='Rotina de Despertamento';}
 
@@ -2485,28 +2513,59 @@ function renderMoodButtons(){
     const help=document.getElementById('moodHelp');
     if(!host || !help) return;
     const latest=lastMoodOfDay();
+    const current=currentMoodRecord();
+    const selected=moodNames(current);
     host.innerHTML=MOOD_UI.map(m=>`
-        <button type="button" class="mood-card ${latest?.mood===m.name?'active':''}"
-            onclick="registerMood(${inlineArg(m.name)})" aria-label="Registrar ${escapeHTML(m.name)}">
+        <button type="button" class="mood-card ${selected.includes(m.name)?'active':''}"
+            style="--mood-ink:${m.color};--mood-rgb:${m.rgb}"
+            aria-pressed="${selected.includes(m.name)?'true':'false'}"
+            onclick="registerMood(${inlineArg(m.name)})" aria-label="${selected.includes(m.name)?'Desmarcar':'Registrar'} ${escapeHTML(m.name)}">
             <i data-lucide="${m.icon}"></i><span>${escapeHTML(m.name)}</span>
         </button>`).join('');
     const all=moodRecordsForDate(todayISO());
-    help.innerHTML=latest
-        ? `<span>${all.length} ${all.length===1?'registro':'registros'} hoje · último ${escapeHTML(latest.startTime||'')}</span>
-            <button type="button" class="mood-edit-recent" onclick="editRecord(${inlineArg(latest.id)})">Editar / observação</button>`
-        : '<span>Um toque salva o estado e o horário. Observações são opcionais.</span>';
+    const lastText=latest?`Último registro ${escapeHTML(latest.startTime||'')} · ${escapeHTML(moodNames(latest).join(' + '))}`:'Toque para registrar um ou mais estados.';
+    help.innerHTML=`<span>${all.length} ${all.length===1?'registro':'registros'} hoje · ${lastText}</span>
+       <div class="mood-help-actions">
+           ${latest?`<button type="button" class="mood-edit-recent" onclick="editRecord(${inlineArg(latest.id)})">Editar</button>`:''}
+           <button type="button" class="mood-new-btn" onclick="beginNewMoodRecord()">Novo registro</button>
+       </div>`;
     lucide.createIcons();
+}
+function beginNewMoodRecord(){
+    forceNewMoodRecord=true;
+    renderMoodButtons();
+    showToast('Novo registro: selecione os estados deste momento.');
 }
 function registerMood(name){
     if(!MOOD_UI.some(m=>m.name===name)) return;
     const now=new Date();
-    const record={id:`mood-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
-        recordType:'mood',activity:'Estado de hoje',mood:name,date:localDateISO(now),
-        startTime:localTimeHHMM(now),createdAt:now.toISOString(),notes:''};
-    records.push(record);
+    let record=currentMoodRecord(now);
+    if(!record){
+        record={id:`mood-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+            recordType:'mood',activity:'Estado de hoje',mood:name,moods:[name],date:localDateISO(now),
+            startTime:localTimeHHMM(now),createdAt:now.toISOString(),notes:''};
+        records.push(record);
+    }else{
+        const names=moodNames(record);
+        if(names.includes(name)){
+            const remaining=names.filter(n=>n!==name);
+            if(!remaining.length){
+                records=records.filter(r=>String(r.id)!==String(record.id));
+                forceNewMoodRecord=true;
+            }else{
+                record.moods=remaining;
+                record.mood=remaining[0];
+            }
+        }else{
+            record.moods=[...names,name];
+            record.mood=record.moods[0];
+        }
+    }
+    if(record && records.includes(record)) forceNewMoodRecord=false;
     save();
     renderMoodButtons();
-    showToast(`${name} registrado. Use "Editar / observação" para complementar.`);
+    const current=currentMoodRecord();
+    showToast(current?`${moodNames(current).join(' + ')} registrado${moodNames(current).length>1?'s':''}.`:'Seleção removida.');
 }
 
 function archiveActivity(index){
@@ -2795,7 +2854,7 @@ function readMorningRoutineNotes(){
 function briefingModelForCurrentMood(){
     const date=document.getElementById('date')?.value || document.getElementById('editDate')?.value || todayISO();
     const latest=lastMoodOfDay(date);
-    return latest?{mood:latest.mood,template:briefingMoodTemplates[latest.mood]||''}:null;
+    return latest?{moods:moodNames(latest),templates:moodNames(latest).map(name=>briefingMoodTemplates[name]||'').filter(Boolean)}:null;
 }
 function briefingModelButtonHTML(textareaId){
     return `<button type="button" class="notes-model-btn" onclick="insertBriefingModel(${inlineArg(textareaId)})">Modelo</button>`;
@@ -2807,11 +2866,13 @@ function insertBriefingModel(textareaId){
     let text=textarea.value;
     const firstLine=(briefingPlanText.split('\n').find(x=>x.trim())||'PLANO DE EXECUÇÃO').trim();
     if(!text.includes(firstLine)) text=briefingPlanText+(text.trim()?'\n\n'+text:'');
-    if(mood?.template && !text.includes(mood.template)) text=text.trimEnd()+'\n\n'+mood.template;
+    for(const template of (mood?.templates||[])){
+        if(!text.includes(template)) text=text.trimEnd()+'\n\n'+template;
+    }
     textarea.value=text;
     textarea.dispatchEvent(new Event('input',{bubbles:true}));
     textarea.focus();
-    showToast(mood?`Modelo de ${mood.mood} acrescentado.`:'Plano acrescentado. Registre um mood para incluir orientações específicas.');
+    showToast(mood?.moods.length?`Modelos de ${mood.moods.join(' + ')} acrescentados.`:'Plano acrescentado. Registre um mood para incluir orientações específicas.');
 }
 function openBriefingTemplateMenu(){
     showModal('Modelos do Briefing',`
@@ -2924,7 +2985,7 @@ function openRegister(activity, selectedDay=null){
                 ${isBriefingActivity(activity)?briefingModelButtonHTML('notes'):(isMorningRoutine(activity)?'':notesModelButtonHTML(activity,'notes'))}
             </div>
             ${isMorningRoutine(activity)?morningRoutineEditorHTML():`<textarea id="notes" class="${isBriefingActivity(activity)?'briefing-editor':''}" placeholder="O que vale a pena deixar registrado?"></textarea>`}
-            ${isBriefingActivity(activity)?`<p class="briefing-mood-info">Modelo: plano de execução + orientações do último mood registrado hoje (${escapeHTML(lastMoodOfDay()?.mood||'sem registro')}).</p>`:''}
+            ${isBriefingActivity(activity)?`<p class="briefing-mood-info">Modelo: plano de execução + orientações dos últimos estados registrados hoje (${escapeHTML(moodNames(lastMoodOfDay()).join(' + ')||'sem registro')}).</p>`:''}
 
             <button class="primary-action" onclick="saveActivityRecord(${inlineArg(activity)})">
                 <i data-lucide="check"></i> Registrar
@@ -3619,11 +3680,12 @@ function renderDay(date){
             const isDisposition=isRepeatedState(r.activity);
             const isMood=isMoodRecord(r);
             const config=isDisposition ? STATE_UI.find(cfg=>cfg.name===r.activity) : null;
-            const icon=isMood?(MOOD_UI.find(m=>m.name===r.mood)?.icon||'smile'):(config?.icon || activityIcon(r.activity));
-            const visualStyle=isDisposition ? '' : `style="${activityVisualStyle(r.activity)}"`;
+            const firstMood=isMood?MOOD_UI.find(m=>m.name===moodNames(r)[0]):null;
+            const icon=isMood?(firstMood?.icon||'smile'):(config?.icon || activityIcon(r.activity));
+            const visualStyle=isMood && firstMood ? `style="--mood-ink:${firstMood.color};--mood-rgb:${firstMood.rgb}"` : (isDisposition ? '' : `style="${activityVisualStyle(r.activity)}"`);
             const reward=r.activity==='Recompensa';
             const time=reward ? '✦' : escapeHTML(r.startTime||'--:--');
-            const detail=isMood ? `${time} · ${escapeHTML(r.mood||'Estado')}` : reward
+            const detail=isMood ? `${time} · ${escapeHTML(moodNames(r).join(' + ')||'Estado')}` : reward
                 ? (r.date>todayISO() ? 'Recompensa prevista' : 'Recompensa · consulte as notas')
                 : (isDisposition
                     ? `${r.startTime ? time : 'Sem horário (registro antigo)'} · Nota ${formatStateValue(r.value)}`
@@ -3634,9 +3696,9 @@ function renderDay(date){
                 <div class="timeline-rail"><span class="timeline-dot"></span></div>
                 <div class="timeline-card" onclick="openRecordMenu(${inlineArg(r.id)})">
                     <div class="timeline-title-row">
-                        <div class="timeline-activity-icon ${config?.cls||''}" ${visualStyle}><i data-lucide="${icon}"></i></div>
+                        <div class="timeline-activity-icon ${isMood?'mood-icon':(config?.cls||'')}" ${visualStyle}><i data-lucide="${icon}"></i></div>
                         <div style="min-width:0">
-                            <div class="timeline-title">${escapeHTML(isMood?'Estado de hoje · '+(r.mood||''):r.activity)}${isDisposition ? ` <span class="timeline-state-score">${formatStateValue(r.value)}</span>` : ''}</div>
+                            <div class="timeline-title">${escapeHTML(isMood?'Estado de hoje · '+moodNames(r).join(' + '):r.activity)}${isDisposition ? ` <span class="timeline-state-score">${formatStateValue(r.value)}</span>` : ''}</div>
                             <div class="timeline-meta">${detail}</div>
                         </div>
                     </div>
@@ -3701,8 +3763,8 @@ function editRecord(id){
                     <div><label class="form-label" for="editDate">Data</label><input type="date" id="editDate" value="${escapeHTML(record.date||'')}"></div>
                     <div><label class="form-label" for="editMoodTime">Hora</label><input type="time" id="editMoodTime" value="${escapeHTML(record.startTime||'')}"></div>
                 </div>
-                <label class="form-label" for="editMood">Estado</label>
-                <select id="editMood">${MOOD_UI.map(m=>`<option value="${escapeHTML(m.name)}" ${m.name===record.mood?'selected':''}>${escapeHTML(m.name)}</option>`).join('')}</select>
+                <label class="form-label">Estados <span>é possível selecionar vários</span></label>
+                <div class="mood-edit-grid">${MOOD_UI.map(m=>`<label class="mood-edit-option" style="--mood-ink:${m.color};--mood-rgb:${m.rgb}"><input type="checkbox" name="editMoods" value="${escapeHTML(m.name)}" ${moodNames(record).includes(m.name)?'checked':''}><span>${escapeHTML(m.name)}</span></label>`).join('')}</div>
                 <label class="form-label" for="editNotes">Observação <span>opcional</span></label>
                 <textarea id="editNotes">${escapeHTML(record.notes||'')}</textarea>
                 <button class="primary-action" onclick="saveEditedRecord(${inlineArg(id)})">Salvar alterações</button>
@@ -3815,7 +3877,10 @@ function saveEditedRecord(id){
         }
         record.date=newDate;
         record.startTime=time;
-        record.mood=document.getElementById('editMood')?.value||record.mood;
+        const selectedMoods=[...document.querySelectorAll('input[name="editMoods"]:checked')].map(el=>el.value);
+        if(!selectedMoods.length){showToast('Selecione pelo menos um estado.','error');return;}
+        record.moods=selectedMoods;
+        record.mood=selectedMoods[0];
         record.notes=document.getElementById('editNotes')?.value||'';
         save();closeModal();refreshAfterRecordSave();showToast('Mood atualizado.');return;
     }
@@ -4839,7 +4904,7 @@ records.forEach(r=>{
 csv += [
 r.date || "",
 r.activity || "",
-r.mood || "",
+isMoodRecord(r)?moodNames(r).join(' + '):(r.mood || ""),
 r.startTime || "",
 r.duration || "",
 r.value ?? "",
@@ -4923,7 +4988,7 @@ function recordImportKey(record){
     const notes = String(record.notes || '');
 
     if(isMoodRecord(record)){
-        return JSON.stringify(['mood',date,record.mood||'',record.startTime||'',notes,record.createdAt||'']);
+        return JSON.stringify(['mood',date,moodNames(record).join('|'),record.startTime||'',notes,record.createdAt||'']);
     }
     const isState = STATE_ACTIVITIES.includes(activity);
 
